@@ -63,24 +63,38 @@ CX = (FULL_DIMS.x - 2*OW_THICC) / 11;
 CY = FULL_DIMS.y / 13;
 
 
-color([1,0,0])
-    crenellated_wall([FULL_DIMS.x, OW_THICC, FULL_DIMS.z],
-            [0,0,0], [OW_THICC,CX,CX+OW_THICC], [OW_THICC,CZ,0], [OW_THICC,CZ,0]);
-color([1,0,0])
-    translate([0, FULL_DIMS.y-OW_THICC, 0])
-    crenellated_wall([FULL_DIMS.x, OW_THICC, FULL_DIMS.z],
-            [0,0,0], [OW_THICC,CX,CX+OW_THICC], [OW_THICC,CZ,0], [OW_THICC,CZ,0]);
-color([0,0,1])
-    rotate_around([OW_THICC/2, OW_THICC/2, 0], [0, 0, 90])
-    crenellated_wall([FULL_DIMS.y, OW_THICC, FULL_DIMS.z],
-            [0,0,0], [OW_THICC,CY,0], [OW_THICC,CZ,CZ], [OW_THICC,CZ,CZ]);
-color([0,0,1])
-    translate([FULL_DIMS.x-OW_THICC, 0, 0])
-    rotate_around([OW_THICC/2, OW_THICC/2, 0], [0, 0, 90])
-    crenellated_wall([FULL_DIMS.y, OW_THICC, FULL_DIMS.z],
-            [0,0,0], [OW_THICC,CY,0], [OW_THICC,CZ,CZ], [OW_THICC,CZ,CZ]);
-color([0,1,0])
+module lower_deck() {
+    color([0,1,0])
     rotate([90, 0, 0])
     rotate([0, 90, 0])
     crenellated_wall([FULL_DIMS.y, OW_THICC, FULL_DIMS.x],
             [OW_THICC,CY,CY], [OW_THICC,CY,CY], [OW_THICC,CX,0], [OW_THICC,CX,0]);
+}
+
+module x_wall() {
+    color([1,0,0])
+    crenellated_wall([FULL_DIMS.x, OW_THICC, FULL_DIMS.z],
+        [0,0,0], [OW_THICC,CX,CX+OW_THICC], [OW_THICC,CZ,0], [OW_THICC,CZ,0]);
+}
+
+module ly_wall() {
+    color([0,0,1])
+    rotate_around([OW_THICC/2, OW_THICC/2, 0], [0, 0, 90])
+    crenellated_wall([FULL_DIMS.y, OW_THICC, FULL_DIMS.z],
+        [0,0,0], [OW_THICC,CY,0], [OW_THICC,CZ,CZ], [OW_THICC,CZ,CZ]);
+}
+
+module ry_wall() {
+    color([0,0,1])
+    translate([FULL_DIMS.x-OW_THICC, 0, 0])
+    rotate_around([OW_THICC/2, OW_THICC/2, 0], [0, 0, 90])
+    crenellated_wall([FULL_DIMS.y, OW_THICC, FULL_DIMS.z],
+            [0,0,0], [OW_THICC,CY,0], [OW_THICC,CZ,CZ], [OW_THICC,CZ,CZ]);
+}
+
+
+lower_deck();
+x_wall();
+translate([0, FULL_DIMS.y-OW_THICC, 0]) x_wall();
+ly_wall();
+ry_wall();
