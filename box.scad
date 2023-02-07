@@ -1,6 +1,7 @@
 
 module crenels(height, width, depth, offset, length) {
     for(i = [offset: 2*width : length]) {
+        // real_width = min(width, length-i);
         if (i + width <= length)
             translate([i, 0, 0])
                 cube([width, depth, height]);
@@ -13,7 +14,7 @@ module crenellated_wall(dims,
                         crn_b = [0,0,0],
                         crn_l = [0,0,0]) {
     union() {
-        translate([crn_b.x, 0, crn_l.x])
+        translate([crn_l.x, 0, crn_b.x])
             cube([
                 dims.x - crn_l.x - crn_r.x,
                 dims.y,
@@ -49,22 +50,37 @@ module rotate_around(pt, rotation) {
     children();
 }
 
+
+OW_THICC = 5;
+IW_THICC = 3;
+SLOT_SIZES = [50, 50, 25];
+ND_SLOT = [20, 2];
+FULL_DIMS = [
+    OW_THICC*2 + IW_THICC*2 + SLOT_SIZES.x*2,
+    OW_THICC*2 + IW_THICC + SLOT_SIZES.y*2,
+    OW_THICC + SLOT_SIZES.z
+];
+CZ = FULL_DIMS.z / 6;
+CX = FULL_DIMS.x / 13;
+CY = (FULL_DIMS.y - 2*OW_THICC) / 11;
+
 color([1,0,0])
-    crenellated_wall([19, 1, 13], [0,0,0], [1,2,0], [1,2,0], [1,2,0]);
-color([0,1,0])
-    rotate_around([1/2, 1/2, 10/2], [0, 0, 90])
-    rotate_around([19/2, 1/2, 10/2], [0, 0, 180])
-    crenellated_wall([19, 1, 13], [0,0,0], [1,2,0], [1,2,0], [1,2,0]);
+    crenellated_wall([FULL_DIMS.x, OW_THICC, FULL_DIMS.z],
+            [0,0,0], [OW_THICC,CZ,CZ], [OW_THICC,CX,-OW_THICC], [OW_THICC,CZ,-OW_THICC]);
+color([1,0,0])
+    translate([0, FULL_DIMS.y-OW_THICC, 0])
+    crenellated_wall([FULL_DIMS.x, OW_THICC, FULL_DIMS.z],
+            [0,0,0], [OW_THICC,CZ,CZ], [OW_THICC,CX,-OW_THICC], [OW_THICC,CZ,-OW_THICC]);
 color([0,0,1])
-    rotate_around([19-1/2, 1/2, 10/2], [0, 0, -90])
-    rotate_around([19/2, 1/2, 10/2], [0, 0, 180])
-    crenellated_wall([19, 1, 13], [0,0,0], [1,2,0], [1,2,0], [1,2,0]);
-color([1,1,0])
-    translate([0, 19-1, 0])
-    rotate_around([19/2, 1/2, 10/2], [0, 0, 180])
-    crenellated_wall([19, 1, 13], [0,0,0], [1,2,0], [1,2,0], [1,2,0]);
-
-color([1,1,1])
-    rotate_around([19/2, 1/2, 1/2], [-90, 0, 0])
-    crenellated_wall([19, 1, 19], [1,2,2], [1,2,2], [1,2,2], [1,2,2]);
-
+    rotate_around([OW_THICC/2, OW_THICC/2, 0], [0, 0, 90])
+    crenellated_wall([FULL_DIMS.y, OW_THICC, FULL_DIMS.z],
+            [0,0,0], [OW_THICC,CZ,0], [OW_THICC,CY,CY], [OW_THICC,CZ,CZ-OW_THICC]);
+color([0,0,1])
+    translate([FULL_DIMS.x-OW_THICC, 0, 0])
+    rotate_around([OW_THICC/2, OW_THICC/2, 0], [0, 0, 90])
+    crenellated_wall([FULL_DIMS.y, OW_THICC, FULL_DIMS.z],
+            [0,0,0], [OW_THICC,CZ,0], [OW_THICC,CY,CY], [OW_THICC,CZ,CZ-OW_THICC]);
+color([0,1,0])
+    rotate_around([0, OW_THICC/2, OW_THICC/2], [-90, 0, 0])
+    crenellated_wall([FULL_DIMS.x, OW_THICC, FULL_DIMS.y],
+            [OW_THICC,CX,CX-OW_THICC], [OW_THICC,CY,0], [OW_THICC,CX,CX-OW_THICC], [OW_THICC,CY,0]);
