@@ -63,6 +63,7 @@ CX = (FULL_DIMS.x - 2*OW_THICC) / 11;
 CY = FULL_DIMS.y / 13;
 SIDE_CUT = 2*CZ;
 BOTT_CUT = CY;
+CENT_CUT = CZ;
 
 
 module lower_deck() {
@@ -109,35 +110,27 @@ module ly_wall() {
     }
 }
 
-module ry_sep() {
-    color([0,0,1])
-    translate([OW_THICC+SLOT_SIZE.x+2*IW_THICC, 0, 0])
-    rotate([0,0,90])
-    union() {
-        translate([OW_THICC, 0, OW_THICC])
-            cube([FULL_DIMS.y-2*OW_THICC, IW_THICC, SLOT_SIZE.z]);
-        translate([0, 0, FULL_DIMS.z-SIDE_CUT])
-            cube([OW_THICC, IW_THICC, SIDE_CUT]);
-        translate([FULL_DIMS.y-OW_THICC, 0, FULL_DIMS.z-SIDE_CUT])
-            cube([OW_THICC, IW_THICC, SIDE_CUT]);
-        translate([OW_THICC, 0, 0])
-            cube([BOTT_CUT, IW_THICC, OW_THICC]);
-        translate([FULL_DIMS.y-OW_THICC-BOTT_CUT, 0, 0])
-            cube([BOTT_CUT, IW_THICC, OW_THICC]);
+module y_sep() {
+    module half() {
+        union() {
+            translate([OW_THICC, 0, OW_THICC])
+                cube([SLOT_SIZE.y, IW_THICC, SLOT_SIZE.z]);
+            translate([0, 0, FULL_DIMS.z-SIDE_CUT])
+                cube([OW_THICC, IW_THICC, SIDE_CUT]);
+            translate([OW_THICC, 0, 0])
+                cube([BOTT_CUT, IW_THICC, OW_THICC]);
+        }
     }
-}
-
-module ly_sep() {
-    color([0.2,0.8,1])
+    color([0,0,1])
     translate([OW_THICC+SLOT_SIZE.x+IW_THICC, 0, 0])
     rotate([0,0,90])
     union() {
-        translate([OW_THICC, 0, OW_THICC])
-            cube([SLOT_SIZE.y, IW_THICC, SLOT_SIZE.z]);
-        translate([0, 0, FULL_DIMS.z-SIDE_CUT])
-            cube([OW_THICC, IW_THICC, SIDE_CUT]);
-        translate([OW_THICC, 0, 0])
-            cube([BOTT_CUT, IW_THICC, OW_THICC]);
+        half();
+        translate([FULL_DIMS.y, 0, 0])
+            mirror([1,0,0])
+            half();
+        translate([OW_THICC+SLOT_SIZE.y, 0, OW_THICC+CENT_CUT])
+            cube([IW_THICC, IW_THICC, SLOT_SIZE.z-2*CENT_CUT]);
     }
 }
 
@@ -146,11 +139,15 @@ module x_sep() {
     translate([0, OW_THICC+SLOT_SIZE.y, 0])
     union() {
         translate([OW_THICC, 0, OW_THICC])
-            cube([SLOT_SIZE.x+IW_THICC, IW_THICC, SLOT_SIZE.z]);
+            cube([SLOT_SIZE.x, IW_THICC, SLOT_SIZE.z]);
         translate([0, 0, FULL_DIMS.z-SIDE_CUT])
             cube([OW_THICC, IW_THICC, SIDE_CUT]);
         translate([OW_THICC, 0, 0])
             cube([BOTT_CUT, IW_THICC, OW_THICC]);
+        translate([OW_THICC+SLOT_SIZE.x, 0, FULL_DIMS.z-CENT_CUT])
+            cube([2*IW_THICC, IW_THICC, CENT_CUT]);
+        translate([OW_THICC+SLOT_SIZE.x, 0, OW_THICC])
+            cube([2*IW_THICC, IW_THICC, CENT_CUT]);
     }
 }
 
@@ -165,12 +162,10 @@ module lower_part(decompose=0) {
         ly_wall();
     translate([decompose, 0, 0])
         ry_wall();
-    translate([decompose, 0, 3*decompose/4])
-        ry_sep();
-    translate([0, -decompose/2, decompose])
-        ly_sep();
-    translate([0, decompose/2, decompose])
-        translate([0, FULL_DIMS.y, 0]) mirror([0,1,0]) ly_sep();
+    translate([decompose, 0, decompose]) {
+        color([0.2,0.8,1]) y_sep();
+        translate([IW_THICC, 0, 0]) y_sep();
+    }
     translate([-decompose/2, 0, decompose])
         x_sep();
 }
