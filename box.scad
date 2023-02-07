@@ -154,16 +154,25 @@ module x_sep() {
     }
 }
 
-module lower_part() {
-    lower_deck();
-    x_wall();
-    translate([0, FULL_DIMS.y-OW_THICC, 0]) x_wall();
-    ly_wall();
-    ry_wall();
-    ry_sep();
-    ly_sep();
-    x_sep();
-    translate([0, FULL_DIMS.y, 0]) mirror([0,1,0]) ly_sep();
+module lower_part(decompose=0) {
+    translate([0, 0, -decompose])
+        lower_deck();
+    translate([0, -decompose, 0])
+        x_wall();
+    translate([0, decompose, 0])
+        translate([0, FULL_DIMS.y-OW_THICC, 0]) x_wall();
+    translate([-decompose, 0, 0])
+        ly_wall();
+    translate([decompose, 0, 0])
+        ry_wall();
+    translate([decompose, 0, 3*decompose/4])
+        ry_sep();
+    translate([0, -decompose/2, decompose])
+        ly_sep();
+    translate([0, decompose/2, decompose])
+        translate([0, FULL_DIMS.y, 0]) mirror([0,1,0]) ly_sep();
+    translate([-decompose/2, 0, decompose])
+        x_sep();
 }
 
 lower_part();
