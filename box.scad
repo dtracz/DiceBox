@@ -1,7 +1,8 @@
+EPS = 1e-12;
 
 module crenels(height, width, depth, offset, length) {
     for(i = [offset: 2*width : length]) {
-        if (i + width <= length)
+        if (i + width < length + EPS)
             translate([i, 0, 0])
                 cube([width, depth, height]);
     }
@@ -58,27 +59,28 @@ FULL_DIMS = [
     OW_THICC + SLOT_SIZES.z
 ];
 CZ = (FULL_DIMS.z - OW_THICC) / 5;
-CX = FULL_DIMS.x / 13;
-CY = (FULL_DIMS.y - 2*OW_THICC) / 11;
+CX = (FULL_DIMS.x - 2*OW_THICC) / 11;
+CY = FULL_DIMS.y / 13;
 
 
 color([1,0,0])
     crenellated_wall([FULL_DIMS.x, OW_THICC, FULL_DIMS.z],
-            [0,0,0], [OW_THICC,CX,CX], [OW_THICC,CZ,0], [OW_THICC,CZ,0]);
+            [0,0,0], [OW_THICC,CX,CX+OW_THICC], [OW_THICC,CZ,0], [OW_THICC,CZ,0]);
 color([1,0,0])
     translate([0, FULL_DIMS.y-OW_THICC, 0])
     crenellated_wall([FULL_DIMS.x, OW_THICC, FULL_DIMS.z],
-            [0,0,0], [OW_THICC,CX,CX], [OW_THICC,CZ,0], [OW_THICC,CZ,0]);
+            [0,0,0], [OW_THICC,CX,CX+OW_THICC], [OW_THICC,CZ,0], [OW_THICC,CZ,0]);
 color([0,0,1])
     rotate_around([OW_THICC/2, OW_THICC/2, 0], [0, 0, 90])
     crenellated_wall([FULL_DIMS.y, OW_THICC, FULL_DIMS.z],
-            [0,0,0], [OW_THICC,CY,OW_THICC], [OW_THICC,CZ,CZ], [OW_THICC,CZ,CZ]);
+            [0,0,0], [OW_THICC,CY,0], [OW_THICC,CZ,CZ], [OW_THICC,CZ,CZ]);
 color([0,0,1])
     translate([FULL_DIMS.x-OW_THICC, 0, 0])
     rotate_around([OW_THICC/2, OW_THICC/2, 0], [0, 0, 90])
     crenellated_wall([FULL_DIMS.y, OW_THICC, FULL_DIMS.z],
-            [0,0,0], [OW_THICC,CY,OW_THICC], [OW_THICC,CZ,CZ], [OW_THICC,CZ,CZ]);
+            [0,0,0], [OW_THICC,CY,0], [OW_THICC,CZ,CZ], [OW_THICC,CZ,CZ]);
 color([0,1,0])
-    rotate_around([0, OW_THICC/2, OW_THICC/2], [-90, 0, 0])
-    crenellated_wall([FULL_DIMS.x, OW_THICC, FULL_DIMS.y],
-            [OW_THICC,CX,0], [OW_THICC,CX,0], [OW_THICC,CY,CY], [OW_THICC,CY,CY]);
+    rotate([90, 0, 0])
+    rotate([0, 90, 0])
+    crenellated_wall([FULL_DIMS.y, OW_THICC, FULL_DIMS.x],
+            [OW_THICC,CY,CY], [OW_THICC,CY,CY], [OW_THICC,CX,0], [OW_THICC,CX,0]);
