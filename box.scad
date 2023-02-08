@@ -5,8 +5,6 @@ module crenels(height, width, depth, offset, length) {
         if (i + width < length + EPS)
             translate([i, 0, 0])
                 cube([width, depth, height]);
-        else
-            echo(i + width - length, length);
     }
 }
 
@@ -162,7 +160,7 @@ module x_sep() {
 }
 
 module upper_deck() {
-    color([0,1,0])
+    color([0,0.7,0])
     rotate([90, 0, 0])
     rotate([0, 90, 0])
     difference() {
@@ -210,7 +208,7 @@ module lower_part(decompose=0) {
     translate([decompose, 0, 0])
         ry_wall(OW_THICC);
     translate([decompose, 0, decompose]) {
-        color([0.2,0.8,1]) y_sep();
+        color([0.5,0,1]) y_sep();
         translate([IW_THICC, 0, 0]) y_sep();
     }
     translate([-decompose/2, 0, decompose])
@@ -237,7 +235,7 @@ module upper_part(open=0, decompose=0) {
     }
 }
 
-OPEN = 0;
+OPEN = 1;
 DECOMPOSE = 0;
 
 lower_part(DECOMPOSE);
