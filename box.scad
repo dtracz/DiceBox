@@ -217,20 +217,30 @@ module lower_part(decompose=0) {
         x_sep();
 }
 
-module upper_part() {
-    translate([0,0,FULL_DIMS.z]) {
-        upper_deck();
-        color([0,1,1]) ly_wall(OW_THICC);
-        translate([OW_THICC+SLOT_SIZE.x, 0, 0])
+module upper_part(open=0, decompose=0) {
+    x_trans = -open * (SLOT_SIZE.x + IW_THICC);
+    translate([-2*decompose, 0, 3*decompose])
+    translate([x_trans,0,FULL_DIMS.z]) {
+        translate([0, 0, -decompose])
+            upper_deck();
+        translate([-decompose, 0, 0])
+            color([0,1,1]) ly_wall(OW_THICC);
+        translate([decompose, 0, 0])
+            translate([OW_THICC+SLOT_SIZE.x, 0, 0])
             color([0,1,1]) ly_wall(IW_THICC);
-        xu_wall();
-        translate([0, FULL_DIMS.y-OW_THICC, 0])
+        translate([0, -decompose, 0])
             xu_wall();
-        xu_sep();
+        translate([0, decompose, 0])
+            translate([0, FULL_DIMS.y-OW_THICC, 0]) xu_wall();
+        translate([0, 0, decompose])
+            xu_sep();
     }
 }
 
-lower_part();
-upper_part();
+OPEN = 0;
+DECOMPOSE = 0;
+
+lower_part(DECOMPOSE);
+upper_part(OPEN, DECOMPOSE);
 mirror_from([FULL_DIMS.x/2,0,0], [1,0,0])
-    upper_part();
+    upper_part(OPEN, DECOMPOSE);
