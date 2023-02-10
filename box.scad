@@ -56,8 +56,8 @@ module mirror_from(translation, plane) {
 }
 
 
-OW_THICC = 5;
-IW_THICC = 3;
+OW_THICC = 6;
+IW_THICC = 4;
 SLOT_SIZE = [50, 50, 25];
 ND_SLOT = [20, 2];
 FULL_DIMS = [
