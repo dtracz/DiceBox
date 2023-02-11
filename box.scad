@@ -316,7 +316,7 @@ module xu_sep() {
 }
 
 
-module generic_hinge(params) {
+module generic_hinge(params, top_open=0) {
     offsets = [
         for (i=0, sum=0;
              i < len(params);
@@ -325,16 +325,18 @@ module generic_hinge(params) {
             sum
     ];
     for(i = [0: 1 : len(params)-1]) {
-        reflect = params[i][0]=="v" ? 1 : 0;
+        reflection = params[i][0]=="v" ? 1 : 0;
+        rotation = params[i][0]=="v" ? 90-top_open : 0;
         color(params[i][1])
             translate([0, offsets[i], 0])
-            mirror([-reflect, 0, reflect])
+            rotate_around([OW_THICC/2, 0, OW_THICC/2], [0, rotation, 0])
+            mirror_from([OW_THICC/2, 0, 0], [reflection, 0, 0])
             hinge_joint(params[i][2], params[i][3]);
     }
 }
 
 
-module hinge(decompose=0) {
+module hinge(top_open=0, decompose=0) {
     c1 = [0.6, 0.9, 1];
     c2 = [0.55, 0.8, 0.95];
     c3 = [0.7, 1, 0.8];
@@ -351,10 +353,10 @@ module hinge(decompose=0) {
               ["h", c3, OW_THICC, BOTT_CUT]];
     translate([0, OW_THICC, 0]) {
         translate([0, SLOT_SIZE.y+IW_THICC, 0])
-            generic_hinge(params);
+            generic_hinge(params, top_open);
         translate([0, SLOT_SIZE.y, 0])
             mirror([0, 1, 0])
-            generic_hinge(params);
+            generic_hinge(params, top_open);
         translate([0, decompose > 0 ? -FULL_DIMS.y : 0, 0])
             translate([OW_THICC/2, -OW_THICC/3, OW_THICC/2])
             color([0.4, 0.4, 0.4])
@@ -410,22 +412,24 @@ module cover(decompose=0) {
 }
 
 
-module upper_part(open=0, decompose=0) {
+module upper_part(open=0, top_open=0, decompose=0) {
     x_trans = -open * (SLOT_SIZE.x + IW_THICC);
     translate([-2*decompose, 0, 3*decompose])
     translate([x_trans,0,FULL_DIMS.z]) {
         upper_base(decompose);
         translate([0, 0, decompose])
+            rotate_around([OW_THICC/2, 0, OW_THICC/2], [0, -top_open, 0])
             cover(decompose);
         translate([-decompose, 0, -decompose/2])
-            hinge(decompose);
+            hinge(top_open, decompose);
     }
 }
 
 OPEN = 1;
+TOP_OPEN = 90; // in degrees
 DECOMPOSE = 0;
 
 lower_part(DECOMPOSE);
-upper_part(OPEN, DECOMPOSE);
+upper_part(OPEN, TOP_OPEN, DECOMPOSE);
 mirror_from([FULL_DIMS.x/2,0,0], [1,0,0])
-    upper_part(OPEN, DECOMPOSE);
+    upper_part(OPEN, TOP_OPEN, DECOMPOSE);
