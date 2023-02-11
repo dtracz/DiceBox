@@ -138,6 +138,7 @@ module ly_wall(thicc) {
     }
 }
 
+
 module y_sep() {
     module half() {
         union() {
@@ -212,8 +213,17 @@ module upper_deck() {
 
 module xu_wall() {
     color([1,1,0])
-    crenellated_wall([FULL_DIMS.x/2, OW_THICC, FULL_DIMS.z],
-        [0,0,0], [OW_THICC,DX,OW_THICC], [IW_THICC,CZ,0], [0,CZ,0]);
+    translate([OW_THICC, 0, 0])
+    union() {
+        translate([0, OW_THICC, OW_THICC])
+            rotate([90, 0, 0])
+            linear_extrude(OW_THICC)
+            polygon([[0,0], [SLOT_SIZE.x,0], [SLOT_SIZE.x,SLOT_SIZE.z], [SLOT_SIZE.z, SLOT_SIZE.z]]);
+        translate([SLOT_SIZE.x, 0, FULL_DIMS.z])
+            rotate([0,90,0])
+            crenels(IW_THICC, CZ, OW_THICC, 0, FULL_DIMS.z-OW_THICC);
+        crenels(OW_THICC, DX, OW_THICC, 0, SLOT_SIZE.x);
+    }
 }
 
 
@@ -228,9 +238,9 @@ module cover_wall() {
     }
     difference() {
         rotate_around([OW_THICC/2, OW_THICC/2, 0], [0, 0, 90])
-            translate([OW_THICC, 0, OW_THICC])
-            crenellated_wall([FULL_DIMS.y-2*OW_THICC, OW_THICC, FULL_DIMS.z-OW_THICC],
-                [0,0,0], [0,CY,2*CY-OW_THICC], [0,CZ,CZ], [0,CZ,CZ]);
+            translate([0, 0, OW_THICC])
+            crenellated_wall([FULL_DIMS.y, OW_THICC, FULL_DIMS.z],
+                [OW_THICC,CY,0], [0,0,0], [OW_THICC,CZ,CZ], [OW_THICC,CZ,CZ]);
         translate([0, 2*OW_THICC, OW_THICC])
             hinge_slot_cut();
         translate([0, 5*OW_THICC+2*IW_THICC, OW_THICC])
@@ -239,6 +249,37 @@ module cover_wall() {
             hinge_slot_cut();
         translate([0, 9*OW_THICC+9*IW_THICC, OW_THICC])
             hinge_slot_cut();
+    }
+}
+
+
+module diag_reinforcement() {
+    color([0.8,0.8,0])
+    translate([OW_THICC, 0, 0])
+    union() {
+        translate([0, OW_THICC, OW_THICC])
+            rotate([90, 0, 0])
+            linear_extrude(OW_THICC)
+            polygon([[0,0], [SLOT_SIZE.z, SLOT_SIZE.z], [0,SLOT_SIZE.z]]);
+        translate([-OW_THICC, 0, FULL_DIMS.z])
+            rotate([0,90,0])
+            crenels(OW_THICC, CZ, OW_THICC, 0, FULL_DIMS.z-OW_THICC);
+        translate([0, 0, FULL_DIMS.z])
+            crenels(OW_THICC, CZ, OW_THICC, 0, SLOT_SIZE.z);
+    }
+}
+
+
+module top_cover() {
+    color([0,0.6,0])
+    translate([FULL_DIMS.x/2, FULL_DIMS.y, FULL_DIMS.z])
+    rotate([90, 0, 0])
+    rotate([0, -90, 0])
+    union() {
+        translate([0, 0, SLOT_SIZE.x-SLOT_SIZE.z+IW_THICC])
+        crenellated_wall([FULL_DIMS.y, OW_THICC, SLOT_SIZE.z+OW_THICC],
+            [OW_THICC,CY,CY], [0,0,0], [OW_THICC,CZ,CZ], [OW_THICC,CZ,CZ]);
+        cube([FULL_DIMS.y, OW_THICC, SLOT_SIZE.x-SLOT_SIZE.z+IW_THICC]);
     }
 }
 
@@ -353,11 +394,15 @@ module upper_part(open=0, decompose=0) {
             color([0,1,1]) ly_wall(IW_THICC);
         translate([0, -decompose, 0])
             xu_wall();
+        diag_reinforcement();
         translate([0, decompose, 0])
             translate([0, FULL_DIMS.y-OW_THICC, 0]) xu_wall();
+        translate([0, decompose, 0])
+            translate([0, FULL_DIMS.y-OW_THICC, 0]) diag_reinforcement();
         translate([0, 0, decompose])
             xu_sep();
         translate([0, OW_THICC, 0]) hinge();
+        top_cover();
     }
 }
 
