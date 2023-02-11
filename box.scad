@@ -301,6 +301,21 @@ module hinge_joint(thicc, ov_lgh) {
 }
 
 
+module xu_sep() {
+    color([1,1,0])
+    translate([0, OW_THICC+SLOT_SIZE.y, 0])
+    union() {
+        translate([OW_THICC, 0, OW_THICC])
+            cube([SLOT_SIZE.x, IW_THICC, SLOT_SIZE.z]);
+        hinge_joint(IW_THICC, BOTT_CUT);
+        translate([OW_THICC+SLOT_SIZE.x, 0, FULL_DIMS.z-SIDE_CUT])
+            cube([IW_THICC, IW_THICC, SIDE_CUT]);
+        translate([OW_THICC+SLOT_SIZE.x-BOTT_CUT, 0, 0])
+            cube([BOTT_CUT, IW_THICC, OW_THICC]);
+    }
+}
+
+
 module generic_hinge(params) {
     offsets = [
         for (i=0, sum=0;
@@ -319,7 +334,7 @@ module generic_hinge(params) {
 }
 
 
-module hinge() {
+module hinge(decompose=0) {
     c1 = [0.6, 0.9, 1];
     c2 = [0.55, 0.8, 0.95];
     c3 = [0.7, 1, 0.8];
@@ -334,29 +349,17 @@ module hinge() {
               ["v", c2, OW_THICC, SIDE_CUT],
               ["v", c1, IW_THICC, SIDE_CUT*2/3],
               ["h", c3, OW_THICC, BOTT_CUT]];
-    translate([0, SLOT_SIZE.y+IW_THICC, 0])
-        generic_hinge(params);
-    translate([0, SLOT_SIZE.y, 0])
-        mirror([0, 1, 0])
-        generic_hinge(params);
-    translate([OW_THICC/2, -OW_THICC/3, OW_THICC/2])
-        color([0.4, 0.4, 0.4])
-        rotate([-90, 0, 0])
-        cylinder(FULL_DIMS.y-OW_THICC*4/3, HRD/2, HRD/2, $fn=100);
-}
-
-
-module xu_sep() {
-    color([1,1,0])
-    translate([0, OW_THICC+SLOT_SIZE.y, 0])
-    union() {
-        translate([OW_THICC, 0, OW_THICC])
-            cube([SLOT_SIZE.x, IW_THICC, SLOT_SIZE.z]);
-        hinge_joint(IW_THICC, BOTT_CUT);
-        translate([OW_THICC+SLOT_SIZE.x, 0, FULL_DIMS.z-SIDE_CUT])
-            cube([IW_THICC, IW_THICC, SIDE_CUT]);
-        translate([OW_THICC+SLOT_SIZE.x-BOTT_CUT, 0, 0])
-            cube([BOTT_CUT, IW_THICC, OW_THICC]);
+    translate([0, OW_THICC, 0]) {
+        translate([0, SLOT_SIZE.y+IW_THICC, 0])
+            generic_hinge(params);
+        translate([0, SLOT_SIZE.y, 0])
+            mirror([0, 1, 0])
+            generic_hinge(params);
+        translate([0, decompose > 0 ? -FULL_DIMS.y : 0, 0])
+            translate([OW_THICC/2, -OW_THICC/3, OW_THICC/2])
+            color([0.4, 0.4, 0.4])
+            rotate([-90, 0, 0])
+            cylinder(FULL_DIMS.y-OW_THICC*4/3, HRD/2, HRD/2, $fn=100);
     }
 }
 
@@ -381,28 +384,41 @@ module lower_part(decompose=0) {
 }
 
 
+module upper_base(decompose=0) {
+    translate([0, 0, -decompose])
+        upper_deck();
+    translate([decompose, 0, 0])
+        translate([OW_THICC+SLOT_SIZE.x, 0, 0])
+        color([0,1,1]) ly_wall(IW_THICC);
+    translate([0, -decompose, 0])
+        xu_wall();
+    translate([0, decompose, 0])
+        translate([0, FULL_DIMS.y-OW_THICC, 0]) xu_wall();
+    translate([0, 0, decompose])
+        xu_sep();
+}
+
+
+module cover(decompose=0) {
+    translate([-decompose, 0, 0])
+        color([0,1,1]) cover_wall();
+        diag_reinforcement();
+    translate([0, decompose, 0])
+        translate([0, FULL_DIMS.y-OW_THICC, 0]) diag_reinforcement();
+    translate([0, 0, decompose])
+        top_cover();
+}
+
+
 module upper_part(open=0, decompose=0) {
     x_trans = -open * (SLOT_SIZE.x + IW_THICC);
     translate([-2*decompose, 0, 3*decompose])
     translate([x_trans,0,FULL_DIMS.z]) {
-        translate([0, 0, -decompose])
-            upper_deck();
-        translate([-decompose, 0, 0])
-            color([0,1,1]) cover_wall();
-        translate([decompose, 0, 0])
-            translate([OW_THICC+SLOT_SIZE.x, 0, 0])
-            color([0,1,1]) ly_wall(IW_THICC);
-        translate([0, -decompose, 0])
-            xu_wall();
-        diag_reinforcement();
-        translate([0, decompose, 0])
-            translate([0, FULL_DIMS.y-OW_THICC, 0]) xu_wall();
-        translate([0, decompose, 0])
-            translate([0, FULL_DIMS.y-OW_THICC, 0]) diag_reinforcement();
+        upper_base(decompose);
         translate([0, 0, decompose])
-            xu_sep();
-        translate([0, OW_THICC, 0]) hinge();
-        top_cover();
+            cover(decompose);
+        translate([-decompose, 0, -decompose/2])
+            hinge(decompose);
     }
 }
 
