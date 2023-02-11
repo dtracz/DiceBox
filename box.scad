@@ -223,6 +223,20 @@ module xu_wall() {
             rotate([0,90,0])
             crenels(IW_THICC, CZ, OW_THICC, 0, FULL_DIMS.z-OW_THICC);
         crenels(OW_THICC, DX, OW_THICC, 0, SLOT_SIZE.x);
+        translate([-OW_THICC, 0, 0])
+            difference() {
+                union() {
+                    translate([OW_THICC/2, 0, 0])
+                        cube([OW_THICC/2, OW_THICC, OW_THICC]);
+                    translate([OW_THICC/2, 0, OW_THICC/2])
+                        rotate([-90, 0, 0])
+                        cylinder(OW_THICC, OW_THICC/2, OW_THICC/2, $fn=100);
+                    cube([OW_THICC/2, OW_THICC, OW_THICC/2]);
+                }
+                translate([OW_THICC/2, OW_THICC*3/5, OW_THICC/2])
+                    rotate([-90, 0, 0])
+                    cylinder(OW_THICC*2/5+1, HRD/2, HRD/2, $fn=100);
+            }
     }
 }
 
@@ -395,7 +409,7 @@ module upper_base(decompose=0) {
     translate([0, -decompose, 0])
         xu_wall();
     translate([0, decompose, 0])
-        translate([0, FULL_DIMS.y-OW_THICC, 0]) xu_wall();
+        mirror_from([0, FULL_DIMS.y/2, 0], [0,1,0]) xu_wall();
     translate([0, 0, decompose])
         xu_sep();
 }
