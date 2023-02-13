@@ -76,6 +76,7 @@ SIDE_CUT = 2*CZ;
 BOTT_CUT = CY;
 CENT_CUT = CZ;
 HRD = 2; // HINGE RHOD DIAMETER
+COV_OV = 4*IW_THICC; // COVER OVERLAP
 
 
 
@@ -284,17 +285,28 @@ module diag_reinforcement() {
 }
 
 
-module top_cover() {
-    color([0,0.6,0])
+module half_top_cover() {
     translate([FULL_DIMS.x/2, FULL_DIMS.y, FULL_DIMS.z])
     rotate([90, 0, 0])
     rotate([0, -90, 0])
     union() {
         translate([0, 0, SLOT_SIZE.x-SLOT_SIZE.z+IW_THICC])
-        crenellated_wall([FULL_DIMS.y, OW_THICC, SLOT_SIZE.z+OW_THICC],
-            [OW_THICC,CY,CY], [0,0,0], [OW_THICC,CZ,CZ], [OW_THICC,CZ,CZ]);
-        cube([FULL_DIMS.y, OW_THICC, SLOT_SIZE.x-SLOT_SIZE.z+IW_THICC]);
+            crenellated_wall([FULL_DIMS.y, OW_THICC/2, SLOT_SIZE.z+OW_THICC],
+                [OW_THICC,CY,CY], [0,0,0], [OW_THICC,CZ,CZ], [OW_THICC,CZ,CZ]);
+        translate([0, 0, COV_OV/2])
+            cube([FULL_DIMS.y, OW_THICC/2, SLOT_SIZE.x-SLOT_SIZE.z+IW_THICC-COV_OV/2]);
+        translate([0, 0, -COV_OV/2])
+            cube([FULL_DIMS.y/2, OW_THICC/2, COV_OV]);
     }
+}
+
+
+module top_cover() {
+    color([0,0.8,0])
+        half_top_cover();
+    color([0,0.6,0])
+        rotate_around([0, FULL_DIMS.y/2, FULL_DIMS.z+OW_THICC/2], [180, 0, 0])
+        half_top_cover();
 }
 
 
@@ -445,5 +457,5 @@ DECOMPOSE = 0;
 
 lower_part(DECOMPOSE);
 upper_part(OPEN, TOP_OPEN, DECOMPOSE);
-mirror_from([FULL_DIMS.x/2,0,0], [1,0,0])
+rotate_around(FULL_DIMS/2, [0, 0, 180])
     upper_part(OPEN, TOP_OPEN, DECOMPOSE);
