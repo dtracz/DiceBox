@@ -84,17 +84,87 @@ function lhp_calc(uhp, open_size, handle_size_z) = [
 
 OPEN_SIZE = SLOT_SIZE.x + IW_THICC;
 HOLE_D = 4;
-UHP1 = [OW_THICC + SLOT_SIZE.x*4/6, OW_THICC + SLOT_SIZE.z*1/3]; // UPPER HOLE POSITION
-UHP2 = [OW_THICC + SLOT_SIZE.x*5/6, OW_THICC + SLOT_SIZE.z*1/3];
+UHP1 = [OW_THICC + 33, OW_THICC + SLOT_SIZE.z*1/3]; // UPPER HOLE POSITION
+UHP2 = [OW_THICC + 43, OW_THICC + SLOT_SIZE.z*1/3];
 LHP1 = lhp_calc(UHP1, OPEN_SIZE, 25);
 LHP2 = lhp_calc(UHP2, OPEN_SIZE, 25);
+SEP = 1;
+LEV_THICC = [6, 4];
 
 
 
-module handle_hole(position) {
+module lever_hole(position) {
     translate([position.x, -1, position.y])
     rotate([-90, 0, 0])
     cylinder(OW_THICC+2, HOLE_D/2, HOLE_D/2, $fn=100);
+}
+
+
+module lever_plug() {
+    translate([0, -LEV_THICC.y-SEP, 0])
+    union() {
+        rotate([-90, 0, 0])
+            cylinder(OW_THICC+SEP+LEV_THICC.x, HOLE_D/2, HOLE_D/2, $fn=100);
+        difference() {
+            sphere(HOLE_D, $fn=100);
+            translate([-HOLE_D-1, 0, -HOLE_D-1])
+            cube(2*HOLE_D+2);
+        }
+    }
+}
+
+
+module lever_bar(length) {
+    translate([0, 0, -LEV_THICC.x/2])
+    difference() {
+        union() {
+            cube([length, LEV_THICC.y, LEV_THICC.x]);
+            translate([0, 0, LEV_THICC.x/2])
+                rotate([-90, 0, 0])
+                cylinder(LEV_THICC.y, LEV_THICC.x/2, LEV_THICC.x/2, $fn=100);
+            translate([length, 0, LEV_THICC.x/2])
+                rotate([-90, 0, 0])
+                cylinder(LEV_THICC.y, LEV_THICC.x/2, LEV_THICC.x/2, $fn=100);
+        }
+        translate([0, -1, LEV_THICC.x/2])
+            rotate([-90, 0, 0])
+            cylinder(LEV_THICC.y+2, HOLE_D/2, HOLE_D/2, $fn=100);
+        translate([length, -1, LEV_THICC.x/2])
+            rotate([-90, 0, 0])
+            cylinder(LEV_THICC.y+2, HOLE_D/2, HOLE_D/2, $fn=100);
+    }
+}
+
+
+module lever(alpha, lhp) {
+    length = sqrt((UHP1.x - LHP1.x)^2 + (FULL_DIMS.z+UHP1.y - LHP1.y)^2);
+    translate([lhp.x, 0, lhp.y])
+        rotate([0, -alpha, 0])
+        translate([0, -LEV_THICC.y-SEP, 0])
+        lever_bar(length);
+    translate([lhp.x, 0, lhp.y])
+        lever_plug();
+    translate([lhp.x + length*cos(alpha), 0, lhp.y + length*sin(alpha)])
+        lever_plug();
+}
+
+
+module closure_levers() {
+    alpha = atan2(FULL_DIMS.z+UHP1.y - LHP1.y, UHP1.x - LHP1.x);
+    lever(alpha, LHP1);
+    lever(alpha, LHP2);
+    mirror_from(FULL_DIMS/2, [0,1,0]) {
+        lever(alpha, LHP1);
+        lever(alpha, LHP2);
+    }
+    mirror_from(FULL_DIMS/2, [1,0,0]) {
+        lever(alpha, LHP1);
+        lever(alpha, LHP2);
+        mirror_from(FULL_DIMS/2, [0,1,0]) {
+            lever(alpha, LHP1);
+            lever(alpha, LHP2);
+        }
+    }
 }
 
 
@@ -134,10 +204,10 @@ module x_wall() {
             [0,0,0], [OW_THICC,CX,CX+OW_THICC], [OW_THICC,CZ,0], [OW_THICC,CZ,0]);
         translate([OW_THICC + SLOT_SIZE.x, -1, OW_THICC+SLOT_SIZE.z-SIDE_CUT])
             cube([2*IW_THICC, OW_THICC+2, SIDE_CUT+1]);
-        handle_hole(LHP1);
-        handle_hole(LHP2);
-        handle_hole([FULL_DIMS.x - LHP1.x, LHP1.y]);
-        handle_hole([FULL_DIMS.x - LHP2.x, LHP2.y]);
+        lever_hole(LHP1);
+        lever_hole(LHP2);
+        lever_hole([FULL_DIMS.x - LHP1.x, LHP1.y]);
+        lever_hole([FULL_DIMS.x - LHP2.x, LHP2.y]);
     }
 }
 
@@ -262,8 +332,8 @@ module xu_wall() {
                         cylinder(OW_THICC*2/5+1, HRD/2, HRD/2, $fn=100);
                 }
         }
-        handle_hole(UHP1);
-        handle_hole(UHP2);
+        lever_hole(UHP1);
+        lever_hole(UHP2);
     }
 }
 
@@ -477,11 +547,13 @@ module upper_part(open=0, top_open=0, decompose=0) {
     }
 }
 
-OPEN = 1;
-TOP_OPEN = 90; // in degrees
+
+OPEN = 0;
+TOP_OPEN = 0; // in degrees
 DECOMPOSE = 0;
 
 lower_part(DECOMPOSE);
 upper_part(OPEN, TOP_OPEN, DECOMPOSE);
 rotate_around(FULL_DIMS/2, [0, 0, 180])
     upper_part(OPEN, TOP_OPEN, DECOMPOSE);
+closure_levers();
