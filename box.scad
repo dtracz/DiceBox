@@ -58,7 +58,6 @@ module mirror_from(translation, plane) {
 }
 
 
-
 OW_THICC = 6;
 IW_THICC = 4;
 SLOT_SIZE = [50, 50, 25];
@@ -78,6 +77,25 @@ CENT_CUT = CZ;
 HRD = 2; // HINGE RHOD DIAMETER
 COV_OV = 4*IW_THICC; // COVER OVERLAP
 
+function lhp_calc(uhp, open_size, handle_size_z) = [
+    (uhp.x + uhp.x-open_size) / 2,
+    (FULL_DIMS.z + uhp.y - handle_size_z) % FULL_DIMS.z
+];
+
+OPEN_SIZE = SLOT_SIZE.x + IW_THICC;
+HOLE_D = 4;
+UHP1 = [OW_THICC + SLOT_SIZE.x*4/6, OW_THICC + SLOT_SIZE.z*1/3]; // UPPER HOLE POSITION
+UHP2 = [OW_THICC + SLOT_SIZE.x*5/6, OW_THICC + SLOT_SIZE.z*1/3];
+LHP1 = lhp_calc(UHP1, OPEN_SIZE, 25);
+LHP2 = lhp_calc(UHP2, OPEN_SIZE, 25);
+
+
+
+module handle_hole(position) {
+    translate([position.x, -1, position.y])
+    rotate([-90, 0, 0])
+    cylinder(OW_THICC+2, HOLE_D/2, HOLE_D/2, $fn=100);
+}
 
 
 // DEPERCATED
@@ -116,6 +134,10 @@ module x_wall() {
             [0,0,0], [OW_THICC,CX,CX+OW_THICC], [OW_THICC,CZ,0], [OW_THICC,CZ,0]);
         translate([OW_THICC + SLOT_SIZE.x, -1, OW_THICC+SLOT_SIZE.z-SIDE_CUT])
             cube([2*IW_THICC, OW_THICC+2, SIDE_CUT+1]);
+        handle_hole(LHP1);
+        handle_hole(LHP2);
+        handle_hole([FULL_DIMS.x - LHP1.x, LHP1.y]);
+        handle_hole([FULL_DIMS.x - LHP2.x, LHP2.y]);
     }
 }
 
@@ -214,30 +236,34 @@ module upper_deck() {
 
 module xu_wall() {
     color([1,1,0])
-    translate([OW_THICC, 0, 0])
-    union() {
-        translate([0, OW_THICC, OW_THICC])
-            rotate([90, 0, 0])
-            linear_extrude(OW_THICC)
-            polygon([[0,0], [SLOT_SIZE.x,0], [SLOT_SIZE.x,SLOT_SIZE.z], [SLOT_SIZE.z, SLOT_SIZE.z]]);
-        translate([SLOT_SIZE.x, 0, FULL_DIMS.z])
-            rotate([0,90,0])
-            crenels(IW_THICC, CZ, OW_THICC, 0, FULL_DIMS.z-OW_THICC);
-        crenels(OW_THICC, DX, OW_THICC, 0, SLOT_SIZE.x);
-        translate([-OW_THICC, 0, 0])
-            difference() {
-                union() {
-                    translate([OW_THICC/2, 0, 0])
-                        cube([OW_THICC/2, OW_THICC, OW_THICC]);
-                    translate([OW_THICC/2, 0, OW_THICC/2])
+    difference() {
+        translate([OW_THICC, 0, 0])
+        union() {
+            translate([0, OW_THICC, OW_THICC])
+                rotate([90, 0, 0])
+                linear_extrude(OW_THICC)
+                polygon([[0,0], [SLOT_SIZE.x,0], [SLOT_SIZE.x,SLOT_SIZE.z], [SLOT_SIZE.z, SLOT_SIZE.z]]);
+            translate([SLOT_SIZE.x, 0, FULL_DIMS.z])
+                rotate([0,90,0])
+                crenels(IW_THICC, CZ, OW_THICC, 0, FULL_DIMS.z-OW_THICC);
+            crenels(OW_THICC, DX, OW_THICC, 0, SLOT_SIZE.x);
+            translate([-OW_THICC, 0, 0])
+                difference() {
+                    union() {
+                        translate([OW_THICC/2, 0, 0])
+                            cube([OW_THICC/2, OW_THICC, OW_THICC]);
+                        translate([OW_THICC/2, 0, OW_THICC/2])
+                            rotate([-90, 0, 0])
+                            cylinder(OW_THICC, OW_THICC/2, OW_THICC/2, $fn=100);
+                        cube([OW_THICC/2, OW_THICC, OW_THICC/2]);
+                    }
+                    translate([OW_THICC/2, OW_THICC*3/5, OW_THICC/2])
                         rotate([-90, 0, 0])
-                        cylinder(OW_THICC, OW_THICC/2, OW_THICC/2, $fn=100);
-                    cube([OW_THICC/2, OW_THICC, OW_THICC/2]);
+                        cylinder(OW_THICC*2/5+1, HRD/2, HRD/2, $fn=100);
                 }
-                translate([OW_THICC/2, OW_THICC*3/5, OW_THICC/2])
-                    rotate([-90, 0, 0])
-                    cylinder(OW_THICC*2/5+1, HRD/2, HRD/2, $fn=100);
-            }
+        }
+        handle_hole(UHP1);
+        handle_hole(UHP2);
     }
 }
 
@@ -439,7 +465,7 @@ module cover(decompose=0) {
 
 
 module upper_part(open=0, top_open=0, decompose=0) {
-    x_trans = -open * (SLOT_SIZE.x + IW_THICC);
+    x_trans = -open * OPEN_SIZE;
     translate([-2*decompose, 0, 3*decompose])
     translate([x_trans,0,FULL_DIMS.z]) {
         upper_base(decompose);
