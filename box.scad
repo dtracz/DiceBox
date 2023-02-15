@@ -90,6 +90,7 @@ LHP1 = lhp_calc(UHP1, OPEN_SIZE, 25);
 LHP2 = lhp_calc(UHP2, OPEN_SIZE, 25);
 SEP = 1;
 LEV_THICC = [6, 4];
+LEV_LGH = sqrt((UHP1.x - LHP1.x)^2 + (FULL_DIMS.z+UHP1.y - LHP1.y)^2);
 
 
 
@@ -104,7 +105,7 @@ module lever_plug() {
     translate([0, -LEV_THICC.y-SEP, 0])
     union() {
         rotate([-90, 0, 0])
-            cylinder(OW_THICC+SEP+LEV_THICC.x, HOLE_D/2, HOLE_D/2, $fn=100);
+            cylinder(OW_THICC+SEP+LEV_THICC.y, HOLE_D/2, HOLE_D/2, $fn=100);
         difference() {
             sphere(HOLE_D, $fn=100);
             translate([-HOLE_D-1, 0, -HOLE_D-1])
@@ -136,33 +137,31 @@ module lever_bar(length) {
 }
 
 
-module lever(alpha, lhp) {
-    length = sqrt((UHP1.x - LHP1.x)^2 + (FULL_DIMS.z+UHP1.y - LHP1.y)^2);
-    translate([lhp.x, 0, lhp.y])
+module lever(alpha, lhp, decompose=0) {
+    translate([lhp.x, -decompose*3/2, lhp.y])
         rotate([0, -alpha, 0])
         translate([0, -LEV_THICC.y-SEP, 0])
-        lever_bar(length);
-    translate([lhp.x, 0, lhp.y])
+        lever_bar(LEV_LGH);
+    translate([lhp.x, -decompose*5/2, lhp.y])
         lever_plug();
-    translate([lhp.x + length*cos(alpha), 0, lhp.y + length*sin(alpha)])
+    translate([lhp.x + LEV_LGH*cos(alpha), -decompose*5/2, lhp.y + LEV_LGH*sin(alpha)])
         lever_plug();
 }
 
 
-module closure_levers() {
-    alpha = atan2(FULL_DIMS.z+UHP1.y - LHP1.y, UHP1.x - LHP1.x);
-    lever(alpha, LHP1);
-    lever(alpha, LHP2);
+module closure_levers(alpha, decompose=0) {
+    lever(alpha, LHP1, decompose);
+    lever(alpha, LHP2, decompose);
     mirror_from(FULL_DIMS/2, [0,1,0]) {
-        lever(alpha, LHP1);
-        lever(alpha, LHP2);
+        lever(alpha, LHP1, decompose);
+        lever(alpha, LHP2, decompose);
     }
     mirror_from(FULL_DIMS/2, [1,0,0]) {
-        lever(alpha, LHP1);
-        lever(alpha, LHP2);
+        lever(alpha, LHP1, decompose);
+        lever(alpha, LHP2, decompose);
         mirror_from(FULL_DIMS/2, [0,1,0]) {
-            lever(alpha, LHP1);
-            lever(alpha, LHP2);
+            lever(alpha, LHP1, decompose);
+            lever(alpha, LHP2, decompose);
         }
     }
 }
@@ -534,10 +533,9 @@ module cover(decompose=0) {
 }
 
 
-module upper_part(open=0, top_open=0, decompose=0) {
-    x_trans = -open * OPEN_SIZE;
+module upper_part(top_open=0, decompose=0) {
     translate([-2*decompose, 0, 3*decompose])
-    translate([x_trans,0,FULL_DIMS.z]) {
+    translate([0,0,FULL_DIMS.z]) {
         upper_base(decompose);
         translate([0, 0, decompose])
             rotate_around([OW_THICC/2, 0, OW_THICC/2], [0, -top_open, 0])
@@ -548,12 +546,25 @@ module upper_part(open=0, top_open=0, decompose=0) {
 }
 
 
-OPEN = 0;
-TOP_OPEN = 0; // in degrees
+module box(open=0, top_open=0, decompose=0) {
+    alpha = atan2(FULL_DIMS.z+UHP1.y - LHP1.y, UHP1.x - LHP1.x);
+    beta = 90-alpha;
+    curr_alpha = alpha + 2*open*beta;
+    pos0 = [LEV_LGH*cos(alpha), 0, LEV_LGH*sin(alpha)];
+    curr_pos = [LEV_LGH*cos(curr_alpha), 0, LEV_LGH*sin(curr_alpha)];
+
+    lower_part(decompose);
+    translate(curr_pos-pos0)
+        upper_part(top_open, decompose);
+    rotate_around(FULL_DIMS/2, [0, 0, 180])
+        translate(curr_pos-pos0)
+        upper_part(top_open, decompose);
+    closure_levers(curr_alpha, decompose);
+}
+
+
+OPEN = 1;
+TOP_OPEN = 90; // in degrees
 DECOMPOSE = 0;
 
-lower_part(DECOMPOSE);
-upper_part(OPEN, TOP_OPEN, DECOMPOSE);
-rotate_around(FULL_DIMS/2, [0, 0, 180])
-    upper_part(OPEN, TOP_OPEN, DECOMPOSE);
-closure_levers();
+box(OPEN, TOP_OPEN, DECOMPOSE);
