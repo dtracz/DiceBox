@@ -58,7 +58,6 @@ module mirror_from(translation, plane) {
 }
 
 
-
 OW_THICC = 6;
 IW_THICC = 4;
 SLOT_SIZE = [50, 50, 25];
@@ -78,6 +77,98 @@ CENT_CUT = CZ;
 HRD = 2; // HINGE RHOD DIAMETER
 COV_OV = 4*IW_THICC; // COVER OVERLAP
 
+function lhp_calc(uhp, open_size, lev_z) = [
+    (uhp.x + uhp.x-open_size) / 2,
+    (FULL_DIMS.z + uhp.y - lev_z) % FULL_DIMS.z
+];
+
+OPEN_SIZE = SLOT_SIZE.x + IW_THICC;
+HOLE_D = 4;
+LEV_Z = 33;
+UHP1 = [OW_THICC + 33, OW_THICC + SLOT_SIZE.z*1/2]; // UPPER HOLE POSITION
+UHP2 = [OW_THICC + 43, OW_THICC + SLOT_SIZE.z*1/2];
+LHP1 = lhp_calc(UHP1, OPEN_SIZE, LEV_Z);
+LHP2 = lhp_calc(UHP2, OPEN_SIZE, LEV_Z);
+SEP = 1;
+LEV_THICC = [sin(atan2(LEV_Z, UHP1.x-LHP1.x))*(UHP2.x-UHP1.x), 4];
+LEV_LGH = sqrt((UHP1.x - LHP1.x)^2 + (FULL_DIMS.z+UHP1.y - LHP1.y)^2);
+
+
+
+module lever_hole(position) {
+    translate([position.x, -1, position.y])
+    rotate([-90, 0, 0])
+    cylinder(OW_THICC+2, HOLE_D/2, HOLE_D/2, $fn=100);
+}
+
+
+module lever_plug() {
+    translate([0, -LEV_THICC.y-SEP, 0])
+    union() {
+        rotate([-90, 0, 0])
+            cylinder(OW_THICC+SEP+LEV_THICC.y, HOLE_D/2, HOLE_D/2, $fn=100);
+        difference() {
+            sphere(HOLE_D, $fn=100);
+            translate([-HOLE_D-1, 0, -HOLE_D-1])
+            cube(2*HOLE_D+2);
+        }
+    }
+}
+
+
+module lever_bar(length) {
+    translate([0, 0, -LEV_THICC.x/2])
+    difference() {
+        union() {
+            cube([length, LEV_THICC.y, LEV_THICC.x]);
+            translate([0, 0, LEV_THICC.x/2])
+                rotate([-90, 0, 0])
+                cylinder(LEV_THICC.y, LEV_THICC.x/2, LEV_THICC.x/2, $fn=100);
+            translate([length, 0, LEV_THICC.x/2])
+                rotate([-90, 0, 0])
+                cylinder(LEV_THICC.y, LEV_THICC.x/2, LEV_THICC.x/2, $fn=100);
+        }
+        translate([0, -1, LEV_THICC.x/2])
+            rotate([-90, 0, 0])
+            cylinder(LEV_THICC.y+2, HOLE_D/2, HOLE_D/2, $fn=100);
+        translate([length, -1, LEV_THICC.x/2])
+            rotate([-90, 0, 0])
+            cylinder(LEV_THICC.y+2, HOLE_D/2, HOLE_D/2, $fn=100);
+    }
+}
+
+
+module lever(alpha, lhp, decompose=0, c) {
+    color(c)
+        translate([lhp.x, -decompose*3/2, lhp.y])
+        rotate([0, -alpha, 0])
+        translate([0, -LEV_THICC.y-SEP, 0])
+        lever_bar(LEV_LGH);
+    translate([lhp.x, -decompose*5/2, lhp.y])
+        lever_plug();
+    translate([lhp.x + LEV_LGH*cos(alpha), -decompose*5/2, lhp.y + LEV_LGH*sin(alpha)])
+        lever_plug();
+}
+
+
+module closure_levers(alpha, decompose=0) {
+    c1 = [1, 0.5, 0];
+    c2 = [1, 0.7, 0];
+    lever(alpha, LHP1, decompose, c1);
+    lever(alpha, LHP2, decompose, c2);
+    mirror_from(FULL_DIMS/2, [0,1,0]) {
+        lever(alpha, LHP1, decompose, c1);
+        lever(alpha, LHP2, decompose, c2);
+    }
+    mirror_from(FULL_DIMS/2, [1,0,0]) {
+        lever(alpha, LHP1, decompose, c1);
+        lever(alpha, LHP2, decompose, c2);
+        mirror_from(FULL_DIMS/2, [0,1,0]) {
+            lever(alpha, LHP1, decompose, c1);
+            lever(alpha, LHP2, decompose, c2);
+        }
+    }
+}
 
 
 // DEPERCATED
@@ -116,6 +207,10 @@ module x_wall() {
             [0,0,0], [OW_THICC,CX,CX+OW_THICC], [OW_THICC,CZ,0], [OW_THICC,CZ,0]);
         translate([OW_THICC + SLOT_SIZE.x, -1, OW_THICC+SLOT_SIZE.z-SIDE_CUT])
             cube([2*IW_THICC, OW_THICC+2, SIDE_CUT+1]);
+        lever_hole(LHP1);
+        lever_hole(LHP2);
+        lever_hole([FULL_DIMS.x - LHP1.x, LHP1.y]);
+        lever_hole([FULL_DIMS.x - LHP2.x, LHP2.y]);
     }
 }
 
@@ -214,30 +309,34 @@ module upper_deck() {
 
 module xu_wall() {
     color([1,1,0])
-    translate([OW_THICC, 0, 0])
-    union() {
-        translate([0, OW_THICC, OW_THICC])
-            rotate([90, 0, 0])
-            linear_extrude(OW_THICC)
-            polygon([[0,0], [SLOT_SIZE.x,0], [SLOT_SIZE.x,SLOT_SIZE.z], [SLOT_SIZE.z, SLOT_SIZE.z]]);
-        translate([SLOT_SIZE.x, 0, FULL_DIMS.z])
-            rotate([0,90,0])
-            crenels(IW_THICC, CZ, OW_THICC, 0, FULL_DIMS.z-OW_THICC);
-        crenels(OW_THICC, DX, OW_THICC, 0, SLOT_SIZE.x);
-        translate([-OW_THICC, 0, 0])
-            difference() {
-                union() {
-                    translate([OW_THICC/2, 0, 0])
-                        cube([OW_THICC/2, OW_THICC, OW_THICC]);
-                    translate([OW_THICC/2, 0, OW_THICC/2])
+    difference() {
+        translate([OW_THICC, 0, 0])
+        union() {
+            translate([0, OW_THICC, OW_THICC])
+                rotate([90, 0, 0])
+                linear_extrude(OW_THICC)
+                polygon([[0,0], [SLOT_SIZE.x,0], [SLOT_SIZE.x,SLOT_SIZE.z], [SLOT_SIZE.z, SLOT_SIZE.z]]);
+            translate([SLOT_SIZE.x, 0, FULL_DIMS.z])
+                rotate([0,90,0])
+                crenels(IW_THICC, CZ, OW_THICC, 0, FULL_DIMS.z-OW_THICC);
+            crenels(OW_THICC, DX, OW_THICC, 0, SLOT_SIZE.x);
+            translate([-OW_THICC, 0, 0])
+                difference() {
+                    union() {
+                        translate([OW_THICC/2, 0, 0])
+                            cube([OW_THICC/2, OW_THICC, OW_THICC]);
+                        translate([OW_THICC/2, 0, OW_THICC/2])
+                            rotate([-90, 0, 0])
+                            cylinder(OW_THICC, OW_THICC/2, OW_THICC/2, $fn=100);
+                        cube([OW_THICC/2, OW_THICC, OW_THICC/2]);
+                    }
+                    translate([OW_THICC/2, OW_THICC*3/5, OW_THICC/2])
                         rotate([-90, 0, 0])
-                        cylinder(OW_THICC, OW_THICC/2, OW_THICC/2, $fn=100);
-                    cube([OW_THICC/2, OW_THICC, OW_THICC/2]);
+                        cylinder(OW_THICC*2/5+1, HRD/2, HRD/2, $fn=100);
                 }
-                translate([OW_THICC/2, OW_THICC*3/5, OW_THICC/2])
-                    rotate([-90, 0, 0])
-                    cylinder(OW_THICC*2/5+1, HRD/2, HRD/2, $fn=100);
-            }
+        }
+        lever_hole(UHP1);
+        lever_hole(UHP2);
     }
 }
 
@@ -438,10 +537,9 @@ module cover(decompose=0) {
 }
 
 
-module upper_part(open=0, top_open=0, decompose=0) {
-    x_trans = -open * (SLOT_SIZE.x + IW_THICC);
+module upper_part(top_open=0, decompose=0) {
     translate([-2*decompose, 0, 3*decompose])
-    translate([x_trans,0,FULL_DIMS.z]) {
+    translate([0,0,FULL_DIMS.z]) {
         upper_base(decompose);
         translate([0, 0, decompose])
             rotate_around([OW_THICC/2, 0, OW_THICC/2], [0, -top_open, 0])
@@ -451,11 +549,26 @@ module upper_part(open=0, top_open=0, decompose=0) {
     }
 }
 
+
+module box(open=0, top_open=0, decompose=0) {
+    alpha = atan2(FULL_DIMS.z+UHP1.y - LHP1.y, UHP1.x - LHP1.x);
+    beta = 90-alpha;
+    curr_alpha = alpha + 2*open*beta;
+    pos0 = [LEV_LGH*cos(alpha), 0, LEV_LGH*sin(alpha)];
+    curr_pos = [LEV_LGH*cos(curr_alpha), 0, LEV_LGH*sin(curr_alpha)];
+
+    lower_part(decompose);
+    translate(curr_pos-pos0)
+        upper_part(top_open, decompose);
+    rotate_around(FULL_DIMS/2, [0, 0, 180])
+        translate(curr_pos-pos0)
+        upper_part(top_open, decompose);
+    closure_levers(curr_alpha, decompose);
+}
+
+
 OPEN = 1;
 TOP_OPEN = 90; // in degrees
 DECOMPOSE = 0;
 
-lower_part(DECOMPOSE);
-upper_part(OPEN, TOP_OPEN, DECOMPOSE);
-rotate_around(FULL_DIMS/2, [0, 0, 180])
-    upper_part(OPEN, TOP_OPEN, DECOMPOSE);
+box(OPEN, TOP_OPEN, DECOMPOSE);
