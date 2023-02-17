@@ -77,19 +77,20 @@ CENT_CUT = CZ;
 HRD = 2; // HINGE RHOD DIAMETER
 COV_OV = 4*IW_THICC; // COVER OVERLAP
 
-function lhp_calc(uhp, open_size, handle_size_z) = [
+function lhp_calc(uhp, open_size, lev_z) = [
     (uhp.x + uhp.x-open_size) / 2,
-    (FULL_DIMS.z + uhp.y - handle_size_z) % FULL_DIMS.z
+    (FULL_DIMS.z + uhp.y - lev_z) % FULL_DIMS.z
 ];
 
 OPEN_SIZE = SLOT_SIZE.x + IW_THICC;
 HOLE_D = 4;
-UHP1 = [OW_THICC + 33, OW_THICC + SLOT_SIZE.z*1/3]; // UPPER HOLE POSITION
-UHP2 = [OW_THICC + 43, OW_THICC + SLOT_SIZE.z*1/3];
-LHP1 = lhp_calc(UHP1, OPEN_SIZE, 25);
-LHP2 = lhp_calc(UHP2, OPEN_SIZE, 25);
+LEV_Z = 33;
+UHP1 = [OW_THICC + 33, OW_THICC + SLOT_SIZE.z*1/2]; // UPPER HOLE POSITION
+UHP2 = [OW_THICC + 43, OW_THICC + SLOT_SIZE.z*1/2];
+LHP1 = lhp_calc(UHP1, OPEN_SIZE, LEV_Z);
+LHP2 = lhp_calc(UHP2, OPEN_SIZE, LEV_Z);
 SEP = 1;
-LEV_THICC = [6, 4];
+LEV_THICC = [sin(atan2(LEV_Z, UHP1.x-LHP1.x))*(UHP2.x-UHP1.x), 4];
 LEV_LGH = sqrt((UHP1.x - LHP1.x)^2 + (FULL_DIMS.z+UHP1.y - LHP1.y)^2);
 
 
@@ -137,8 +138,9 @@ module lever_bar(length) {
 }
 
 
-module lever(alpha, lhp, decompose=0) {
-    translate([lhp.x, -decompose*3/2, lhp.y])
+module lever(alpha, lhp, decompose=0, c) {
+    color(c)
+        translate([lhp.x, -decompose*3/2, lhp.y])
         rotate([0, -alpha, 0])
         translate([0, -LEV_THICC.y-SEP, 0])
         lever_bar(LEV_LGH);
@@ -150,18 +152,20 @@ module lever(alpha, lhp, decompose=0) {
 
 
 module closure_levers(alpha, decompose=0) {
-    lever(alpha, LHP1, decompose);
-    lever(alpha, LHP2, decompose);
+    c1 = [1, 0.5, 0];
+    c2 = [1, 0.7, 0];
+    lever(alpha, LHP1, decompose, c1);
+    lever(alpha, LHP2, decompose, c2);
     mirror_from(FULL_DIMS/2, [0,1,0]) {
-        lever(alpha, LHP1, decompose);
-        lever(alpha, LHP2, decompose);
+        lever(alpha, LHP1, decompose, c1);
+        lever(alpha, LHP2, decompose, c2);
     }
     mirror_from(FULL_DIMS/2, [1,0,0]) {
-        lever(alpha, LHP1, decompose);
-        lever(alpha, LHP2, decompose);
+        lever(alpha, LHP1, decompose, c1);
+        lever(alpha, LHP2, decompose, c2);
         mirror_from(FULL_DIMS/2, [0,1,0]) {
-            lever(alpha, LHP1, decompose);
-            lever(alpha, LHP2, decompose);
+            lever(alpha, LHP1, decompose, c1);
+            lever(alpha, LHP2, decompose, c2);
         }
     }
 }
