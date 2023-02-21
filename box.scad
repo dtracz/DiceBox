@@ -116,18 +116,6 @@ module closure_levers(alpha, decompose=0) {
 }
 
 
-// DEPERCATED
-//module quarter_cutter(r, h) {
-//    difference() {
-//        translate([0, -1, 0])
-//            cube([r+1, h+2, r+1]);
-//        translate([0, -2, 0])
-//            rotate([-90, 0, 0])
-//            cylinder(h+4, r, r);
-//    }
-//}
-
-
 module lower_deck() {
     color([0,1,0])
     rotate([90, 0, 0])
