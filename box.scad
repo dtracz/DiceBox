@@ -1,9 +1,10 @@
-EPS = 1e-12;
+$EPS = 1e-12;
+$fn=100;
 
 
 module crenels(height, width, depth, offset, length) {
     for(i = [offset: 2*width : length]) {
-        if (i + width < length + EPS)
+        if (i + width < length + $EPS)
             translate([i, 0, 0])
                 cube([width, depth, height]);
     }
@@ -98,7 +99,7 @@ LEV_LGH = sqrt((UHP1.x - LHP1.x)^2 + (FULL_DIMS.z+UHP1.y - LHP1.y)^2);
 module lever_hole(position) {
     translate([position.x, -1, position.y])
     rotate([-90, 0, 0])
-    cylinder(OW_THICC+2, HOLE_D/2, HOLE_D/2, $fn=100);
+    cylinder(OW_THICC+2, HOLE_D/2, HOLE_D/2);
 }
 
 
@@ -106,9 +107,9 @@ module lever_plug() {
     translate([0, -LEV_THICC.y-SEP, 0])
     union() {
         rotate([-90, 0, 0])
-            cylinder(OW_THICC+SEP+LEV_THICC.y, HOLE_D/2, HOLE_D/2, $fn=100);
+            cylinder(OW_THICC+SEP+LEV_THICC.y, HOLE_D/2, HOLE_D/2);
         difference() {
-            sphere(HOLE_D, $fn=100);
+            sphere(HOLE_D);
             translate([-HOLE_D-1, 0, -HOLE_D-1])
             cube(2*HOLE_D+2);
         }
@@ -123,17 +124,17 @@ module lever_bar(length) {
             cube([length, LEV_THICC.y, LEV_THICC.x]);
             translate([0, 0, LEV_THICC.x/2])
                 rotate([-90, 0, 0])
-                cylinder(LEV_THICC.y, LEV_THICC.x/2, LEV_THICC.x/2, $fn=100);
+                cylinder(LEV_THICC.y, LEV_THICC.x/2, LEV_THICC.x/2);
             translate([length, 0, LEV_THICC.x/2])
                 rotate([-90, 0, 0])
-                cylinder(LEV_THICC.y, LEV_THICC.x/2, LEV_THICC.x/2, $fn=100);
+                cylinder(LEV_THICC.y, LEV_THICC.x/2, LEV_THICC.x/2);
         }
         translate([0, -1, LEV_THICC.x/2])
             rotate([-90, 0, 0])
-            cylinder(LEV_THICC.y+2, HOLE_D/2, HOLE_D/2, $fn=100);
+            cylinder(LEV_THICC.y+2, HOLE_D/2, HOLE_D/2);
         translate([length, -1, LEV_THICC.x/2])
             rotate([-90, 0, 0])
-            cylinder(LEV_THICC.y+2, HOLE_D/2, HOLE_D/2, $fn=100);
+            cylinder(LEV_THICC.y+2, HOLE_D/2, HOLE_D/2);
     }
 }
 
@@ -172,13 +173,13 @@ module closure_levers(alpha, decompose=0) {
 
 
 // DEPERCATED
-//module quarter_cutter(r, h, $fn=40) {
+//module quarter_cutter(r, h) {
 //    difference() {
 //        translate([0, -1, 0])
 //            cube([r+1, h+2, r+1]);
 //        translate([0, -2, 0])
 //            rotate([-90, 0, 0])
-//            cylinder(h+4, r, r, $fn=$fn);
+//            cylinder(h+4, r, r);
 //    }
 //}
 
@@ -327,12 +328,12 @@ module xu_wall() {
                             cube([OW_THICC/2, OW_THICC, OW_THICC]);
                         translate([OW_THICC/2, 0, OW_THICC/2])
                             rotate([-90, 0, 0])
-                            cylinder(OW_THICC, OW_THICC/2, OW_THICC/2, $fn=100);
+                            cylinder(OW_THICC, OW_THICC/2, OW_THICC/2);
                         cube([OW_THICC/2, OW_THICC, OW_THICC/2]);
                     }
                     translate([OW_THICC/2, OW_THICC*3/5, OW_THICC/2])
                         rotate([-90, 0, 0])
-                        cylinder(OW_THICC*2/5+1, HRD/2, HRD/2, $fn=100);
+                        cylinder(OW_THICC*2/5+1, HRD/2, HRD/2);
                 }
         }
         lever_hole(UHP1);
@@ -416,12 +417,12 @@ module hinge_joint(thicc, ov_lgh) {
                 cube([ov_lgh+OW_THICC/2, thicc, OW_THICC]);
             translate([OW_THICC/2, 0, OW_THICC/2])
                 rotate([-90, 0, 0])
-                cylinder(thicc, OW_THICC/2, OW_THICC/2, $fn=100);
+                cylinder(thicc, OW_THICC/2, OW_THICC/2);
             cube([OW_THICC/2, thicc, OW_THICC/2]);
         }
         translate([OW_THICC/2, -1, OW_THICC/2])
             rotate([-90, 0, 0])
-            cylinder(thicc+2, HRD/2, HRD/2, $fn=100);
+            cylinder(thicc+2, HRD/2, HRD/2);
     }
 }
 
@@ -486,7 +487,7 @@ module hinge(top_open=0, decompose=0) {
             translate([OW_THICC/2, -OW_THICC/3, OW_THICC/2])
             color([0.4, 0.4, 0.4])
             rotate([-90, 0, 0])
-            cylinder(FULL_DIMS.y-OW_THICC*4/3, HRD/2, HRD/2, $fn=100);
+            cylinder(FULL_DIMS.y-OW_THICC*4/3, HRD/2, HRD/2);
     }
 }
 
