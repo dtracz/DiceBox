@@ -64,3 +64,50 @@ module hinge() {
             cylinder(FULL_DIMS.y-OW_THICC*4/3, HRD/2, HRD/2);
     }
 }
+
+
+module cut_hinge_slots1() {
+    difference() {
+        children();
+        union() {
+            translate([OW_THICC-1, OW_THICC+SLOT_SIZE.y+6*IW_THICC++4*OW_THICC, -1])
+                cube([BOTT_CUT+1, OW_THICC+1, OW_THICC+2]);
+            translate([OW_THICC-1, OW_THICC+SLOT_SIZE.y+4*IW_THICC+OW_THICC, -1])
+                cube([BOTT_CUT+1, OW_THICC*2, OW_THICC+2]);
+            translate([OW_THICC-1, OW_THICC+SLOT_SIZE.y+IW_THICC-1, -1])
+                cube([BOTT_CUT+1, IW_THICC+1, OW_THICC+2]);
+
+            mirror_from([0, FULL_DIMS.y/2, 0], [0,1,0]) {
+                translate([OW_THICC-1, OW_THICC+SLOT_SIZE.y+6*IW_THICC++4*OW_THICC, -1])
+                    cube([BOTT_CUT+1, OW_THICC+1, OW_THICC+2]);
+                translate([OW_THICC-1, OW_THICC+SLOT_SIZE.y+4*IW_THICC+OW_THICC, -1])
+                    cube([BOTT_CUT+1, OW_THICC*2, OW_THICC+2]);
+                translate([OW_THICC-1, OW_THICC+SLOT_SIZE.y+IW_THICC-1, -1])
+                    cube([BOTT_CUT+1, IW_THICC+1, OW_THICC+2]);
+            }
+        }
+    }
+}
+
+
+module cut_hinge_slots2() {
+    module hinge_slot_cut() {
+        translate([-1, 0, -1])
+            cube([OW_THICC+2, IW_THICC+1, SIDE_CUT*2/3+1]);
+        translate([-1, IW_THICC, -1])
+            cube([OW_THICC+2, OW_THICC, SIDE_CUT+1]);
+        translate([-1, IW_THICC+OW_THICC-1, -1])
+            cube([OW_THICC+2, IW_THICC+1, SIDE_CUT*2/3+1]);
+    }
+    difference() {
+        children();
+        translate([0, 2*OW_THICC, OW_THICC])
+            hinge_slot_cut();
+        translate([0, 5*OW_THICC+2*IW_THICC, OW_THICC])
+            hinge_slot_cut();
+        translate([0, 6*OW_THICC+7*IW_THICC, OW_THICC])
+            hinge_slot_cut();
+        translate([0, 9*OW_THICC+9*IW_THICC, OW_THICC])
+            hinge_slot_cut();
+    }
+}

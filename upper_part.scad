@@ -3,16 +3,6 @@ include <hinge.scad>
 
 
 
-module upper_deck_hinge_slots() {
-    translate([OW_THICC+SLOT_SIZE.y+4*IW_THICC+OW_THICC, -1, OW_THICC-1])
-        cube([OW_THICC*2, OW_THICC+2, BOTT_CUT+1]);
-    translate([OW_THICC+SLOT_SIZE.y+6*IW_THICC++4*OW_THICC, -1, OW_THICC-1])
-        cube([OW_THICC+1, OW_THICC+2, BOTT_CUT+1]);
-    translate([OW_THICC+SLOT_SIZE.y+IW_THICC-1, -1, OW_THICC-1])
-        cube([IW_THICC+1, OW_THICC+2, BOTT_CUT+1]);
-}
-
-
 module upper_deck() {
     color([0,0.7,0])
     rotate([90, 0, 0])
@@ -21,9 +11,6 @@ module upper_deck() {
         translate([0, 0, OW_THICC])
         crenellated_wall([FULL_DIMS.y, OW_THICC, SLOT_SIZE.x+IW_THICC],
                 [IW_THICC,CY,CY], [0,CY,CY], [OW_THICC,DX,DX], [OW_THICC,DX,DX]);
-        upper_deck_hinge_slots();
-        mirror_from([FULL_DIMS.y/2, 0, 0], [1,0,0])
-            upper_deck_hinge_slots();
         translate([OW_THICC+SLOT_SIZE.y, -1, OW_THICC-1])
             cube([IW_THICC, OW_THICC+2, BOTT_CUT+1]);
         translate([OW_THICC + SLOT_SIZE.y, -1, OW_THICC+SLOT_SIZE.x-BOTT_CUT])
@@ -67,28 +54,10 @@ module xu_wall() {
 
 
 module cover_wall() {
-    module hinge_slot_cut() {
-        translate([-1, 0, -1])
-            cube([OW_THICC+2, IW_THICC+1, SIDE_CUT*2/3+1]);
-        translate([-1, IW_THICC, -1])
-            cube([OW_THICC+2, OW_THICC, SIDE_CUT+1]);
-        translate([-1, IW_THICC+OW_THICC-1, -1])
-            cube([OW_THICC+2, IW_THICC+1, SIDE_CUT*2/3+1]);
-    }
-    difference() {
-        rotate_around([OW_THICC/2, OW_THICC/2, 0], [0, 0, 90])
-            translate([0, 0, OW_THICC])
-            crenellated_wall([FULL_DIMS.y, OW_THICC, FULL_DIMS.z],
-                [OW_THICC,CY,0], [0,0,0], [OW_THICC,CZ,CZ], [OW_THICC,CZ,CZ]);
-        translate([0, 2*OW_THICC, OW_THICC])
-            hinge_slot_cut();
-        translate([0, 5*OW_THICC+2*IW_THICC, OW_THICC])
-            hinge_slot_cut();
-        translate([0, 6*OW_THICC+7*IW_THICC, OW_THICC])
-            hinge_slot_cut();
-        translate([0, 9*OW_THICC+9*IW_THICC, OW_THICC])
-            hinge_slot_cut();
-    }
+    rotate_around([OW_THICC/2, OW_THICC/2, 0], [0, 0, 90])
+        translate([0, 0, OW_THICC])
+        crenellated_wall([FULL_DIMS.y, OW_THICC, FULL_DIMS.z],
+            [OW_THICC,CY,0], [0,0,0], [OW_THICC,CZ,CZ], [OW_THICC,CZ,CZ]);
 }
 
 
@@ -151,6 +120,7 @@ module xu_sep() {
 
 module upper_base() {
     translate([0, 0, -$EXPLODE])
+        cut_hinge_slots1()
         upper_deck();
     translate([$EXPLODE, 0, 0])
         translate([OW_THICC+SLOT_SIZE.x, 0, 0])
@@ -166,7 +136,9 @@ module upper_base() {
 
 module cover() {
     translate([-$EXPLODE, 0, 0])
-        color([0,1,1]) cover_wall();
+        color([0,1,1])
+        cut_hinge_slots2()
+        cover_wall();
         diag_reinforcement();
     translate([0, $EXPLODE, 0])
         translate([0, FULL_DIMS.y-OW_THICC, 0]) diag_reinforcement();
