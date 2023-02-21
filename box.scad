@@ -83,34 +83,34 @@ module lever_bar(length) {
 }
 
 
-module lever(alpha, lhp, decompose=0, c) {
+module lever(alpha, lhp, c) {
     color(c)
-        translate([lhp.x, -decompose*3/2, lhp.y])
+        translate([lhp.x, -$EXPLODE*3/2, lhp.y])
         rotate([0, -alpha, 0])
         translate([0, -LEV_THICC.y-SEP, 0])
         lever_bar(LEV_LGH);
-    translate([lhp.x, -decompose*5/2, lhp.y])
+    translate([lhp.x, -$EXPLODE*5/2, lhp.y])
         lever_plug();
-    translate([lhp.x + LEV_LGH*cos(alpha), -decompose*5/2, lhp.y + LEV_LGH*sin(alpha)])
+    translate([lhp.x + LEV_LGH*cos(alpha), -$EXPLODE*5/2, lhp.y + LEV_LGH*sin(alpha)])
         lever_plug();
 }
 
 
-module closure_levers(alpha, decompose=0) {
+module closure_levers(alpha) {
     c1 = [1, 0.5, 0];
     c2 = [1, 0.7, 0];
-    lever(alpha, LHP1, decompose, c1);
-    lever(alpha, LHP2, decompose, c2);
+    lever(alpha, LHP1, c1);
+    lever(alpha, LHP2, c2);
     mirror_from(FULL_DIMS/2, [0,1,0]) {
-        lever(alpha, LHP1, decompose, c1);
-        lever(alpha, LHP2, decompose, c2);
+        lever(alpha, LHP1, c1);
+        lever(alpha, LHP2, c2);
     }
     mirror_from(FULL_DIMS/2, [1,0,0]) {
-        lever(alpha, LHP1, decompose, c1);
-        lever(alpha, LHP2, decompose, c2);
+        lever(alpha, LHP1, c1);
+        lever(alpha, LHP2, c2);
         mirror_from(FULL_DIMS/2, [0,1,0]) {
-            lever(alpha, LHP1, decompose, c1);
-            lever(alpha, LHP2, decompose, c2);
+            lever(alpha, LHP1, c1);
+            lever(alpha, LHP2, c2);
         }
     }
 }
@@ -374,7 +374,7 @@ module xu_sep() {
 }
 
 
-module generic_hinge(params, top_open=0) {
+module generic_hinge(params) {
     offsets = [
         for (i=0, sum=0;
              i < len(params);
@@ -384,7 +384,7 @@ module generic_hinge(params, top_open=0) {
     ];
     for(i = [0: 1 : len(params)-1]) {
         reflection = params[i][0]=="v" ? 1 : 0;
-        rotation = params[i][0]=="v" ? 90-top_open : 0;
+        rotation = params[i][0]=="v" ? 90-$TOP_OPEN : 0;
         color(params[i][1])
             translate([0, offsets[i], 0])
             rotate_around([OW_THICC/2, 0, OW_THICC/2], [0, rotation, 0])
@@ -394,7 +394,7 @@ module generic_hinge(params, top_open=0) {
 }
 
 
-module hinge(top_open=0, decompose=0) {
+module hinge() {
     c1 = [0.6, 0.9, 1];
     c2 = [0.55, 0.8, 0.95];
     c3 = [0.7, 1, 0.8];
@@ -411,11 +411,11 @@ module hinge(top_open=0, decompose=0) {
               ["h", c3, OW_THICC, BOTT_CUT]];
     translate([0, OW_THICC, 0]) {
         translate([0, SLOT_SIZE.y+IW_THICC, 0])
-            generic_hinge(params, top_open);
+            generic_hinge(params);
         translate([0, SLOT_SIZE.y, 0])
             mirror([0, 1, 0])
-            generic_hinge(params, top_open);
-        translate([0, decompose > 0 ? -FULL_DIMS.y : 0, 0])
+            generic_hinge(params);
+        translate([0, $EXPLODE > 0 ? -FULL_DIMS.y : 0, 0])
             translate([OW_THICC/2, -OW_THICC/3, OW_THICC/2])
             color([0.4, 0.4, 0.4])
             rotate([-90, 0, 0])
@@ -424,84 +424,84 @@ module hinge(top_open=0, decompose=0) {
 }
 
 
-module lower_part(decompose=0) {
-    translate([0, 0, -decompose])
+module lower_part() {
+    translate([0, 0, -$EXPLODE])
         lower_deck();
-    translate([0, -decompose, 0])
+    translate([0, -$EXPLODE, 0])
         x_wall();
-    translate([0, decompose, 0])
+    translate([0, $EXPLODE, 0])
         translate([0, FULL_DIMS.y-OW_THICC, 0]) x_wall();
-    translate([-decompose, 0, 0])
+    translate([-$EXPLODE, 0, 0])
         ly_wall(OW_THICC);
-    translate([decompose, 0, 0])
+    translate([$EXPLODE, 0, 0])
         ry_wall(OW_THICC);
-    translate([decompose, 0, decompose]) {
+    translate([$EXPLODE, 0, $EXPLODE]) {
         color([0.5,0,1]) y_sep();
         translate([IW_THICC, 0, 0]) y_sep();
     }
-    translate([-decompose/2, 0, decompose])
+    translate([-$EXPLODE/2, 0, $EXPLODE])
         x_sep();
 }
 
 
-module upper_base(decompose=0) {
-    translate([0, 0, -decompose])
+module upper_base() {
+    translate([0, 0, -$EXPLODE])
         upper_deck();
-    translate([decompose, 0, 0])
+    translate([$EXPLODE, 0, 0])
         translate([OW_THICC+SLOT_SIZE.x, 0, 0])
         color([0,1,1]) ly_wall(IW_THICC);
-    translate([0, -decompose, 0])
+    translate([0, -$EXPLODE, 0])
         xu_wall();
-    translate([0, decompose, 0])
+    translate([0, $EXPLODE, 0])
         mirror_from([0, FULL_DIMS.y/2, 0], [0,1,0]) xu_wall();
-    translate([0, 0, decompose])
+    translate([0, 0, $EXPLODE])
         xu_sep();
 }
 
 
-module cover(decompose=0) {
-    translate([-decompose, 0, 0])
+module cover() {
+    translate([-$EXPLODE, 0, 0])
         color([0,1,1]) cover_wall();
         diag_reinforcement();
-    translate([0, decompose, 0])
+    translate([0, $EXPLODE, 0])
         translate([0, FULL_DIMS.y-OW_THICC, 0]) diag_reinforcement();
-    translate([0, 0, decompose])
+    translate([0, 0, $EXPLODE])
         top_cover();
 }
 
 
-module upper_part(top_open=0, decompose=0) {
-    translate([-2*decompose, 0, 3*decompose])
+module upper_part() {
+    translate([-2*$EXPLODE, 0, 3*$EXPLODE])
     translate([0,0,FULL_DIMS.z]) {
-        upper_base(decompose);
-        translate([0, 0, decompose])
-            rotate_around([OW_THICC/2, 0, OW_THICC/2], [0, -top_open, 0])
-            cover(decompose);
-        translate([-decompose, 0, -decompose/2])
-            hinge(top_open, decompose);
+        upper_base();
+        translate([0, 0, $EXPLODE])
+            rotate_around([OW_THICC/2, 0, OW_THICC/2], [0, -$TOP_OPEN, 0])
+            cover();
+        translate([-$EXPLODE, 0, -$EXPLODE/2])
+            hinge();
     }
 }
 
 
-module box(open=0, top_open=0, decompose=0) {
+module box() {
     alpha = atan2(FULL_DIMS.z+UHP1.y - LHP1.y, UHP1.x - LHP1.x);
     beta = 90-alpha;
-    curr_alpha = alpha + 2*open*beta;
+    curr_alpha = alpha + 2*$OPEN*beta;
     pos0 = [LEV_LGH*cos(alpha), 0, LEV_LGH*sin(alpha)];
     curr_pos = [LEV_LGH*cos(curr_alpha), 0, LEV_LGH*sin(curr_alpha)];
 
-    lower_part(decompose);
+    lower_part();
     translate(curr_pos-pos0)
-        upper_part(top_open, decompose);
+        upper_part();
     rotate_around(FULL_DIMS/2, [0, 0, 180])
         translate(curr_pos-pos0)
-        upper_part(top_open, decompose);
-    closure_levers(curr_alpha, decompose);
+        upper_part();
+    closure_levers(curr_alpha);
 }
 
 
-OPEN = 1;
-TOP_OPEN = 90; // in degrees
-DECOMPOSE = 0;
+$OPEN = 1;
+$TOP_OPEN = 90; // in degrees
+$EXPLODE = 0;
 
-box(OPEN, TOP_OPEN, DECOMPOSE);
+box();
