@@ -1,4 +1,8 @@
 
+$EPS = 1e-12;
+
+
+
 module crenels(height, width, depth, offset, length) {
     for(i = [offset: 2*width : length]) {
         if (i + width < length + $EPS)

@@ -1,3 +1,7 @@
+include <globals.scad>
+use <toolkit.scad>
+
+
 
 module lever_hole(position) {
     translate([position.x, -1, position.y])

@@ -1,6 +1,8 @@
-include <lower_part.scad>
-include <hinge.scad>
-include <main_closure.scad>
+include <globals.scad>
+use <toolkit.scad>
+use <lower_part.scad>
+use <hinge.scad>
+use <main_closure.scad>
 
 
 //--COVER-------------------------------------------------------
