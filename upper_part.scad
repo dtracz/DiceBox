@@ -3,6 +3,56 @@ include <hinge.scad>
 include <main_closure.scad>
 
 
+//--COVER-------------------------------------------------------
+
+module half_top_cover() {
+    translate([FULL_DIMS.x/2, FULL_DIMS.y, FULL_DIMS.z])
+    rotate([90, 0, 0])
+    rotate([0, -90, 0])
+    union() {
+        translate([0, 0, SLOT_SIZE.x-SLOT_SIZE.z+IW_THICC])
+            crenellated_wall([FULL_DIMS.y, OW_THICC/2, SLOT_SIZE.z+OW_THICC],
+                [OW_THICC,CY,CY], [0,0,0], [OW_THICC,CZ,CZ], [OW_THICC,CZ,CZ]);
+        translate([0, 0, COV_OV/2])
+            cube([FULL_DIMS.y, OW_THICC/2, SLOT_SIZE.x-SLOT_SIZE.z+IW_THICC-COV_OV/2]);
+        translate([0, 0, -COV_OV/2])
+            cube([FULL_DIMS.y/2, OW_THICC/2, COV_OV]);
+    }
+}
+
+
+module top_cover() {
+    color([0,0.8,0])
+        half_top_cover();
+    color([0,0.6,0])
+        rotate_around([0, FULL_DIMS.y/2, FULL_DIMS.z+OW_THICC/2], [180, 0, 0])
+        half_top_cover();
+}
+
+
+module cover_wall() {
+    rotate_around([OW_THICC/2, OW_THICC/2, 0], [0, 0, 90])
+        translate([0, 0, OW_THICC])
+        crenellated_wall([FULL_DIMS.y, OW_THICC, FULL_DIMS.z],
+            [OW_THICC,CY,0], [0,0,0], [OW_THICC,CZ,CZ], [OW_THICC,CZ,CZ]);
+}
+
+
+module cover() {
+    translate([-$EXPLODE, 0, 0])
+        color([0,1,1])
+        cut_hinge_slots2()
+        cover_wall();
+    diag_reinforcement();
+    translate([0, $EXPLODE, 0])
+        translate([0, FULL_DIMS.y-OW_THICC, 0])
+        diag_reinforcement();
+    translate([0, 0, $EXPLODE])
+        top_cover();
+}
+
+
+//--MAIN-PART---------------------------------------------------
 
 module upper_deck() {
     color([0,0.7,0])
@@ -54,14 +104,6 @@ module xu_wall() {
 }
 
 
-module cover_wall() {
-    rotate_around([OW_THICC/2, OW_THICC/2, 0], [0, 0, 90])
-        translate([0, 0, OW_THICC])
-        crenellated_wall([FULL_DIMS.y, OW_THICC, FULL_DIMS.z],
-            [OW_THICC,CY,0], [0,0,0], [OW_THICC,CZ,CZ], [OW_THICC,CZ,CZ]);
-}
-
-
 module diag_reinforcement() {
     color([0.8,0.8,0])
     translate([OW_THICC, 0, 0])
@@ -76,31 +118,6 @@ module diag_reinforcement() {
         translate([0, 0, FULL_DIMS.z])
             crenels(OW_THICC, CZ, OW_THICC, 0, SLOT_SIZE.z);
     }
-}
-
-
-module half_top_cover() {
-    translate([FULL_DIMS.x/2, FULL_DIMS.y, FULL_DIMS.z])
-    rotate([90, 0, 0])
-    rotate([0, -90, 0])
-    union() {
-        translate([0, 0, SLOT_SIZE.x-SLOT_SIZE.z+IW_THICC])
-            crenellated_wall([FULL_DIMS.y, OW_THICC/2, SLOT_SIZE.z+OW_THICC],
-                [OW_THICC,CY,CY], [0,0,0], [OW_THICC,CZ,CZ], [OW_THICC,CZ,CZ]);
-        translate([0, 0, COV_OV/2])
-            cube([FULL_DIMS.y, OW_THICC/2, SLOT_SIZE.x-SLOT_SIZE.z+IW_THICC-COV_OV/2]);
-        translate([0, 0, -COV_OV/2])
-            cube([FULL_DIMS.y/2, OW_THICC/2, COV_OV]);
-    }
-}
-
-
-module top_cover() {
-    color([0,0.8,0])
-        half_top_cover();
-    color([0,0.6,0])
-        rotate_around([0, FULL_DIMS.y/2, FULL_DIMS.z+OW_THICC/2], [180, 0, 0])
-        half_top_cover();
 }
 
 
@@ -135,22 +152,8 @@ module upper_base() {
 }
 
 
-module cover() {
-    translate([-$EXPLODE, 0, 0])
-        color([0,1,1])
-        cut_hinge_slots2()
-        cover_wall();
-        diag_reinforcement();
-    translate([0, $EXPLODE, 0])
-        translate([0, FULL_DIMS.y-OW_THICC, 0]) diag_reinforcement();
-    translate([0, 0, $EXPLODE])
-        top_cover();
-}
-
-
 module upper_part() {
-    translate([-2*$EXPLODE, 0, 3*$EXPLODE])
-    translate([0,0,FULL_DIMS.z]) {
+    translate([-2*$EXPLODE, 0, 3*$EXPLODE]) {
         upper_base();
         translate([0, 0, $EXPLODE])
             rotate_around([OW_THICC/2, 0, OW_THICC/2], [0, -$TOP_OPEN, 0])

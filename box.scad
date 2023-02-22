@@ -1,7 +1,6 @@
 use <toolkit.scad>
 include <main_closure.scad>
 include <lower_part.scad>
-include <hinge.scad>
 include <upper_part.scad>
 
 
@@ -50,9 +49,11 @@ ALPHA = atan2(FULL_DIMS.z+UHP1.y - LHP1.y, UHP1.x - LHP1.x);
 module box() {
     lower_part();
     open()
+        translate([0,0,FULL_DIMS.z])
         upper_part();
     rotate_around(FULL_DIMS/2, [0, 0, 180])
         open()
+        translate([0,0,FULL_DIMS.z])
         upper_part();
     closure_levers();
 }
