@@ -2,7 +2,7 @@ include <globals.scad>
 use <toolkit.scad>
 use <main_closure.scad>
 use <lower_part.scad>
-use <upper_part.scad>
+use <hinged_upper_part.scad>
 
 
 
