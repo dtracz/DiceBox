@@ -1,5 +1,6 @@
 include <lower_part.scad>
 include <hinge.scad>
+include <main_closure.scad>
 
 
 
