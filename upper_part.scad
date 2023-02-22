@@ -74,34 +74,30 @@ module upper_deck() {
 
 module xu_wall() {
     color([1,1,0])
-    difference() {
-        translate([OW_THICC, 0, 0])
-        union() {
-            translate([0, OW_THICC, OW_THICC])
-                rotate([90, 0, 0])
-                linear_extrude(OW_THICC)
-                polygon([[0,0], [SLOT_SIZE.x,0], [SLOT_SIZE.x,SLOT_SIZE.z], [SLOT_SIZE.z, SLOT_SIZE.z]]);
-            translate([SLOT_SIZE.x, 0, FULL_DIMS.z])
-                rotate([0,90,0])
-                crenels(IW_THICC, CZ, OW_THICC, 0, FULL_DIMS.z-OW_THICC);
-            crenels(OW_THICC, DX, OW_THICC, 0, SLOT_SIZE.x);
-            translate([-OW_THICC, 0, 0])
-                difference() {
-                    union() {
-                        translate([OW_THICC/2, 0, 0])
-                            cube([OW_THICC/2, OW_THICC, OW_THICC]);
-                        translate([OW_THICC/2, 0, OW_THICC/2])
-                            rotate([-90, 0, 0])
-                            cylinder(OW_THICC, OW_THICC/2, OW_THICC/2);
-                        cube([OW_THICC/2, OW_THICC, OW_THICC/2]);
-                    }
-                    translate([OW_THICC/2, OW_THICC*3/5, OW_THICC/2])
+    translate([OW_THICC, 0, 0])
+    union() {
+        translate([0, OW_THICC, OW_THICC])
+            rotate([90, 0, 0])
+            linear_extrude(OW_THICC)
+            polygon([[0,0], [SLOT_SIZE.x,0], [SLOT_SIZE.x,SLOT_SIZE.z], [SLOT_SIZE.z, SLOT_SIZE.z]]);
+        translate([SLOT_SIZE.x, 0, FULL_DIMS.z])
+            rotate([0,90,0])
+            crenels(IW_THICC, CZ, OW_THICC, 0, FULL_DIMS.z-OW_THICC);
+        crenels(OW_THICC, DX, OW_THICC, 0, SLOT_SIZE.x);
+        translate([-OW_THICC, 0, 0])
+            difference() {
+                union() {
+                    translate([OW_THICC/2, 0, 0])
+                        cube([OW_THICC/2, OW_THICC, OW_THICC]);
+                    translate([OW_THICC/2, 0, OW_THICC/2])
                         rotate([-90, 0, 0])
-                        cylinder(OW_THICC*2/5+1, HRD/2, HRD/2);
+                        cylinder(OW_THICC, OW_THICC/2, OW_THICC/2);
+                    cube([OW_THICC/2, OW_THICC, OW_THICC/2]);
                 }
-        }
-        lever_hole(UHP1);
-        lever_hole(UHP2);
+                translate([OW_THICC/2, OW_THICC*3/5, OW_THICC/2])
+                    rotate([-90, 0, 0])
+                    cylinder(OW_THICC*2/5+1, HRD/2, HRD/2);
+            }
     }
 }
 
@@ -146,9 +142,14 @@ module upper_base(EXPLODE) {
         translate([OW_THICC+SLOT_SIZE.x, 0, 0])
         color([0,1,1]) ly_wall(IW_THICC);
     translate([0, -EXPLODE, 0])
+        cut_lever_hole(UHP1)
+        cut_lever_hole(UHP2)
         xu_wall();
     translate([0, EXPLODE, 0])
-        mirror_from([0, FULL_DIMS.y/2, 0], [0,1,0]) xu_wall();
+        mirror_from([0, FULL_DIMS.y/2, 0], [0,1,0])
+        cut_lever_hole(UHP1)
+        cut_lever_hole(UHP2)
+        xu_wall();
     translate([0, 0, EXPLODE])
         xu_sep();
 }

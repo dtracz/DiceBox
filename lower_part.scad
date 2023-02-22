@@ -28,10 +28,6 @@ module x_wall() {
             [0,0,0], [OW_THICC,CX,CX+OW_THICC], [OW_THICC,CZ,0], [OW_THICC,CZ,0]);
         translate([OW_THICC + SLOT_SIZE.x, -1, OW_THICC+SLOT_SIZE.z-SIDE_CUT])
             cube([2*IW_THICC, OW_THICC+2, SIDE_CUT+1]);
-        lever_hole(LHP1);
-        lever_hole(LHP2);
-        lever_hole([FULL_DIMS.x - LHP1.x, LHP1.y]);
-        lever_hole([FULL_DIMS.x - LHP2.x, LHP2.y]);
     }
 }
 
@@ -103,9 +99,18 @@ module lower_part(EXPLODE) {
     translate([0, 0, -EXPLODE])
         lower_deck();
     translate([0, -EXPLODE, 0])
+        cut_lever_hole(LHP1)
+        cut_lever_hole(LHP2)
+        cut_lever_hole([FULL_DIMS.x - LHP1.x, LHP1.y])
+        cut_lever_hole([FULL_DIMS.x - LHP2.x, LHP2.y])
         x_wall();
     translate([0, EXPLODE, 0])
-        translate([0, FULL_DIMS.y-OW_THICC, 0]) x_wall();
+        translate([0, FULL_DIMS.y-OW_THICC, 0])
+        cut_lever_hole(LHP1)
+        cut_lever_hole(LHP2)
+        cut_lever_hole([FULL_DIMS.x - LHP1.x, LHP1.y])
+        cut_lever_hole([FULL_DIMS.x - LHP2.x, LHP2.y])
+        x_wall();
     translate([-EXPLODE, 0, 0])
         ly_wall(OW_THICC);
     translate([EXPLODE, 0, 0])
