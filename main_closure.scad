@@ -46,49 +46,56 @@ module lever_bar(length) {
 }
 
 
-module lever(alpha, lhp, c) {
+module lever(alpha, lhp, c, explode) {
     color(c)
-        translate([lhp.x, -$EXPLODE*3/2, lhp.y])
+        translate([lhp.x, -explode*3/2, lhp.y])
         rotate([0, -alpha, 0])
         translate([0, -LEV_THICC.y-SEP, 0])
         lever_bar(LEV_LGH);
-    translate([lhp.x, -$EXPLODE*5/2, lhp.y])
-        lever_plug();
-    translate([lhp.x + LEV_LGH*cos(alpha), -$EXPLODE*5/2, lhp.y + LEV_LGH*sin(alpha)])
-        lever_plug();
+    translate([0, -explode*5/2, 0]) {
+        translate([lhp.x, 0, lhp.y])
+            lever_plug();
+        translate([lhp.x+LEV_LGH*cos(alpha), 0, lhp.y+LEV_LGH*sin(alpha)])
+            lever_plug();
+    }
 }
 
 
-function get_curr_alpha() =
-    ALPHA + 2*$OPEN*(90-ALPHA);
+function get_curr_alpha(main_open) =
+    ALPHA + 2*main_open*(90-ALPHA);
 
 
-module closure_levers() {
-    alpha = get_curr_alpha();
+module closure_levers(main_open, EXPLODE) {
+    alpha = get_curr_alpha(main_open);
     c1 = [1, 0.5, 0];
     c2 = [1, 0.7, 0];
-    lever(alpha, LHP1, c1);
-    lever(alpha, LHP2, c2);
+    lever(alpha, LHP1, c1, EXPLODE);
+    lever(alpha, LHP2, c2, EXPLODE);
     mirror_from(FULL_DIMS/2, [0,1,0]) {
-        lever(alpha, LHP1, c1);
-        lever(alpha, LHP2, c2);
+        lever(alpha, LHP1, c1, EXPLODE);
+        lever(alpha, LHP2, c2, EXPLODE);
     }
     mirror_from(FULL_DIMS/2, [1,0,0]) {
-        lever(alpha, LHP1, c1);
-        lever(alpha, LHP2, c2);
+        lever(alpha, LHP1, c1, EXPLODE);
+        lever(alpha, LHP2, c2, EXPLODE);
         mirror_from(FULL_DIMS/2, [0,1,0]) {
-            lever(alpha, LHP1, c1);
-            lever(alpha, LHP2, c2);
+            lever(alpha, LHP1, c1, EXPLODE);
+            lever(alpha, LHP2, c2, EXPLODE);
         }
     }
 }
 
 
-module open() {
-    alpha = get_curr_alpha();
+module open(main_open) {
+    alpha = get_curr_alpha(main_open);
     pos0 = [LEV_LGH*cos(ALPHA), 0, LEV_LGH*sin(ALPHA)];
     curr_pos = [LEV_LGH*cos(alpha), 0, LEV_LGH*sin(alpha)];
     translate(curr_pos-pos0)
         children();
 }
 
+
+EXPLODE = 0;
+MAIN_OPEN = 1;
+
+closure_levers(MAIN_OPEN, EXPLODE);

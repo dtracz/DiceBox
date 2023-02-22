@@ -20,7 +20,7 @@ module hinge_joint(thicc, ov_lgh) {
 }
 
 
-module generic_hinge(params) {
+module generic_hinge(params, top_open) {
     offsets = [
         for (i=0, sum=0;
              i < len(params);
@@ -30,7 +30,7 @@ module generic_hinge(params) {
     ];
     for(i = [0: 1 : len(params)-1]) {
         reflection = params[i][0]=="v" ? 1 : 0;
-        rotation = params[i][0]=="v" ? 90-$TOP_OPEN : 0;
+        rotation = params[i][0]=="v" ? 90-top_open : 0;
         color(params[i][1])
             translate([0, offsets[i], 0])
             rotate_around([OW_THICC/2, 0, OW_THICC/2], [0, rotation, 0])
@@ -40,7 +40,7 @@ module generic_hinge(params) {
 }
 
 
-module hinge() {
+module hinge(top_open, EXPLODE) {
     c1 = [0.6, 0.9, 1];
     c2 = [0.55, 0.8, 0.95];
     c3 = [0.7, 1, 0.8];
@@ -57,11 +57,11 @@ module hinge() {
               ["h", c3, OW_THICC, BOTT_CUT]];
     translate([0, OW_THICC, 0]) {
         translate([0, SLOT_SIZE.y+IW_THICC, 0])
-            generic_hinge(params);
+            generic_hinge(params, top_open);
         translate([0, SLOT_SIZE.y, 0])
             mirror([0, 1, 0])
-            generic_hinge(params);
-        translate([0, $EXPLODE > 0 ? -FULL_DIMS.y : 0, 0])
+            generic_hinge(params, top_open);
+        translate([0, EXPLODE > 0 ? -FULL_DIMS.y : 0, 0])
             translate([OW_THICC/2, -OW_THICC/3, OW_THICC/2])
             color([0.4, 0.4, 0.4])
             rotate([-90, 0, 0])
@@ -115,3 +115,9 @@ module cut_hinge_slots2() {
             hinge_slot_cut();
     }
 }
+
+
+TOP_OPEN = 0; // in degrees
+EXPLODE = 0;
+
+hinge(TOP_OPEN, EXPLODE);

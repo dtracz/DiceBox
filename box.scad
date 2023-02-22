@@ -6,24 +6,24 @@ use <upper_part.scad>
 
 
 
-module box() {
-    lower_part();
-    open()
+module box(top_open, main_open, EXPLODE) {
+    lower_part(EXPLODE);
+    open(main_open)
+        translate([-2*EXPLODE, 0, 3*EXPLODE])
         translate([0,0,FULL_DIMS.z])
-        upper_part();
+        upper_part(top_open, EXPLODE);
     rotate_around(FULL_DIMS/2, [0, 0, 180])
-        open()
+        translate([-2*EXPLODE, 0, 3*EXPLODE])
+        open(main_open)
         translate([0,0,FULL_DIMS.z])
-        upper_part();
-    closure_levers();
+        upper_part(top_open, EXPLODE);
+    closure_levers(main_open, EXPLODE);
 }
 
 
-$fn=100;
-
-$OPEN = 1;
-$TOP_OPEN = 90; // in degrees
-$EXPLODE = 0;
+MAIN_OPEN = 1;
+TOP_OPEN = 90; // in degrees
+EXPLODE = 0;
 
 
-box();
+box(TOP_OPEN, MAIN_OPEN, EXPLODE);

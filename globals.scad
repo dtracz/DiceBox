@@ -1,4 +1,7 @@
 
+$fn=100;
+
+
 OW_THICC = 6;
 IW_THICC = 4;
 SLOT_SIZE = [50, 50, 25];

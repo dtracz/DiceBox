@@ -40,16 +40,16 @@ module cover_wall() {
 }
 
 
-module cover() {
-    translate([-$EXPLODE, 0, 0])
+module cover(EXPLODE) {
+    translate([-EXPLODE, 0, 0])
         color([0,1,1])
         cut_hinge_slots2()
         cover_wall();
     diag_reinforcement();
-    translate([0, $EXPLODE, 0])
+    translate([0, EXPLODE, 0])
         translate([0, FULL_DIMS.y-OW_THICC, 0])
         diag_reinforcement();
-    translate([0, 0, $EXPLODE])
+    translate([0, 0, EXPLODE])
         top_cover();
 }
 
@@ -138,29 +138,33 @@ module xu_sep() {
 }
 
 
-module upper_base() {
-    translate([0, 0, -$EXPLODE])
+module upper_base(EXPLODE) {
+    translate([0, 0, -EXPLODE])
         cut_hinge_slots1()
         upper_deck();
-    translate([$EXPLODE, 0, 0])
+    translate([EXPLODE, 0, 0])
         translate([OW_THICC+SLOT_SIZE.x, 0, 0])
         color([0,1,1]) ly_wall(IW_THICC);
-    translate([0, -$EXPLODE, 0])
+    translate([0, -EXPLODE, 0])
         xu_wall();
-    translate([0, $EXPLODE, 0])
+    translate([0, EXPLODE, 0])
         mirror_from([0, FULL_DIMS.y/2, 0], [0,1,0]) xu_wall();
-    translate([0, 0, $EXPLODE])
+    translate([0, 0, EXPLODE])
         xu_sep();
 }
 
 
-module upper_part() {
-    translate([-2*$EXPLODE, 0, 3*$EXPLODE]) {
-        upper_base();
-        translate([0, 0, $EXPLODE])
-            rotate_around([OW_THICC/2, 0, OW_THICC/2], [0, -$TOP_OPEN, 0])
-            cover();
-        translate([-$EXPLODE, 0, -$EXPLODE/2])
-            hinge();
-    }
+module upper_part(top_open, EXPLODE) {
+    upper_base(EXPLODE);
+    translate([0, 0, EXPLODE])
+        rotate_around([OW_THICC/2, 0, OW_THICC/2], [0, -top_open, 0])
+        cover(EXPLODE);
+    translate([-EXPLODE, 0, -EXPLODE/2])
+        hinge(top_open, EXPLODE);
 }
+
+
+TOP_OPEN = 90; // in degrees
+EXPLODE = 0;
+
+upper_part(TOP_OPEN, EXPLODE);

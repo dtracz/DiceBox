@@ -99,21 +99,26 @@ module x_sep() {
 }
 
 
-module lower_part() {
-    translate([0, 0, -$EXPLODE])
+module lower_part(EXPLODE) {
+    translate([0, 0, -EXPLODE])
         lower_deck();
-    translate([0, -$EXPLODE, 0])
+    translate([0, -EXPLODE, 0])
         x_wall();
-    translate([0, $EXPLODE, 0])
+    translate([0, EXPLODE, 0])
         translate([0, FULL_DIMS.y-OW_THICC, 0]) x_wall();
-    translate([-$EXPLODE, 0, 0])
+    translate([-EXPLODE, 0, 0])
         ly_wall(OW_THICC);
-    translate([$EXPLODE, 0, 0])
+    translate([EXPLODE, 0, 0])
         ry_wall(OW_THICC);
-    translate([$EXPLODE, 0, $EXPLODE]) {
+    translate([EXPLODE, 0, EXPLODE]) {
         color([0.5,0,1]) y_sep();
         translate([IW_THICC, 0, 0]) y_sep();
     }
-    translate([-$EXPLODE/2, 0, $EXPLODE])
+    translate([-EXPLODE/2, 0, EXPLODE])
         x_sep();
 }
+
+
+EXPLODE = 0;
+
+lower_part(EXPLODE);
