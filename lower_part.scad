@@ -24,10 +24,14 @@ module lower_deck() {
 module x_wall() {
     color([1,0,0])
     difference() {
-        crenellated_wall([FULL_DIMS.x, OW_THICC, FULL_DIMS.z],
-            [0,0,0], [OW_THICC,CX,CX+OW_THICC], [OW_THICC,CZ,0], [OW_THICC,CZ,0]);
+        rotate_around([FULL_DIMS.z/2, 0, FULL_DIMS.z/2], [0, 90, 0])
+            crenellated_wall([FULL_DIMS.z, OW_THICC, FULL_DIMS.x], [OW_THICC,CZ,0], [OW_THICC,CZ,0], [OW_THICC,CX,CX], [0,0,0]);
         translate([OW_THICC + SLOT_SIZE.x, -1, OW_THICC+SLOT_SIZE.z-SIDE_CUT])
             cube([2*IW_THICC, OW_THICC+2, SIDE_CUT+1]);
+        translate([-1, -1, -CZ/2])
+            cube([OW_THICC+2, OW_THICC+2, CZ]);
+        translate([FULL_DIMS.x-OW_THICC-1, -1, -CZ/2])
+            cube([OW_THICC+2, OW_THICC+2, CZ]);
     }
 }
 

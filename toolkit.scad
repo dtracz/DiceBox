@@ -5,9 +5,10 @@ $EPS = 1e-12;
 
 module crenels(height, width, depth, offset, length) {
     for(i = [offset: 2*width : length]) {
-        if (i + width < length + $EPS)
-            translate([i, 0, 0])
-                cube([width, depth, height]);
+        real_width = i+width<length+$EPS ? width+min(i, 0) : length-i;
+        mv = max(0, i);
+        translate([mv, 0, 0])
+            cube([real_width, depth, height]);
     }
 }
 
