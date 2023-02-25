@@ -72,8 +72,8 @@ nail(UHP1);
 translate([0,1,0])
     arc(UHP1, ARM, 90-APH, 2*APH, [1,1,1]);
 
-//$t=0;
-BETA = $t*2*APH;
+t = min(max($t*1.2-0.1, 0), 1);
+BETA = t*2*APH;
 FIXED_LGH = len2D(D-S); //sqrt((D.x-S.x)^2 + (D.y-S.y)^2);
 
 function rot2D(O, X, theta) = [(X-O).x*cos(theta) - (X-O).y*sin(theta),
@@ -96,6 +96,14 @@ MOV_S = [
 ];
 
 nail(MOV_S, [0,1,0]);
+
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+COV_ANGLE_0 = atan2((D-S).y, (D-S).x);
+COV_ANGLE_CURR = atan2((MOV_D-MOV_S).y, (MOV_D-MOV_S).x);
+
+COV_THETA = COV_ANGLE_CURR - COV_ANGLE_0;
+echo(COV_THETA);
 
 //--COVER-------------------------------------------------------
 
@@ -282,8 +290,8 @@ module upper_base(EXPLODE) {
 module upper_part(top_open, EXPLODE) {
     upper_base(EXPLODE);
     translate([0, 0, EXPLODE])
-        translate(top_open*[FULL_DIMS.z, 0, -FULL_DIMS.x/2+FULL_DIMS.z])
-        rotate_around([OW_THICC/2, 0, OW_THICC/2], [0, -90*top_open, 0])
+        translate([MOV_S.x-S.x, 0, MOV_S.y-S.y])
+        rotate_around([OW_THICC/2, 0, OW_THICC/2], [0, -COV_THETA, 0])
         cover(EXPLODE);
 }
 
