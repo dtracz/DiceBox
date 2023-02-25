@@ -7,6 +7,96 @@ use <main_closure.scad>
 RS = 15;
 DZ = (SLOT_SIZE.z-RS)/2;
 
+//--CALCULATIONS------------------------------------------------
+
+// S---R-A
+//      \|
+//       E
+// SR = RE
+
+SA = FULL_DIMS.z;
+AE = FULL_DIMS.x/2 - FULL_DIMS.z;
+RE = (AE^2 + SA^2) / (2*SA);
+
+S = [OW_THICC/2, OW_THICC/2];
+R = S + [RE, 0];
+E = S + [SA, -AE];
+
+MAX_GAMMA = 180 - asin(AE/RE);
+
+module nail(pos, c=[1,0,0]) {
+    translate([pos.x, 2, pos.y])
+    rotate([90, 0, 0])
+    % color([c.x,c.y,c.z,0.8])
+    cylinder(10, 1, 1);
+}
+
+module arc(center, r, a0, a, c) {
+    translate([center.x, 0, center.y]) {
+        translate([0, -4, 0])
+        rotate([90, 0, 0])
+        % color([c.x,c.y,c.z,0.2])
+        cylinder(2, r, r);
+        rotate([90, -a0, 0])
+        % color([c.x,c.y,c.z,0.5])
+        rotate_extrude(angle=a, $fn=1000)
+        polygon([[0,4], [r,4], [r,6], [0,6]]);
+    }
+}
+
+
+nail(S);
+nail(R);
+nail(E);
+arc(R, RE, 180, MAX_GAMMA, [1,0,1]);
+
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+function len2D(v) = sqrt((v.x)^2 + (v.y)^2);
+
+
+MP_Y = 2.2;
+MP_X = MP_Y + IW_THICC;
+
+REINF_CENT = (RS-IW_THICC)/3;
+C = [OW_THICC+MP_X, FULL_DIMS.z-IW_THICC-MP_Y];
+D = [OW_THICC+SLOT_SIZE.x-MP_Y, FULL_DIMS.z-MP_X];
+APH = atan2(D.x - UHP1.x, D.y - UHP1.y);
+ARM = len2D(D-UHP1); //sqrt((D.x-UHP1.x)^2 + (D.y-UHP1.y)^2);
+echo(APH);
+echo(ALPHA);
+
+nail(C);
+nail(D);
+nail(UHP1);
+translate([0,1,0])
+    arc(UHP1, ARM, 90-APH, 2*APH, [1,1,1]);
+
+//$t=0;
+BETA = $t*2*APH;
+FIXED_LGH = len2D(D-S); //sqrt((D.x-S.x)^2 + (D.y-S.y)^2);
+
+function rot2D(O, X, theta) = [(X-O).x*cos(theta) - (X-O).y*sin(theta),
+        (X-O).x*sin(theta) + (X-O).y*cos(theta)]+O;
+
+MOV_D = rot2D(UHP1, D, BETA);
+
+translate([0,-0.5,0])
+    arc(MOV_D, FIXED_LGH , 0, 0, [0,0,1]);
+nail(MOV_D, [0,0,1]);
+
+CENT_DIFF = len2D(R - MOV_D);
+COS_THETA = (CENT_DIFF^2 + RE^2 - FIXED_LGH^2) / (2*CENT_DIFF*RE);
+SIN_THETA = sqrt(1 - COS_THETA^2);
+VP = RE * (MOV_D - R) / CENT_DIFF;
+
+MOV_S = [
+    VP.x*COS_THETA - VP.y*SIN_THETA + R.x,
+    VP.x*SIN_THETA + VP.y*COS_THETA + R.y,
+];
+
+nail(MOV_S, [0,1,0]);
+
 //--COVER-------------------------------------------------------
 
 module top_cover() {
@@ -158,7 +248,7 @@ module xu_sep() {
     translate([OW_THICC, OW_THICC+SLOT_SIZE.y, 0])
     union() {
         translate([0, 0, OW_THICC])
-            cube([SLOT_SIZE.x, IW_THICC, SLOT_SIZE.z]);
+            cube([SLOT_SIZE.x, IW_THICC, SLOT_SIZE.z-IW_THICC]);
         cube([BOTT_CUT, IW_THICC, OW_THICC]);
 //        translate([SLOT_SIZE.x, 0, FULL_DIMS.z-SIDE_CUT])
 //            cube([IW_THICC, IW_THICC, SIDE_CUT]);
@@ -192,12 +282,13 @@ module upper_base(EXPLODE) {
 module upper_part(top_open, EXPLODE) {
     upper_base(EXPLODE);
     translate([0, 0, EXPLODE])
-        rotate_around([OW_THICC/2, 0, OW_THICC/2], [0, -top_open, 0])
+        translate(top_open*[FULL_DIMS.z, 0, -FULL_DIMS.x/2+FULL_DIMS.z])
+        rotate_around([OW_THICC/2, 0, OW_THICC/2], [0, -90*top_open, 0])
         cover(EXPLODE);
 }
 
 
-TOP_OPEN = 0; // in degrees
+TOP_OPEN = 0;
 EXPLODE = 0;
 
 upper_part(TOP_OPEN, EXPLODE);
