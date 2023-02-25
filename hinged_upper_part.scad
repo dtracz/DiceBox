@@ -40,12 +40,30 @@ module cover_wall() {
 }
 
 
+module diag_reinforcement() {
+    color([0.8,0.8,0])
+    translate([OW_THICC, 0, 0])
+    union() {
+        translate([0, OW_THICC, OW_THICC])
+            rotate([90, 0, 0])
+            linear_extrude(OW_THICC)
+            polygon([[0,0], [SLOT_SIZE.z, SLOT_SIZE.z], [0,SLOT_SIZE.z]]);
+        translate([-OW_THICC, 0, FULL_DIMS.z])
+            rotate([0,90,0])
+            crenels(OW_THICC, CZ, OW_THICC, 0, FULL_DIMS.z-OW_THICC);
+        translate([0, 0, FULL_DIMS.z])
+            crenels(OW_THICC, CZ, OW_THICC, 0, SLOT_SIZE.z);
+    }
+}
+
+
 module cover(EXPLODE) {
     translate([-EXPLODE, 0, 0])
         color([0,1,1])
         cut_hinge_slots2()
         cover_wall();
-    diag_reinforcement();
+    translate([0, -EXPLODE, 0])
+        diag_reinforcement();
     translate([0, EXPLODE, 0])
         translate([0, FULL_DIMS.y-OW_THICC, 0])
         diag_reinforcement();
@@ -98,23 +116,6 @@ module xu_wall() {
                     rotate([-90, 0, 0])
                     cylinder(OW_THICC*2/5+1, HRD/2, HRD/2);
             }
-    }
-}
-
-
-module diag_reinforcement() {
-    color([0.8,0.8,0])
-    translate([OW_THICC, 0, 0])
-    union() {
-        translate([0, OW_THICC, OW_THICC])
-            rotate([90, 0, 0])
-            linear_extrude(OW_THICC)
-            polygon([[0,0], [SLOT_SIZE.z, SLOT_SIZE.z], [0,SLOT_SIZE.z]]);
-        translate([-OW_THICC, 0, FULL_DIMS.z])
-            rotate([0,90,0])
-            crenels(OW_THICC, CZ, OW_THICC, 0, FULL_DIMS.z-OW_THICC);
-        translate([0, 0, FULL_DIMS.z])
-            crenels(OW_THICC, CZ, OW_THICC, 0, SLOT_SIZE.z);
     }
 }
 
