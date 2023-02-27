@@ -7,22 +7,53 @@ use <main_closure.scad>
 RS = 15;
 DZ = (SLOT_SIZE.z-RS)/2;
 
+MP_Y = 2.2;
+MP_X = MP_Y + IW_THICC;
+
 //--CALCULATIONS------------------------------------------------
 // Lower lever schme
 // S---R-A
 //      \|
 //       E
 // SR = RE
-
 SA = FULL_DIMS.z;
 AE = FULL_DIMS.x/2 - FULL_DIMS.z;
 RE = (AE^2 + SA^2) / (2*SA);
-
 S = [OW_THICC/2, OW_THICC/2];
 R = S + [RE, 0];
 E = S + [SA, -AE];
 
-MAX_GAMMA = 180 - asin(AE/RE);
+// Upper lever schme
+// C       D
+//   \   /
+//     T
+C = [OW_THICC+MP_X, FULL_DIMS.z-IW_THICC-MP_Y];
+D = [OW_THICC+SLOT_SIZE.x-MP_Y, FULL_DIMS.z-MP_X];
+T = [(C.x+D.x)/2, (S.y+D.y)/2+8];
+// CTD angle
+UP_LEV_RANGE = 2*atan2(D.x - T.x, D.y - T.y);
+
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+function len2D(v) = sqrt((v.x)^2 + (v.y)^2);
+
+function rot2D(O, X, theta) = [(X-O).x*cos(theta) - (X-O).y*sin(theta),
+        (X-O).x*sin(theta) + (X-O).y*cos(theta)]+O;
+
+function get_current_D(open) = rot2D(T, D, open*UP_LEV_RANGE);
+
+function get_current_S(open) =
+ let( mov_D = get_current_D(open)                         )
+ let( center_dist = len2D(R - mov_D)                      )
+ let( cos_theta = (center_dist^2 + RE^2 - len2D(D-S)^2) /
+                     (2*center_dist*RE)                   )
+ let( sin_theta = sqrt(1 - cos_theta^2)                   )
+ let( vp = RE * (mov_D - R) / center_dist                 )
+      [ vp.x*cos_theta - vp.y*sin_theta + R.x,
+        vp.x*sin_theta + vp.y*cos_theta + R.y,
+      ];
+
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 module nail(pos, c=[1,0,0]) {
     translate([pos.x, 2, pos.y])
@@ -45,70 +76,24 @@ module arc(center, r, a0, a, c) {
 }
 
 
-nail(S);
-nail(R);
-nail(E);
-arc(R, RE, 180, MAX_GAMMA, [1,0,1]);
-
-// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-// Upper lever schme
-// C       D
-//   \   /
-//     T
-
-function len2D(v) = sqrt((v.x)^2 + (v.y)^2);
-
-
-MP_Y = 2.2;
-MP_X = MP_Y + IW_THICC;
-
-REINF_CENT = (RS-IW_THICC)/3;
-C = [OW_THICC+MP_X, FULL_DIMS.z-IW_THICC-MP_Y];
-D = [OW_THICC+SLOT_SIZE.x-MP_Y, FULL_DIMS.z-MP_X];
-T = [(C.x+D.x)/2, (S.y+D.y)/2+8];
-APH = atan2(D.x - T.x, D.y - T.y);
-ARM = len2D(D-T); //sqrt((D.x-T.x)^2 + (D.y-T.y)^2);
-echo(APH);
-echo(ALPHA);
-
-nail(C);
-nail(D);
-nail(T);
-translate([0,1,0])
-    arc(T, ARM, 90-APH, 2*APH, [1,1,1]);
-
-t = min(max($t*1.2-0.1, 0), 1);
-BETA = t*2*APH;
-FIXED_LGH = len2D(D-S); //sqrt((D.x-S.x)^2 + (D.y-S.y)^2);
-
-function rot2D(O, X, theta) = [(X-O).x*cos(theta) - (X-O).y*sin(theta),
-        (X-O).x*sin(theta) + (X-O).y*cos(theta)]+O;
-
-MOV_D = rot2D(T, D, BETA);
-
-nail(MOV_D, [0,0,1]);
-translate([0,-0.5,0])
-    arc(MOV_D, FIXED_LGH , 0, 0, [0,0,1]);
-
-CENT_DIFF = len2D(R - MOV_D);
-COS_THETA = (CENT_DIFF^2 + RE^2 - FIXED_LGH^2) / (2*CENT_DIFF*RE);
-SIN_THETA = sqrt(1 - COS_THETA^2);
-VP = RE * (MOV_D - R) / CENT_DIFF;
-
-MOV_S = [
-    VP.x*COS_THETA - VP.y*SIN_THETA + R.x,
-    VP.x*SIN_THETA + VP.y*COS_THETA + R.y,
-];
-
-nail(MOV_S, [0,1,0]);
-
-// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
-COV_ANGLE_0 = atan2((D-S).y, (D-S).x);
-COV_ANGLE_CURR = atan2((MOV_D-MOV_S).y, (MOV_D-MOV_S).x);
-
-COV_THETA = COV_ANGLE_CURR - COV_ANGLE_0;
-echo(COV_THETA);
+module math_visualisation(open) {
+    mov_D = get_current_D(open);
+    mov_S = get_current_S(open);
+    nail(C);
+    nail(D);
+    nail(T);
+    translate([0,1,0])
+        arc(T, len2D(D-T), 90-UP_LEV_RANGE/2, UP_LEV_RANGE, [1,1,1]);
+    nail(S);
+    nail(R);
+    nail(E);
+    max_gamma = 180 - asin(AE/RE);
+    arc(R, RE, 180, max_gamma, [1,0,1]);
+    translate([0,-0.5,0])
+        arc(mov_D, len2D(D-S) , 0, 0, [0,0,1]);
+    nail(mov_D, [0,0,1]);
+    nail(mov_S, [0,1,0]);
+}
 
 //--COVER-------------------------------------------------------
 
@@ -292,16 +277,23 @@ module upper_base(EXPLODE) {
 }
 
 
-module upper_part(top_open, EXPLODE) {
+module upper_part(open, EXPLODE) {
+    mov_D = get_current_D(open);
+    mov_S = get_current_S(open);
+    cov_angle_0 = atan2((D-S).y, (D-S).x);
+    cov_angle_curr = atan2((mov_D-mov_S).y, (mov_D-mov_S).x);
+    cov_angle = cov_angle_curr - cov_angle_0;
+
     upper_base(EXPLODE);
     translate([0, 0, EXPLODE])
-        translate([MOV_S.x-S.x, 0, MOV_S.y-S.y])
-        rotate_around([OW_THICC/2, 0, OW_THICC/2], [0, -COV_THETA, 0])
+        translate([mov_S.x-S.x, 0, mov_S.y-S.y])
+        rotate_around([OW_THICC/2, 0, OW_THICC/2], [0, -cov_angle, 0])
         cover(EXPLODE);
 }
 
 
-TOP_OPEN = 0;
+TOP_OPEN = min(max($t*1.2-0.1, 0), 1);
 EXPLODE = 0;
 
+math_visualisation(TOP_OPEN);
 upper_part(TOP_OPEN, EXPLODE);
