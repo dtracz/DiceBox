@@ -8,7 +8,7 @@ RS = 15;
 DZ = (SLOT_SIZE.z-RS)/2;
 
 //--CALCULATIONS------------------------------------------------
-
+// Lower lever schme
 // S---R-A
 //      \|
 //       E
@@ -51,6 +51,10 @@ nail(E);
 arc(R, RE, 180, MAX_GAMMA, [1,0,1]);
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+// Upper lever schme
+// C       D
+//   \   /
+//     T
 
 function len2D(v) = sqrt((v.x)^2 + (v.y)^2);
 
@@ -61,16 +65,17 @@ MP_X = MP_Y + IW_THICC;
 REINF_CENT = (RS-IW_THICC)/3;
 C = [OW_THICC+MP_X, FULL_DIMS.z-IW_THICC-MP_Y];
 D = [OW_THICC+SLOT_SIZE.x-MP_Y, FULL_DIMS.z-MP_X];
-APH = atan2(D.x - UHP1.x, D.y - UHP1.y);
-ARM = len2D(D-UHP1); //sqrt((D.x-UHP1.x)^2 + (D.y-UHP1.y)^2);
+T = [(C.x+D.x)/2, (S.y+D.y)/2+8];
+APH = atan2(D.x - T.x, D.y - T.y);
+ARM = len2D(D-T); //sqrt((D.x-T.x)^2 + (D.y-T.y)^2);
 echo(APH);
 echo(ALPHA);
 
 nail(C);
 nail(D);
-nail(UHP1);
+nail(T);
 translate([0,1,0])
-    arc(UHP1, ARM, 90-APH, 2*APH, [1,1,1]);
+    arc(T, ARM, 90-APH, 2*APH, [1,1,1]);
 
 t = min(max($t*1.2-0.1, 0), 1);
 BETA = t*2*APH;
@@ -79,11 +84,11 @@ FIXED_LGH = len2D(D-S); //sqrt((D.x-S.x)^2 + (D.y-S.y)^2);
 function rot2D(O, X, theta) = [(X-O).x*cos(theta) - (X-O).y*sin(theta),
         (X-O).x*sin(theta) + (X-O).y*cos(theta)]+O;
 
-MOV_D = rot2D(UHP1, D, BETA);
+MOV_D = rot2D(T, D, BETA);
 
+nail(MOV_D, [0,0,1]);
 translate([0,-0.5,0])
     arc(MOV_D, FIXED_LGH , 0, 0, [0,0,1]);
-nail(MOV_D, [0,0,1]);
 
 CENT_DIFF = len2D(R - MOV_D);
 COS_THETA = (CENT_DIFF^2 + RE^2 - FIXED_LGH^2) / (2*CENT_DIFF*RE);
