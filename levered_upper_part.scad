@@ -6,6 +6,7 @@ use <main_closure.scad>
 
 RS = 15;
 DZ = (SLOT_SIZE.z-RS)/2;
+TLHD = 3; // top lever hole diameter;
 
 MP_Y = 2.2;
 MP_X = MP_Y + IW_THICC;
@@ -178,13 +179,16 @@ module cover(EXPLODE) {
     translate([-EXPLODE, 0, 0])
         cover_wall();
     translate([0, -EXPLODE, 0])
+        cut_lever_hole(D, TLHD)
         translate([0, 0, FULL_DIMS.z-RS]) {
             outer_reinforcement(RS);
             translate([FULL_DIMS.x/2-RS, 0, 0])
             inner_reinforcement(RS);
         }
     translate([0, EXPLODE, 0])
-        translate([0, FULL_DIMS.y-OW_THICC, FULL_DIMS.z-RS]) {
+        translate([0, FULL_DIMS.y-OW_THICC, 0])
+        cut_lever_hole(D, TLHD)
+        translate([0, 0, FULL_DIMS.z-RS]) {
             outer_reinforcement(RS);
             translate([FULL_DIMS.x/2-RS, 0, 0])
             inner_reinforcement(RS);
@@ -195,9 +199,7 @@ module cover(EXPLODE) {
         cover_sep();
 }
 
-
-//--MAIN-PART---------------------------------------------------
-
+//--BASE--------------------------------------------------------
 
 module upper_deck() {
     color([0,0.7,0])
@@ -257,8 +259,6 @@ module xu_sep() {
 
 
 module upper_base(EXPLODE) {
-    translate([0, 0, -EXPLODE])
-        upper_deck();
     translate([EXPLODE, 0, 0])
         translate([OW_THICC+SLOT_SIZE.x, 0, 0])
         color([0,1,1])
@@ -266,16 +266,43 @@ module upper_base(EXPLODE) {
     translate([0, -EXPLODE, 0])
         cut_lever_hole(UHP1)
         cut_lever_hole(UHP2)
+        cut_lever_hole(R, TLHD)
+        cut_lever_hole(T, TLHD)
         xu_wall();
     translate([0, EXPLODE, 0])
         mirror_from([0, FULL_DIMS.y/2, 0], [0,1,0])
         cut_lever_hole(UHP1)
         cut_lever_hole(UHP2)
+        cut_lever_hole(R, TLHD)
+        cut_lever_hole(T, TLHD)
         xu_wall();
     translate([0, 0, EXPLODE])
         xu_sep();
+    translate([0, 0, -EXPLODE])
+        upper_deck();
 }
 
+//--LEVERS------------------------------------------------------
+
+module one_side_levers(open, EXPLODE) {
+    beta0 = 90 - (UP_LEV_RANGE/2);
+    beta = beta0 + open*UP_LEV_RANGE;
+    tll = len2D(D-T);
+    lever(beta, T, tll, TLHD, [0.55,0.8,0], EXPLODE);
+    mov_S = get_current_S(open);
+    gamma = atan2((mov_S-R).y, (mov_S-R).x);
+    bll = len2D(S-R);
+    lever(gamma, R, bll, TLHD, [0.55,0.8,0.7], EXPLODE);
+}
+
+
+module levers(open, EXPLODE) {
+    one_side_levers(open, EXPLODE);
+    mirror_from(FULL_DIMS/2, [0,1,0])
+        one_side_levers(open, EXPLODE);
+}
+
+//--MAIN-PART---------------------------------------------------
 
 module upper_part(open, EXPLODE) {
     mov_D = get_current_D(open);
@@ -289,6 +316,7 @@ module upper_part(open, EXPLODE) {
         translate([mov_S.x-S.x, 0, mov_S.y-S.y])
         rotate_around([OW_THICC/2, 0, OW_THICC/2], [0, -cov_angle, 0])
         cover(EXPLODE);
+    levers(open, EXPLODE);
 }
 
 
