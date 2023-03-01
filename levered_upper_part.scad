@@ -276,10 +276,9 @@ module upper_base(EXPLODE) {
         cut_lever_hole(R, TLHD)
         cut_lever_hole(T, TLHD)
         xu_wall();
-    translate([0, 0, EXPLODE])
-        xu_sep();
-    translate([0, 0, -EXPLODE])
+    translate([0, 0, -EXPLODE/2])
         upper_deck();
+    xu_sep();
 }
 
 //--LEVERS------------------------------------------------------
@@ -312,7 +311,7 @@ module upper_part(open, EXPLODE) {
     cov_angle = cov_angle_curr - cov_angle_0;
 
     upper_base(EXPLODE);
-    translate([0, 0, EXPLODE])
+    translate([-EXPLODE, 0, EXPLODE])
         translate([mov_S.x-S.x, 0, mov_S.y-S.y])
         rotate_around([OW_THICC/2, 0, OW_THICC/2], [0, -cov_angle, 0])
         cover(EXPLODE);
