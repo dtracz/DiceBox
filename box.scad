@@ -2,7 +2,8 @@ include <globals.scad>
 use <toolkit.scad>
 use <main_closure.scad>
 use <lower_part.scad>
-use <hinged_upper_part.scad>
+//use <hinged_upper_part.scad>
+use <levered_upper_part.scad>
 
 
 
@@ -21,8 +22,8 @@ module box(top_open, main_open, EXPLODE) {
 }
 
 
-MAIN_OPEN = 1;
-TOP_OPEN = 90; // in degrees
+MAIN_OPEN = min(max($t*1.2-0.1, 0), 1);
+TOP_OPEN = min(max($t*1.2-0.1, 0), 1);
 EXPLODE = 0;
 
 

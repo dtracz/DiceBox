@@ -24,18 +24,20 @@ COV_OV = 4*IW_THICC; // COVER OVERLAP
 
 function lhp_calc(uhp, open_size, lev_z) = [
     (uhp.x + uhp.x-open_size) / 2,
-    (FULL_DIMS.z + uhp.y - lev_z) % FULL_DIMS.z
+    FULL_DIMS.z + uhp.y - lev_z
 ];
 
 
-OPEN_SIZE = SLOT_SIZE.x + IW_THICC;
+OPEN_SIZE = FULL_DIMS.z + OW_THICC;
 HOLE_D = 4;
-LEV_Z = 33;
-UHP1 = [OW_THICC + 33, OW_THICC + SLOT_SIZE.z*1/2]; // UPPER HOLE POSITION
-UHP2 = [OW_THICC + 43, OW_THICC + SLOT_SIZE.z*1/2];
+LEV_Z = 26;
+UHP_Z = OW_THICC + 4;
+//UHP1 = [OW_THICC + (SLOT_SIZE.x+IW_THICC)/2, UHP_Z]; // UPPER HOLE POSITION
+UHP1 = [OW_THICC + 39, UHP_Z]; // UPPER HOLE POSITION
+UHP2 = [OW_THICC + 47, UHP_Z];
 LHP1 = lhp_calc(UHP1, OPEN_SIZE, LEV_Z);
 LHP2 = lhp_calc(UHP2, OPEN_SIZE, LEV_Z);
 SEP = 1;
-LEV_THICC = [sin(atan2(LEV_Z, UHP1.x-LHP1.x))*(UHP2.x-UHP1.x), 4];
+LEV_THICC = [6, 4];
 LEV_LGH = sqrt((UHP1.x - LHP1.x)^2 + (FULL_DIMS.z+UHP1.y - LHP1.y)^2);
 ALPHA = atan2(FULL_DIMS.z+UHP1.y - LHP1.y, UHP1.x - LHP1.x);
