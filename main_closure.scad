@@ -3,31 +3,31 @@ use <toolkit.scad>
 
 
 
-module cut_lever_hole(position) {
+module cut_lever_hole(position, d=HOLE_D) {
     difference() {
         children();
         translate([position.x, -1, position.y])
             rotate([-90, 0, 0])
-            cylinder(OW_THICC+2, HOLE_D/2, HOLE_D/2);
+            cylinder(OW_THICC+2, d/2, d/2);
     }
 }
 
 
-module lever_plug() {
+module lever_plug(hole_d) {
     translate([0, -LEV_THICC.y-SEP, 0])
     union() {
         rotate([-90, 0, 0])
-            cylinder(OW_THICC+SEP+LEV_THICC.y, HOLE_D/2, HOLE_D/2);
+            cylinder(OW_THICC+SEP+LEV_THICC.y, hole_d/2, hole_d/2);
         difference() {
-            sphere(HOLE_D);
-            translate([-HOLE_D-1, 0, -HOLE_D-1])
-            cube(2*HOLE_D+2);
+            sphere(hole_d);
+            translate([-hole_d-1, 0, -hole_d-1])
+            cube(2*hole_d+2);
         }
     }
 }
 
 
-module lever_bar(length) {
+module lever_bar(length, hole_d) {
     translate([0, 0, -LEV_THICC.x/2])
     difference() {
         union() {
@@ -41,25 +41,25 @@ module lever_bar(length) {
         }
         translate([0, -1, LEV_THICC.x/2])
             rotate([-90, 0, 0])
-            cylinder(LEV_THICC.y+2, HOLE_D/2, HOLE_D/2);
+            cylinder(LEV_THICC.y+2, hole_d/2, hole_d/2);
         translate([length, -1, LEV_THICC.x/2])
             rotate([-90, 0, 0])
-            cylinder(LEV_THICC.y+2, HOLE_D/2, HOLE_D/2);
+            cylinder(LEV_THICC.y+2, hole_d/2, hole_d/2);
     }
 }
 
 
-module lever(alpha, lhp, c, explode) {
+module lever(alpha, lhp, length, hole_d, c=[0.8, 0.8, 0], explode=0) {
     color(c)
         translate([lhp.x, -explode*3/2, lhp.y])
         rotate([0, -alpha, 0])
         translate([0, -LEV_THICC.y-SEP, 0])
-        lever_bar(LEV_LGH);
+        lever_bar(length, hole_d);
     translate([0, -explode*5/2, 0]) {
         translate([lhp.x, 0, lhp.y])
-            lever_plug();
-        translate([lhp.x+LEV_LGH*cos(alpha), 0, lhp.y+LEV_LGH*sin(alpha)])
-            lever_plug();
+            lever_plug(hole_d);
+        translate([lhp.x+length*cos(alpha), 0, lhp.y+length*sin(alpha)])
+            lever_plug(hole_d);
     }
 }
 
@@ -72,18 +72,18 @@ module closure_levers(main_open, EXPLODE) {
     alpha = get_curr_alpha(main_open);
     c1 = [1, 0.5, 0];
     c2 = [1, 0.7, 0];
-    lever(alpha, LHP1, c1, EXPLODE);
-    lever(alpha, LHP2, c2, EXPLODE);
+    lever(alpha, LHP1, LEV_LGH, HOLE_D, c1, EXPLODE);
+    lever(alpha, LHP2, LEV_LGH, HOLE_D, c2, EXPLODE);
     mirror_from(FULL_DIMS/2, [0,1,0]) {
-        lever(alpha, LHP1, c1, EXPLODE);
-        lever(alpha, LHP2, c2, EXPLODE);
+        lever(alpha, LHP1, LEV_LGH, HOLE_D, c1, EXPLODE);
+        lever(alpha, LHP2, LEV_LGH, HOLE_D, c2, EXPLODE);
     }
     mirror_from(FULL_DIMS/2, [1,0,0]) {
-        lever(alpha, LHP1, c1, EXPLODE);
-        lever(alpha, LHP2, c2, EXPLODE);
+        lever(alpha, LHP1, LEV_LGH, HOLE_D, c1, EXPLODE);
+        lever(alpha, LHP2, LEV_LGH, HOLE_D, c2, EXPLODE);
         mirror_from(FULL_DIMS/2, [0,1,0]) {
-            lever(alpha, LHP1, c1, EXPLODE);
-            lever(alpha, LHP2, c2, EXPLODE);
+            lever(alpha, LHP1, LEV_LGH, HOLE_D, c1, EXPLODE);
+            lever(alpha, LHP2, LEV_LGH, HOLE_D, c2, EXPLODE);
         }
     }
 }
