@@ -63,6 +63,7 @@ module nail(pos, c=[1,0,0]) {
     cylinder(10, 1, 1);
 }
 
+
 module arc(center, r, a0, a, c) {
     translate([center.x, 0, center.y]) {
         translate([0, -4, 0])
@@ -117,12 +118,20 @@ module top_cover() {
 
 module cover_wall() {
     color([0,1,1])
+    cut_lever_hole(S, TLHD)
+    cut_lever_hole(S, TLHD, in_depth=FULL_DIMS.y-OW_THICC)
     rotate_around([OW_THICC/2, OW_THICC/2, 0], [0, 0, 90])
     union() {
         translate([0, 0, FULL_DIMS.z-RS])
             crenellated_wall([FULL_DIMS.y, OW_THICC, RS+OW_THICC],
                 [OW_THICC,CY,0], [0,0,0], [OW_THICC,RS/3,RS/3], [OW_THICC,RS/3,RS/3]);
-        cube([FULL_DIMS.y, OW_THICC, FULL_DIMS.z-RS]);
+        translate([0, 0, OW_THICC/2])
+            cube([FULL_DIMS.y, OW_THICC, FULL_DIMS.z-RS-OW_THICC/2]);
+        translate([0, OW_THICC/2, 0])
+            cube([FULL_DIMS.y, OW_THICC/2, OW_THICC/2]);
+        translate([0, OW_THICC/2, OW_THICC/2])
+            rotate([0, 90, 0])
+            cylinder(FULL_DIMS.y, OW_THICC/2, OW_THICC/2);
     }
 }
 

@@ -3,10 +3,10 @@ use <toolkit.scad>
 
 
 
-module cut_lever_hole(position, d=HOLE_D) {
+module cut_lever_hole(position, d=HOLE_D, in_depth=0) {
     difference() {
         children();
-        translate([position.x, -1, position.y])
+        translate([position.x, in_depth-1, position.y])
             rotate([-90, 0, 0])
             cylinder(OW_THICC+2, d/2, d/2);
     }
