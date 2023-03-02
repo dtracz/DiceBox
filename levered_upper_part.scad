@@ -8,8 +8,8 @@ RS = 15;
 DZ = (SLOT_SIZE.z-RS)/2;
 TLHD = 3; // top lever hole diameter;
 
-MP_X = RS*3/5;
-MP_Y = RS*2/5;
+MP_X = RS*4/5;
+MP_Y = RS*1/2;
 
 //--CALCULATIONS------------------------------------------------
 // Lower lever schme
@@ -18,7 +18,7 @@ MP_Y = RS*2/5;
 //       E
 // SR = RE
 SA = FULL_DIMS.z;
-AE = FULL_DIMS.x/2 - FULL_DIMS.z;
+AE = FULL_DIMS.x/2 - FULL_DIMS.z - IW_THICC;
 RE = (AE^2 + SA^2) / (2*SA);
 S = [OW_THICC/2, OW_THICC/2];
 R = S + [RE, 0];
@@ -29,10 +29,12 @@ E = S + [SA, -AE];
 //   \   /
 //     T
 C = [OW_THICC + MP_Y, FULL_DIMS.z-RS + MP_X];
-D = [FULL_DIMS.x/2-RS + MP_X, FULL_DIMS.z - MP_Y];
+D = [OW_THICC+SLOT_SIZE.x-RS + MP_X, FULL_DIMS.z - MP_Y];
 // returns point basing on it's y position
 function line_T(y) = let(T_ = (C+D)/2) T_ + [-((T_-C).y/(T_-C).x)*y, y];
-T = line_T(-3);
+T = line_T(-2.25);
+echo(D.y);
+echo(T.y);
 // CTD angle
 UP_LEV_OFFSET = atan2(D.y - T.y, D.x - T.x);
 UP_LEV_RANGE = (atan2(C.y - T.y, C.x - T.x) - UP_LEV_OFFSET + 360) % 360;
@@ -115,13 +117,13 @@ module top_cover() {
             translate([OW_THICC+SLOT_SIZE.y, -1, RS/2])
                 cube([IW_THICC, OW_THICC+2, RS/2+1]);
         }
-        translate([0,0,RS])
-            cube([FULL_DIMS.y, OW_THICC, FULL_DIMS.x/2-OW_THICC-2*RS]);
+        translate([0,0,RS+IW_THICC])
+            cube([FULL_DIMS.y, OW_THICC, SLOT_SIZE.x-2*RS]);
         difference() {
-            crenellated_wall([FULL_DIMS.y, OW_THICC, RS],
+            crenellated_wall([FULL_DIMS.y, OW_THICC, RS+IW_THICC],
                 [0,0,0], [IW_THICC,CY,CY], [OW_THICC,RS/3,RS/3], [OW_THICC,RS/3,RS/3]);
             translate([OW_THICC+SLOT_SIZE.y, -1, IW_THICC-1])
-                cube([IW_THICC, OW_THICC+2, RS/3+1]);
+                cube([IW_THICC, OW_THICC+2, RS/2+1]);
         }
     }
 }
@@ -153,18 +155,12 @@ module cover_wall() {
 
 module cover_sep() {
     color([0,0.8,0.8])
-    translate([OW_THICC+SLOT_SIZE.x, OW_THICC, FULL_DIMS.z-RS])
-    union() {
-        rotate_around([IW_THICC/2, IW_THICC/2, 0], [0, 0, 90])
-        difference() {
-            crenellated_wall([FULL_DIMS.y-2*OW_THICC, IW_THICC, RS+OW_THICC], [OW_THICC,CY,-OW_THICC], [0,RS/3,RS/2], [0,RS/3,RS/2], [0,0,0]);
-            translate([SLOT_SIZE.x, -1, -1])
-                cube([IW_THICC, IW_THICC+2, RS/2+1]);
-        }
-        translate([0, -OW_THICC, RS/2])
-            cube([IW_THICC, OW_THICC, RS/3]);
-        translate([0, FULL_DIMS.y-2*OW_THICC, RS/2])
-            cube([IW_THICC, OW_THICC, RS/3]);
+    translate([OW_THICC+SLOT_SIZE.x, 0, FULL_DIMS.z-RS])
+    rotate_around([IW_THICC/2, IW_THICC/2, 0], [0, 0, 90])
+    difference() {
+        crenellated_wall([FULL_DIMS.y, IW_THICC, RS+OW_THICC], [OW_THICC,CY,0], [0,0,0], [OW_THICC,RS/3,RS/3], [OW_THICC,RS/3,RS/3]);
+        translate([OW_THICC+SLOT_SIZE.x, -1, -1])
+            cube([IW_THICC, IW_THICC+2, RS/2+1]);
     }
 }
 
@@ -189,14 +185,13 @@ module outer_reinforcement(rs) {
 module inner_reinforcement(rs) {
     color([0.8,0.8,0])
     union() {
-        difference() {
-            translate([0, OW_THICC, 0])
-                rotate([90, 0, 0])
-                linear_extrude(OW_THICC)
-                polygon([[rs,0], [rs, rs], [0,rs]]);
-            translate([rs-IW_THICC, -1, rs/2])
-                cube([IW_THICC+1, OW_THICC+2, rs/3]);
-        }
+        translate([0, OW_THICC, 0])
+            rotate([90, 0, 0])
+            linear_extrude(OW_THICC)
+            polygon([[rs,0], [rs, rs], [0,rs]]);
+        translate([RS, 0, rs])
+            rotate([0,90,0])
+            crenels(IW_THICC, rs/3, OW_THICC, 0, rs);
         translate([0, 0, rs])
             crenels(OW_THICC, rs/3, OW_THICC, 0, rs);
     }
@@ -205,16 +200,17 @@ module inner_reinforcement(rs) {
 
 module inner_central_reinf(rs) {
     color([0.8,0.8,0])
-    translate([FULL_DIMS.x/2-RS,OW_THICC+SLOT_SIZE.y,FULL_DIMS.z-RS])
+    translate([OW_THICC+SLOT_SIZE.x,OW_THICC+SLOT_SIZE.y,FULL_DIMS.z-RS])
     rotate_around([0, IW_THICC/2, IW_THICC/2], [90, 0, 0])
     linear_extrude(IW_THICC)
-    polygon([[RS, 0],
-             [RS, RS/2],
-             [RS-IW_THICC, RS/2],
-             [RS-IW_THICC, RS+OW_THICC],
-             [RS-IW_THICC-RS/3, RS+OW_THICC],
-             [RS-IW_THICC-RS/3, RS],
-             [0, RS]
+    polygon([[0, 0],
+             [IW_THICC, 0],
+             [IW_THICC, RS/2],
+             [0, RS/2],
+             [0, RS+OW_THICC],
+             [-RS/2, RS+OW_THICC],
+             [-RS/2, RS],
+             [-RS, RS]
     ]);
 }
 
@@ -243,7 +239,7 @@ module cover(EXPLODE) {
         cut_lever_hole(D, TLHD)
         translate([0, 0, FULL_DIMS.z-RS]) {
             outer_reinforcement(RS);
-            translate([FULL_DIMS.x/2-RS, 0, 0])
+            translate([OW_THICC+SLOT_SIZE.x-RS, 0, 0])
             inner_reinforcement(RS);
         }
     translate([0, EXPLODE, 0])
@@ -251,7 +247,7 @@ module cover(EXPLODE) {
         cut_lever_hole(D, TLHD)
         translate([0, 0, FULL_DIMS.z-RS]) {
             outer_reinforcement(RS);
-            translate([FULL_DIMS.x/2-RS, 0, 0])
+            translate([OW_THICC+SLOT_SIZE.x-RS, 0, 0])
             inner_reinforcement(RS);
         }
     translate([0, 0, EXPLODE])
@@ -286,8 +282,8 @@ module xu_wall() {
     union() {
         rotate_around([0, OW_THICC/2, OW_THICC/2], [90, 0, 0])
         linear_extrude(OW_THICC)
-        polygon([[SLOT_SIZE.x+IW_THICC, FULL_DIMS.z-RS],
-                 [SLOT_SIZE.x+IW_THICC-RS, FULL_DIMS.z],
+        polygon([[SLOT_SIZE.x, FULL_DIMS.z-RS],
+                 [SLOT_SIZE.x-RS, FULL_DIMS.z],
                  [RS, FULL_DIMS.z],
                  [0, FULL_DIMS.z-RS],
         ]);
@@ -315,7 +311,8 @@ module xu_sep() {
         rotate_around([0, IW_THICC/2, IW_THICC/2], [90, 0, 0])
         linear_extrude(IW_THICC)
         polygon([[SLOT_SIZE.x+IW_THICC, FULL_DIMS.z-RS],
-                 [SLOT_SIZE.x+IW_THICC-RS, FULL_DIMS.z],
+                 [SLOT_SIZE.x, FULL_DIMS.z-RS],
+                 [SLOT_SIZE.x-RS, FULL_DIMS.z],
                  [RS, FULL_DIMS.z],
                  [0, FULL_DIMS.z-RS],
                  [0, 0],
