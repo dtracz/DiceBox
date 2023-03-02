@@ -8,8 +8,8 @@ RS = 15;
 DZ = (SLOT_SIZE.z-RS)/2;
 TLHD = 3; // top lever hole diameter;
 
-MP_Y = 2.2;
-MP_X = MP_Y + IW_THICC;
+MP_X = RS*3/5;
+MP_Y = RS*2/5;
 
 //--CALCULATIONS------------------------------------------------
 // Lower lever schme
@@ -24,15 +24,18 @@ S = [OW_THICC/2, OW_THICC/2];
 R = S + [RE, 0];
 E = S + [SA, -AE];
 
-// Upper lever schme
+// Upper lever schme (possibly rotated)
 // C       D
 //   \   /
 //     T
-C = [OW_THICC+MP_X, FULL_DIMS.z-IW_THICC-MP_Y];
-D = [OW_THICC+SLOT_SIZE.x-MP_Y, FULL_DIMS.z-MP_X];
-T = [(C.x+D.x)/2, (S.y+D.y)/2+8];
+C = [OW_THICC + MP_Y, FULL_DIMS.z-RS + MP_X];
+D = [FULL_DIMS.x/2-RS + MP_X, FULL_DIMS.z - MP_Y];
+// returns point basing on it's y position
+function line_T(y) = let(T_ = (C+D)/2) T_ + [-((T_-C).y/(T_-C).x)*y, y];
+T = line_T(-3);
 // CTD angle
-UP_LEV_RANGE = 2*atan2(D.x - T.x, D.y - T.y);
+UP_LEV_OFFSET = atan2(D.y - T.y, D.x - T.x);
+UP_LEV_RANGE = (atan2(C.y - T.y, C.x - T.x) - UP_LEV_OFFSET + 360) % 360;
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
@@ -85,7 +88,7 @@ module math_visualisation(open) {
     nail(D);
     nail(T);
     translate([0,1,0])
-        arc(T, len2D(D-T), 90-UP_LEV_RANGE/2, UP_LEV_RANGE, [1,1,1]);
+        arc(T, len2D(D-T), UP_LEV_OFFSET, UP_LEV_RANGE, [1,1,1]);
     nail(S);
     nail(R);
     nail(E);
@@ -354,8 +357,7 @@ module upper_base(EXPLODE) {
 //--LEVERS------------------------------------------------------
 
 module one_side_levers(open, EXPLODE) {
-    beta0 = 90 - (UP_LEV_RANGE/2);
-    beta = beta0 + open*UP_LEV_RANGE;
+    beta = UP_LEV_OFFSET + open*UP_LEV_RANGE;
     tll = len2D(D-T);
     lever(beta, T, tll, TLHD, [0.55,0.8,0], EXPLODE);
     mov_S = get_current_S(open);
