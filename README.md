@@ -14,6 +14,9 @@ Full box in the current version:
 Cover trajectory:
 ![](https://github.com/dtracz/DiceBox/blob/master/visualizations/cover_move.gif)
 
+Explode:
+![](https://github.com/dtracz/DiceBox/blob/master/visualizations/explode.png)
+
 
 ## Disclaimer
 
