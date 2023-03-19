@@ -1,6 +1,6 @@
 # DiceBox
 
-This project is an attempt to create a facny box using Open SCAD / SolidPython.
+This project is an attempt to create a facny box using Open SCAD / ~~SolidPython~~ [OOML](https://github.com/avalero/OOML) (currently on `ooml_migration` branch)
 
 The box is created with mind to possibility of laser cutting all its components in a plywood, to facilitate its physical crafting.
 3D printable model is also planned for the unspecified future (but feel free to issue a PR sooner).
