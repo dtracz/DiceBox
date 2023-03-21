@@ -3,27 +3,53 @@
 #include <utility>
 #include <concepts>
 #include <vector>
+#include <cmath>
 #include "core.h"
 #include "components.h"
+
+
+const double EPS = 1e-8;
 
 
 struct Vec3 {
     double x, y, z;
 
-    Vec3(): x{0}, y{0}, z{0} { }
-
     Vec3(double x, double y, double z): x{x}, y{y}, z{z} { }
+
+    static const Vec3 ZERO() {
+        return {0, 0, 0};
+    }
 
     Vec3 operator-() {
         return {-x, -y, -z};
     }
 
-    Vec3 operator+(Vec3 other) {
+    Vec3 operator+(Vec3 other) const {
         return {x+other.x, y+other.y, z+other.z};
     }
 
-    Vec3 operator-(Vec3 other) {
+    Vec3& operator+=(Vec3 other) {
+        x += other.x;
+        y += other.y;
+        z += other.z;
+        return *this;
+    }
+
+    Vec3 operator-(Vec3 other) const {
         return {x-other.x, y-other.y, z-other.z};
+    }
+
+    Vec3& operator-=(Vec3 other) {
+        x -= other.x;
+        y -= other.y;
+        z -= other.z;
+        return *this;
+    }
+
+    bool operator==(Vec3 other) const {
+        return std::abs(x - other.x) < EPS
+            && std::abs(y - other.y) < EPS
+            && std::abs(z - other.z) < EPS;
     }
 };
 
@@ -39,6 +65,19 @@ class FlatPart {
     bool _empty;
     double _thickness;
     std::vector<std::pair<_TransformT, Vec3>> _transforms;
+
+    FlatPart& _transform(_TransformT type, Vec3 vec) {
+        if (!_transforms.empty() &&
+             _transforms.back().first == type) {
+            auto pair = _transforms.back();
+            _transforms.pop_back();
+            Vec3 prev_transform = pair.second;
+            vec += prev_transform;
+        }
+        if (vec != Vec3::ZERO())
+            _transforms.emplace_back(_TransformT::tTranslate, vec);
+        return *this;
+    }
 
 
   public:
@@ -99,21 +138,17 @@ class FlatPart {
 
 
     FlatPart& translate(Vec3 vec) {
-        _transforms.emplace_back(_TransformT::tTranslate, vec);
-        return *this;
+        return _transform(_TransformT::tTranslate, vec);
     }
-
 
     FlatPart& rotate(Vec3 vec) {
-        _transforms.emplace_back(_TransformT::tRotate, vec);
-        return *this;
+        return _transform(_TransformT::tRotate, vec);
     }
 
-
     FlatPart& rotate(Vec3 vec, Vec3 center) {
-        this->translate(-center);
-        this->rotate(vec);
-        this->translate(center);
+        translate(-center);
+        rotate(vec);
+        translate(center);
         return *this;
     }
 
@@ -157,7 +192,8 @@ int main() {
 
     auto fp2 = fp;
 
-    fp.translate({1,2,3});
+    fp.translate({1,0,3});
+    fp.translate({0,2,0});
     fp.set_thickness(3);
 
     fp2.translate({0,0,-2});
