@@ -3,27 +3,43 @@
 #include <utility>
 #include <concepts>
 #include <vector>
-#include <array>
 #include "core.h"
 #include "components.h"
 
 
+struct Vec3 {
+    double x, y, z;
+
+    Vec3(): x{0}, y{0}, z{0} { }
+
+    Vec3(double x, double y, double z): x{x}, y{y}, z{z} { }
+
+    Vec3 operator-() {
+        return {-x, -y, -z};
+    }
+
+    Vec3 operator+(Vec3 other) {
+        return {x+other.x, y+other.y, z+other.z};
+    }
+
+    Vec3 operator-(Vec3 other) {
+        return {x-other.x, y-other.y, z-other.z};
+    }
+};
+
+
 class FlatPart {
+  private:
     enum class _TransformT {
         tTranslate,
         tRotate,
     };
 
-  private:
     Component2D _shape;
     bool _empty;
     double _thickness;
-    std::vector<std::pair<_TransformT, std::array<double, 3>>> _transforms;
+    std::vector<std::pair<_TransformT, Vec3>> _transforms;
 
-
-    static inline std::array<double, 3> _negate(std::array<double, 3> v) {
-        return {-v[0], -v[1], -v[2]};
-    }
 
   public:
     FlatPart(double thickness=-1):
@@ -82,20 +98,20 @@ class FlatPart {
     }
 
 
-    FlatPart& translate(std::array<double,3> vec) {
+    FlatPart& translate(Vec3 vec) {
         _transforms.emplace_back(_TransformT::tTranslate, vec);
         return *this;
     }
 
 
-    FlatPart& rotate(std::array<double,3> vec) {
+    FlatPart& rotate(Vec3 vec) {
         _transforms.emplace_back(_TransformT::tRotate, vec);
         return *this;
     }
 
 
-    FlatPart& rotate(std::array<double,3> vec, std::array<double,3> center) {
-        this->translate(_negate(center));
+    FlatPart& rotate(Vec3 vec, Vec3 center) {
+        this->translate(-center);
         this->rotate(vec);
         this->translate(center);
         return *this;
@@ -115,14 +131,14 @@ class FlatPart {
             auto transform_vec = t.second;
             switch (transform_type) {
                 case _TransformT::tTranslate:
-                    part.translate(transform_vec[0],
-                                   transform_vec[1],
-                                   transform_vec[2]);
+                    part.translate(transform_vec.x,
+                                   transform_vec.y,
+                                   transform_vec.z);
                     break;
                 case _TransformT::tRotate:
-                    part.rotate(transform_vec[0],
-                                transform_vec[1],
-                                transform_vec[2]);
+                    part.rotate(transform_vec.x,
+                                transform_vec.y,
+                                transform_vec.z);
                     break;
             }
         }
@@ -139,12 +155,17 @@ int main() {
        - Circle::create(2)
        + Square::create(1, 10);
 
-    fp.translate({1,2,3});
+    auto fp2 = fp;
 
+    fp.translate({1,2,3});
     fp.set_thickness(3);
+
+    fp2.translate({0,0,-2});
+    fp2.set_thickness(2);
 
     IndentWriter writer;
     fp.render3D(writer);
+    fp2.render3D(writer);
     std::cout << writer;
 
     return 0;
