@@ -1,5 +1,7 @@
 #include <utility>
 #include <vector>
+#include <numeric>
+#include <iterator>
 #include "core/Component2D.h"
 #include "components/Square.h"
 #include "core/Union.h"
@@ -24,7 +26,11 @@ Component2D crenels(std::pair<double, double> crenel_dims,
         );
         offset += 2*x;
     }
-    return fold(crenels_v, [](auto c1, auto c2) { return c1 + c2; });
+    return std::accumulate(
+            std::next(crenels_v.begin()),
+            crenels_v.end(),
+            crenels_v.front()
+    );
 }
 
 

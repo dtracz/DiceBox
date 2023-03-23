@@ -9,17 +9,6 @@
 
 
 
-template <typename T, class F>
-inline T fold(const std::vector<T>& vec, F f) {
-    if (vec.empty())
-        throw std::runtime_error("cannot fold empty vector");
-    T res = vec.front();
-    for (size_t i = 1; i < vec.size(); i++)
-        res = f(res, vec[i]);
-    return res;
-}
-
-
 Component2D crenels(std::pair<double, double> crenel_dims,
                     double length, double offset=0);
 
