@@ -4,8 +4,10 @@
 #include <stdexcept>
 #include <vector>
 #include <utility>
+#include <memory>
 #include <concepts>
 #include "core/Component2D.h"
+#include "core/Component.h"
 
 
 struct Vec3 {
@@ -61,7 +63,29 @@ struct Color : Vec3 {
 };
 
 
-class FlatPart {
+
+class Part3D {
+  public:
+    virtual void set_color(Color) = 0;
+
+    virtual Part3D& translate(Vec3) = 0;
+
+    virtual Part3D& rotate(Vec3) = 0;
+
+    virtual Part3D& rotate(Vec3, Vec3) = 0;
+
+    virtual Part3D& mirror(Vec3) = 0;
+
+    virtual Part3D& mirror(Vec3, Vec3) = 0;
+
+    virtual void render3D(IndentWriter&) = 0;
+
+  protected:
+    virtual Component _get_final_form() = 0;
+};
+
+
+class FlatPart : public Part3D {
     enum class _TransformT {
         tTranslate,
         tRotate,
@@ -90,7 +114,7 @@ class FlatPart {
         _thickness = thickness;
     }
 
-    void set_color(Color color) {
+    void set_color(Color color) override {
         _color = color;
     }
 
@@ -129,30 +153,35 @@ class FlatPart {
     }
 
 
-    FlatPart& translate(Vec3 vec);
+    FlatPart& translate(Vec3 vec) override;
 
-    FlatPart& rotate(Vec3 vec) {
+    FlatPart& rotate(Vec3 vec) override {
         if (vec != Vec3::ZERO())
             _transforms.emplace_back(_TransformT::tRotate, -vec);
         return *this;
     }
 
-    FlatPart& rotate(Vec3 vec, Vec3 center);
+    FlatPart& rotate(Vec3 vec, Vec3 center) override;
 
-    FlatPart& mirror(Vec3 vec) {
+    FlatPart& mirror(Vec3 vec) override {
         if (vec != Vec3::ZERO())
             _transforms.emplace_back(_TransformT::tMirror, -vec);
         return *this;
     }
 
-    FlatPart& mirror(Vec3 vec, Vec3 center);
+    FlatPart& mirror(Vec3 vec, Vec3 center) override;
 
 
     void render2D(IndentWriter& writer) const {
         writer << _shape;
     }
 
-    void render3D(IndentWriter&);
+
+    Component _get_final_form() override;
+
+    void render3D(IndentWriter& writer) override {
+        writer << _get_final_form();
+    }
 
 
   private:
@@ -163,6 +192,48 @@ class FlatPart {
     std::vector<std::pair<_TransformT, Vec3>> _transforms;
 
 };  // class FlatPart
+
+
+class HelperPart : public Part3D,
+                   public Component {
+  public:
+    template<typename T>
+        requires std::convertible_to<T, Component2D>
+    HelperPart(T&& other): Component {std::forward<T>(other)} { }
+
+    void set_color(Color color) override {
+        Component::color(color.x, color.y, color.z, color.alpha);
+    }
+
+    HelperPart& translate(Vec3 vec) override {
+        Component::translate(vec.x, vec.y, vec.z);
+        return *this;
+    }
+
+    HelperPart& rotate(Vec3 vec) override {
+        Component::rotate(vec.x, vec.y, vec.z);
+        return *this;
+    }
+
+    HelperPart& rotate(Vec3, Vec3) override;
+
+    HelperPart& mirror(Vec3 vec) override {
+        Component::mirror(vec.x, vec.y, vec.z);
+        return *this;
+    }
+
+    HelperPart& mirror(Vec3, Vec3) override;
+
+    void render3D(IndentWriter& writer) override {
+        writer << *this;
+    }
+
+  protected:
+    Component _get_final_form() override {
+        return *this;
+    }
+
+};  // class HelperPart
 
 
 #endif  // BASE_H_INCLUDED

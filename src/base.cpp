@@ -45,7 +45,7 @@ FlatPart& FlatPart::mirror(Vec3 vec, Vec3 center) {
 }
 
 
-void FlatPart::render3D(IndentWriter& writer) {
+Component FlatPart::_get_final_form() {
     if (_thickness < 0)
         throw std::runtime_error("set thickness first");
     auto part = _shape.linearExtrudedCopy(_thickness);
@@ -72,6 +72,23 @@ void FlatPart::render3D(IndentWriter& writer) {
     }
     if (_color.is_valid())
         part.color(_color.x, _color.y, _color.z, _color.alpha);
-    writer << part;
+    return part;
+}
+
+
+
+HelperPart& HelperPart::rotate(Vec3 vec, Vec3 center) {
+    translate(-center);
+    rotate(vec);
+    translate(center);
+    return *this;
+}
+
+
+HelperPart& HelperPart::mirror(Vec3 vec, Vec3 center) {
+    translate(-center);
+    mirror(vec);
+    translate(center);
+    return *this;
 }
 

@@ -28,14 +28,32 @@ int main() {
     FlatPart fp4 {crenellated_wall(
             {20, 10}, {4,2,-2},  {4,2,-2},  {2,2,0},  {2,2,0}
     )};
-    fp4.set_thickness(8);
+    fp4.set_thickness(2);
     fp4.translate({0, -15, 0});
+    auto fp5 = fp4;
+    fp4.rotate({0,0,90});
+    fp4.rotate({0,90,0});
+
+    Color c = {1,0,1};
+    c += {0,1,0};
+
+    auto fp6 = fp4;
+    fp6.mirror({0,1,0}, {0,-1,0});
+
+    fp4.set_color({1,0,0});
+    fp5.set_color({0,1,0});
+    fp6.set_color({0,0,1});
+
+    HelperPart hp0 = Cube::create(2,3,4);
 
     IndentWriter writer;
-    fp.render3D(writer);
-    fp2.render3D(writer);
-    fp3.render2D(writer);
+    // fp.render3D(writer);
+    // fp2.render3D(writer);
+    // fp3.render2D(writer);
     fp4.render3D(writer);
+    fp5.render3D(writer);
+    fp6.render3D(writer);
+    hp0.render3D(writer);
     std::cout << writer;
 
     return 0;
