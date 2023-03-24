@@ -63,6 +63,7 @@ struct Color : Vec3 {
 };
 
 
+class Module3D;
 
 class Part3D {
   public:
@@ -82,6 +83,8 @@ class Part3D {
 
   protected:
     virtual Component _get_final_form() = 0;
+
+    friend class Module3D;
 };
 
 
@@ -234,6 +237,59 @@ class HelperPart : public Part3D,
     }
 
 };  // class HelperPart
+
+
+class Module3D : public Part3D {
+    enum class _CompositionT {
+        tAdd,
+        tCut,
+    };
+
+  public:
+    // TODO: deep-copy constructor
+    // Module3D(Module3D& other);
+
+    void set_color(Color color) override {
+        for (auto pair : _parts)
+            pair.second->set_color(color);
+    }
+
+    Module3D& translate(Vec3 vec) override {
+        for (auto pair : _parts)
+            pair.second->translate(vec);
+        return *this;
+    }
+
+    Module3D& rotate(Vec3 vec) override {
+        for (auto pair : _parts)
+            pair.second->rotate(vec);
+        return *this;
+    }
+
+    Module3D& rotate(Vec3, Vec3) override;
+
+    Module3D& mirror(Vec3 vec) override {
+        for (auto pair : _parts)
+            pair.second->mirror(vec);
+        return *this;
+    }
+
+    Module3D& mirror(Vec3, Vec3) override;
+
+    void render3D(IndentWriter& writer) override {
+        writer << _get_final_form();
+    }
+
+  protected:
+    Component _get_final_form() override;
+
+  private:
+    std::vector<std::pair<
+        _CompositionT,
+        std::shared_ptr<Part3D>>
+    > _parts;
+
+};  // class Module3D
 
 
 #endif  // BASE_H_INCLUDED

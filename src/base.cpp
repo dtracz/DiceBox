@@ -92,3 +92,43 @@ HelperPart& HelperPart::mirror(Vec3 vec, Vec3 center) {
     return *this;
 }
 
+
+
+Module3D& Module3D::rotate(Vec3 vec, Vec3 center) {
+    translate(-center);
+    rotate(vec);
+    translate(center);
+    return *this;
+}
+
+
+Module3D& Module3D::mirror(Vec3 vec, Vec3 center) {
+    translate(-center);
+    mirror(vec);
+    translate(center);
+    return *this;
+}
+
+
+Component Module3D::_get_final_form() {
+    if (_parts.empty())
+        throw std::runtime_error("this Module3D is empty");
+    if (_parts.front().first == _CompositionT::tCut)
+        throw std::runtime_error("first Part3D of the Module3D needs to be added");
+    auto component = _parts.front().second->_get_final_form();
+    for (size_t i = 0; i < _parts.size(); i++) {
+        auto pair = _parts[i];
+        _CompositionT ctype = pair.first;
+        auto shp = pair.second;
+        switch (ctype) {
+            case _CompositionT::tAdd:
+                component = component + shp->_get_final_form();
+                break;
+            case _CompositionT::tCut:
+                component = component - shp->_get_final_form();
+                break;
+        }
+    }
+    return component;
+}
+
