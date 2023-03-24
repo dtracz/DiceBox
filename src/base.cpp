@@ -70,6 +70,8 @@ void FlatPart::render3D(IndentWriter& writer) {
                 break;
         }
     }
+    if (_color.is_valid())
+        part.color(_color.x, _color.y, _color.z, _color.alpha);
     writer << part;
 }
 

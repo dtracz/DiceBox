@@ -48,6 +48,18 @@ struct Vec3 {
 };  // class Vec3
 
 
+struct Color : Vec3 {
+    double alpha;
+
+    Color(double r=1, double g=1, double b=1, double alpha=1):
+        Vec3 {r, g, b}, alpha {alpha} { }
+
+    bool is_valid() {
+        return std::min({x,y,z,alpha}) >= 0
+            && std::max({x,y,z,alpha}) <= 1;
+    }
+};
+
 
 class FlatPart {
     enum class _TransformT {
@@ -57,23 +69,29 @@ class FlatPart {
     };
 
   public:
-    FlatPart(double thickness=-1):
+    FlatPart(double thickness=-1, Color color = {-1}):
             _shape{Component2D()},
             _empty{true},
-            _thickness{thickness} { }
+            _thickness{thickness},
+            _color{color} { }
 
     template<typename T>
         requires std::convertible_to<T, Component2D>
-    FlatPart(T&& comp, double thickness=-1):
+    FlatPart(T&& comp, double thickness=-1, Color color = {-1}):
             _shape{std::forward<T>(comp)},
             _empty{false},
-            _thickness{thickness} { }
+            _thickness{thickness},
+            _color{color} { }
 
 
     void set_thickness(double thickness, bool force_reset=false) {
         if (_thickness > 0 && !force_reset)
             throw std::runtime_error("thichness is already set");
         _thickness = thickness;
+    }
+
+    void set_color(Color color) {
+        _color = color;
     }
 
 
@@ -141,6 +159,7 @@ class FlatPart {
     Component2D _shape;
     bool _empty;
     double _thickness;
+    Color _color;
     std::vector<std::pair<_TransformT, Vec3>> _transforms;
 
 };  // class FlatPart
