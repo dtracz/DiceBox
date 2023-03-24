@@ -110,12 +110,12 @@ class FlatPart {
     }
 
 
-    FlatPart& translate(Vec3 vec) {
-        return _transform(_TransformT::tTranslate, vec);
-    }
+    FlatPart& translate(Vec3 vec);
 
     FlatPart& rotate(Vec3 vec) {
-        return _transform(_TransformT::tRotate, vec);
+        if (vec != Vec3::ZERO())
+            _transforms.emplace_back(_TransformT::tRotate, -vec);
+        return *this;
     }
 
     FlatPart& rotate(Vec3 vec, Vec3 center);
@@ -133,8 +133,6 @@ class FlatPart {
     bool _empty;
     double _thickness;
     std::vector<std::pair<_TransformT, Vec3>> _transforms;
-
-    FlatPart& _transform(_TransformT type, Vec3 vec);
 
 };  // class FlatPart
 

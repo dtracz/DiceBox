@@ -15,9 +15,9 @@ bool Vec3::operator==(Vec3 other) const {
 
 
 
-FlatPart& FlatPart::_transform(_TransformT type, Vec3 vec) {
+FlatPart& FlatPart::translate(Vec3 vec) {
     if (!_transforms.empty() &&
-         _transforms.back().first == type) {
+         _transforms.back().first == _TransformT::tTranslate) {
         auto pair = _transforms.back();
         _transforms.pop_back();
         Vec3 prev_transform = pair.second;
