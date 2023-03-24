@@ -37,6 +37,14 @@ FlatPart& FlatPart::rotate(Vec3 vec, Vec3 center) {
 }
 
 
+FlatPart& FlatPart::mirror(Vec3 vec, Vec3 center) {
+    translate(-center);
+    mirror(vec);
+    translate(center);
+    return *this;
+}
+
+
 void FlatPart::render3D(IndentWriter& writer) {
     if (_thickness < 0)
         throw std::runtime_error("set thickness first");
@@ -52,6 +60,11 @@ void FlatPart::render3D(IndentWriter& writer) {
                 break;
             case _TransformT::tRotate:
                 part.rotate(transform_vec.x,
+                            transform_vec.y,
+                            transform_vec.z);
+                break;
+            case _TransformT::tMirror:
+                part.mirror(transform_vec.x,
                             transform_vec.y,
                             transform_vec.z);
                 break;

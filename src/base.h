@@ -53,6 +53,7 @@ class FlatPart {
     enum class _TransformT {
         tTranslate,
         tRotate,
+        tMirror,
     };
 
   public:
@@ -119,6 +120,14 @@ class FlatPart {
     }
 
     FlatPart& rotate(Vec3 vec, Vec3 center);
+
+    FlatPart& mirror(Vec3 vec) {
+        if (vec != Vec3::ZERO())
+            _transforms.emplace_back(_TransformT::tMirror, -vec);
+        return *this;
+    }
+
+    FlatPart& mirror(Vec3 vec, Vec3 center);
 
 
     void render2D(IndentWriter& writer) const {
