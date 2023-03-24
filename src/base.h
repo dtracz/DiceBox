@@ -6,6 +6,7 @@
 #include <utility>
 #include <memory>
 #include <concepts>
+#include <type_traits>
 #include "core/Component2D.h"
 #include "core/Component.h"
 
@@ -249,6 +250,28 @@ class Module3D : public Part3D {
     // TODO: deep-copy constructor
     // Module3D(Module3D& other);
 
+    template <typename T1, typename T2>
+        requires std::derived_from<typename std::remove_reference<T1>::type, Part3D>
+              && std::derived_from<typename std::remove_reference<T2>::type, Part3D>
+    static Module3D Union(T1&& part1, T2&& part2) {
+        return Module3D(
+                std::forward<T1>(part1),
+                std::forward<T2>(part2),
+                _CompositionT::tAdd
+        );
+    }
+
+    template <typename T1, typename T2>
+        requires std::derived_from<typename std::remove_reference<T1>::type, Part3D>
+              && std::derived_from<typename std::remove_reference<T2>::type, Part3D>
+    static Module3D Difference(T1&& part1, T2&& part2) {
+        return Module3D(
+                std::forward<T1>(part1),
+                std::forward<T2>(part2),
+                _CompositionT::tCut
+        );
+    }
+
     void set_color(Color color) override {
         for (auto pair : _parts)
             pair.second->set_color(color);
@@ -288,6 +311,17 @@ class Module3D : public Part3D {
         _CompositionT,
         std::shared_ptr<Part3D>>
     > _parts;
+
+
+    template <typename T1, typename T2>
+        requires std::derived_from<T1, Part3D>
+              && std::derived_from<T2, Part3D>
+    Module3D (T1 part1, T2 part2, _CompositionT ctype) {
+        auto shp1 = std::shared_ptr<Part3D>(new T1(std::move(part1)));
+        _parts.emplace_back(_CompositionT::tAdd, shp1);
+        auto shp2 = std::shared_ptr<Part3D>(new T2(std::move(part2)));
+        _parts.emplace_back(ctype, shp2);
+    }
 
 };  // class Module3D
 
