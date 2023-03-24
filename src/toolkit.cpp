@@ -26,6 +26,8 @@ Component2D crenels(std::pair<double, double> crenel_dims,
         );
         offset += 2*x;
     }
+    if (crenels_v.empty())
+        throw std::runtime_error("no crenels created");
     return std::accumulate(
             std::next(crenels_v.begin()),
             crenels_v.end(),
