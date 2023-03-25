@@ -240,15 +240,8 @@ class Module3D : public Part3D {
     // TODO: deep-copy constructor
     // Module3D(Module3D& other);
 
-    template <typename T1, typename T2>
-        requires std::derived_from<typename std::remove_reference<T1>::type, Part3D>
-              && std::derived_from<typename std::remove_reference<T2>::type, Part3D>
-    static Module3D Union(T1&& part1, T2&& part2) {
-        return Module3D(
-                std::forward<T1>(part1),
-                std::forward<T2>(part2),
-                _CompositionT::tAdd
-        );
+    static Module3D Union(std::derived_from<Part3D> auto... args) {
+        return (... + args);
     }
 
     template <typename T1, typename T2>
