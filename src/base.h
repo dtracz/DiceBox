@@ -239,6 +239,8 @@ class Module3D : public Part3D {
   public:
     // TODO: deep-copy constructor
     // Module3D(Module3D& other);
+    Module3D(Module3D&) = default;
+    Module3D(Module3D&&) = default;
 
     static Module3D Union(std::derived_from<Part3D> auto... args) {
         return (... + args);
@@ -295,17 +297,26 @@ class Module3D : public Part3D {
         std::shared_ptr<Part3D>>
     > _parts;
 
-    Module3D(std::derived_from<Part3D> auto part) {
-        auto shp = std::make_shared<decltype(part)>(std::move(part));
+    template <typename T>
+        requires std::derived_from<typename std::remove_reference<T>::type, Part3D>
+    Module3D(T&& part) {
+        auto shp = std::make_shared<typename std::remove_reference<T>::type>(
+                std::forward<T>(part)
+        );
         _parts.emplace_back(_CompositionT::tAdd, shp);
     }
 
-    Module3D (std::derived_from<Part3D> auto part1,
-              std::derived_from<Part3D> auto part2,
-              _CompositionT ctype) {
-        auto shp1 = std::make_shared<decltype(part1)>(std::move(part1));
+    template <typename T1, typename T2>
+        requires std::derived_from<typename std::remove_reference<T1>::type, Part3D>
+              && std::derived_from<typename std::remove_reference<T2>::type, Part3D>
+    Module3D (T1&& part1, T2&& part2, _CompositionT ctype) {
+        auto shp1 = std::make_shared<typename std::remove_reference<T1>::type>(
+                std::forward<T1>(part1)
+        );
         _parts.emplace_back(_CompositionT::tAdd, shp1);
-        auto shp2 = std::make_shared<decltype(part2)>(std::move(part2));
+        auto shp2 = std::make_shared<typename std::remove_reference<T2>::type>(
+                std::forward<T2>(part2)
+        );
         _parts.emplace_back(ctype, shp2);
     }
 
