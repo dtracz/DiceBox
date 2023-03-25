@@ -323,7 +323,51 @@ class Module3D : public Part3D {
         _parts.emplace_back(ctype, shp2);
     }
 
+    template <typename T1, typename T2>
+        requires std::derived_from<typename std::remove_reference<T1>::type, Part3D>
+              && std::derived_from<typename std::remove_reference<T2>::type, Part3D>
+    friend Module3D operator+(T1&&, T2&&);
+
+    friend Module3D operator+(Module3D&, std::derived_from<Part3D> auto);
+
+    template <typename T1, typename T2>
+        requires std::derived_from<typename std::remove_reference<T1>::type, Part3D>
+              && std::derived_from<typename std::remove_reference<T2>::type, Part3D>
+    friend Module3D operator-(T1&&, T2&&);
+
 };  // class Module3D
+
+
+
+template <typename T1, typename T2>
+    requires std::derived_from<typename std::remove_reference<T1>::type, Part3D>
+          && std::derived_from<typename std::remove_reference<T2>::type, Part3D>
+Module3D operator+(T1&& part1, T2&& part2) {
+    return Module3D(
+            std::forward<T1>(part1),
+            std::forward<T2>(part2),
+            Module3D::_CompositionT::tAdd
+    );
+}
+
+
+Module3D operator+(Module3D& part1, std::derived_from<Part3D> auto part2) {
+    auto shp = std::make_shared<decltype(part2)>(std::move(part2));
+    part1._parts.emplace_back(Module3D::_CompositionT::tAdd, shp);
+    return part1;
+}
+
+
+template <typename T1, typename T2>
+    requires std::derived_from<typename std::remove_reference<T1>::type, Part3D>
+          && std::derived_from<typename std::remove_reference<T2>::type, Part3D>
+Module3D operator-(T1&& part1, T2&& part2) {
+    return Module3D(
+            std::forward<T1>(part1),
+            std::forward<T2>(part2),
+            Module3D::_CompositionT::tCut
+    );
+}
 
 
 #endif  // BASE_H_INCLUDED
