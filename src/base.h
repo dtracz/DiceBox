@@ -103,10 +103,9 @@ class FlatPart : public Part3D {
             _thickness{thickness},
             _color{color} { }
 
-    template<typename T>
-        requires std::convertible_to<T, Component2D>
-    FlatPart(T&& comp, double thickness=-1, Color color = {-1}):
-            _shape{std::forward<T>(comp)},
+    FlatPart(std::convertible_to<Component2D> auto&& comp,
+             double thickness=-1, Color color = {-1}):
+            _shape{std::forward<decltype(comp)>(comp)},
             _empty{false},
             _thickness{thickness},
             _color{color} { }
@@ -123,37 +122,29 @@ class FlatPart : public Part3D {
     }
 
 
-    template<typename T>
-        requires std::convertible_to<T, Component2D>
-    FlatPart& add(T&& shape) {
+    FlatPart& add(std::convertible_to<Component2D> auto&& shape) {
         if (_empty) {
-            _shape = std::forward<T>(shape);
+            _shape = std::forward<decltype(shape)>(shape);
             _empty = false;
         } else {
-            _shape = _shape + std::forward<T>(shape);
+            _shape = _shape + std::forward<decltype(shape)>(shape);
         }
         return *this;
     }
 
-    template<typename T>
-        requires std::convertible_to<T, Component2D>
-    FlatPart& operator+(T&& shape) {
-        return this->add(std::forward<T>(shape));
+    FlatPart& operator+(std::convertible_to<Component2D> auto&& shape) {
+        return this->add(std::forward<decltype(shape)>(shape));
     }
 
-    template<typename T>
-        requires std::convertible_to<T, Component2D>
-    FlatPart& cut(T&& shape) {
+    FlatPart& cut(std::convertible_to<Component2D> auto&& shape) {
         if (_empty)
             throw std::runtime_error("cannot cut from empty component");
-        _shape = _shape - std::forward<T>(shape);
+        _shape = _shape - std::forward<decltype(shape)>(shape);
         return *this;
     }
 
-    template<typename T>
-        requires std::convertible_to<T, Component2D>
-    FlatPart& operator-(T&& shape) {
-        return this->cut(std::forward<T>(shape));
+    FlatPart& operator-(std::convertible_to<Component2D> auto&& shape) {
+        return this->cut(std::forward<decltype(shape)>(shape));
     }
 
 
@@ -201,9 +192,8 @@ class FlatPart : public Part3D {
 class HelperPart : public Part3D,
                    public Component {
   public:
-    template<typename T>
-        requires std::convertible_to<T, Component2D>
-    HelperPart(T&& other): Component {std::forward<T>(other)} { }
+    HelperPart(std::convertible_to<Component2D> auto&& other):
+            Component {std::forward<decltype(other)>(other)} { }
 
     void set_color(Color color) override {
         Component::color(color.x, color.y, color.z, color.alpha);
@@ -313,13 +303,12 @@ class Module3D : public Part3D {
     > _parts;
 
 
-    template <typename T1, typename T2>
-        requires std::derived_from<T1, Part3D>
-              && std::derived_from<T2, Part3D>
-    Module3D (T1 part1, T2 part2, _CompositionT ctype) {
-        auto shp1 = std::shared_ptr<Part3D>(new T1(std::move(part1)));
+    Module3D (std::derived_from<Part3D> auto part1,
+              std::derived_from<Part3D> auto part2,
+              _CompositionT ctype) {
+        auto shp1 = std::make_shared<decltype(part1)>(std::move(part1));
         _parts.emplace_back(_CompositionT::tAdd, shp1);
-        auto shp2 = std::shared_ptr<Part3D>(new T2(std::move(part2)));
+        auto shp2 = std::make_shared<decltype(part2)>(std::move(part2));
         _parts.emplace_back(ctype, shp2);
     }
 
