@@ -295,6 +295,10 @@ class Module3D : public Part3D {
         std::shared_ptr<Part3D>>
     > _parts;
 
+    Module3D(std::derived_from<Part3D> auto part) {
+        auto shp = std::make_shared<decltype(part)>(std::move(part));
+        _parts.emplace_back(_CompositionT::tAdd, shp);
+    }
 
     Module3D (std::derived_from<Part3D> auto part1,
               std::derived_from<Part3D> auto part2,
@@ -310,8 +314,6 @@ class Module3D : public Part3D {
               && std::derived_from<typename std::remove_reference<T2>::type, Part3D>
     friend Module3D operator+(T1&&, T2&&);
 
-    friend Module3D operator+(Module3D&, std::derived_from<Part3D> auto);
-
     template <typename T1, typename T2>
         requires std::derived_from<typename std::remove_reference<T1>::type, Part3D>
               && std::derived_from<typename std::remove_reference<T2>::type, Part3D>
@@ -325,18 +327,20 @@ template <typename T1, typename T2>
     requires std::derived_from<typename std::remove_reference<T1>::type, Part3D>
           && std::derived_from<typename std::remove_reference<T2>::type, Part3D>
 Module3D operator+(T1&& part1, T2&& part2) {
-    return Module3D(
-            std::forward<T1>(part1),
-            std::forward<T2>(part2),
-            Module3D::_CompositionT::tAdd
-    );
-}
-
-
-Module3D operator+(Module3D& part1, std::derived_from<Part3D> auto part2) {
-    auto shp = std::make_shared<decltype(part2)>(std::move(part2));
-    part1._parts.emplace_back(Module3D::_CompositionT::tAdd, shp);
-    return part1;
+    if (std::same_as<typename std::remove_reference<T1>::type, Module3D>) {
+        Module3D mod {std::forward<T1>(part1)};
+        auto shp = std::make_shared<typename std::remove_reference<T2>::type>(
+                std::forward<T2>(part2)
+        );
+        mod._parts.emplace_back(Module3D::_CompositionT::tAdd, shp);
+        return mod;
+    } else {
+        return Module3D(
+                std::forward<T1>(part1),
+                std::forward<T2>(part2),
+                Module3D::_CompositionT::tAdd
+        );
+    }
 }
 
 
