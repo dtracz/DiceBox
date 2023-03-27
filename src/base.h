@@ -74,11 +74,11 @@ class Part3D {
 
     virtual Part3D& rotate(Vec3) = 0;
 
-    virtual Part3D& rotate(Vec3, Vec3) = 0;
+    virtual Part3D& rotate(Vec3, Vec3);
 
     virtual Part3D& mirror(Vec3) = 0;
 
-    virtual Part3D& mirror(Vec3, Vec3) = 0;
+    virtual Part3D& mirror(Vec3, Vec3);
 
     virtual void render3D(IndentWriter&) = 0;
 
@@ -150,7 +150,7 @@ class FlatPart : public Part3D {
     }
 
 
-    FlatPart& translate(Vec3 vec) override;
+    FlatPart& translate(Vec3) override;
 
     FlatPart& rotate(Vec3 vec) override {
         if (vec != Vec3::ZERO())
@@ -158,7 +158,7 @@ class FlatPart : public Part3D {
         return *this;
     }
 
-    FlatPart& rotate(Vec3 vec, Vec3 center) override;
+    using Part3D::rotate;
 
     FlatPart& mirror(Vec3 vec) override {
         if (vec != Vec3::ZERO())
@@ -166,7 +166,7 @@ class FlatPart : public Part3D {
         return *this;
     }
 
-    FlatPart& mirror(Vec3 vec, Vec3 center) override;
+    using Part3D::mirror;
 
 
     void render2D(IndentWriter& writer) const {
@@ -216,14 +216,14 @@ class HelperPart : public Part3D,
         return *this;
     }
 
-    HelperPart& rotate(Vec3, Vec3) override;
+    using Part3D::rotate;
 
     HelperPart& mirror(Vec3 vec) override {
         Component::mirror(vec.x, vec.y, vec.z);
         return *this;
     }
 
-    HelperPart& mirror(Vec3, Vec3) override;
+    using Part3D::mirror;
 
     void render3D(IndentWriter& writer) override {
         writer << *this;
@@ -283,7 +283,7 @@ class Module3D : public Part3D {
         return *this;
     }
 
-    Module3D& rotate(Vec3, Vec3) override;
+    using Part3D::rotate;
 
     Module3D& mirror(Vec3 vec) override {
         for (auto pair : _parts)
@@ -291,7 +291,7 @@ class Module3D : public Part3D {
         return *this;
     }
 
-    Module3D& mirror(Vec3, Vec3) override;
+    using Part3D::mirror;
 
     void render3D(IndentWriter& writer) override {
         writer << _get_final_form();

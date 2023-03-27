@@ -14,6 +14,21 @@ bool Vec3::operator==(Vec3 other) const {
 }
 
 
+Part3D& Part3D::rotate(Vec3 vec, Vec3 center) {
+    translate(-center);
+    rotate(vec);
+    translate(center);
+    return *this;
+}
+
+
+Part3D& Part3D::mirror(Vec3 vec, Vec3 center) {
+    translate(-center);
+    mirror(vec);
+    translate(center);
+    return *this;
+}
+
 
 FlatPart& FlatPart::translate(Vec3 vec) {
     if (!_transforms.empty() &&
@@ -25,22 +40,6 @@ FlatPart& FlatPart::translate(Vec3 vec) {
     }
     if (vec != Vec3::ZERO())
         _transforms.emplace_back(_TransformT::tTranslate, vec);
-    return *this;
-}
-
-
-FlatPart& FlatPart::rotate(Vec3 vec, Vec3 center) {
-    translate(-center);
-    rotate(vec);
-    translate(center);
-    return *this;
-}
-
-
-FlatPart& FlatPart::mirror(Vec3 vec, Vec3 center) {
-    translate(-center);
-    mirror(vec);
-    translate(center);
     return *this;
 }
 
@@ -77,43 +76,12 @@ Component FlatPart::_get_final_form() {
 
 
 
-HelperPart& HelperPart::rotate(Vec3 vec, Vec3 center) {
-    translate(-center);
-    rotate(vec);
-    translate(center);
-    return *this;
-}
-
-
-HelperPart& HelperPart::mirror(Vec3 vec, Vec3 center) {
-    translate(-center);
-    mirror(vec);
-    translate(center);
-    return *this;
-}
-
-
 Module3D::Module3D(Module3D& other) {
     for (auto& pair : other._parts) {
         auto type = pair.first;
         std::shared_ptr<Part3D> shp = pair.second;
         _parts.emplace_back(type, shp->_clone());
     }
-}
-
-Module3D& Module3D::rotate(Vec3 vec, Vec3 center) {
-    translate(-center);
-    rotate(vec);
-    translate(center);
-    return *this;
-}
-
-
-Module3D& Module3D::mirror(Vec3 vec, Vec3 center) {
-    translate(-center);
-    mirror(vec);
-    translate(center);
-    return *this;
 }
 
 
