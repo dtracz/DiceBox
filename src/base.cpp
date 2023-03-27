@@ -58,9 +58,9 @@ Component FlatPart::_get_final_form() {
                                transform_vec.z);
                 break;
             case _TransformT::tRotate:
-                part.rotate(transform_vec.x,
-                            transform_vec.y,
-                            transform_vec.z);
+                part.rotate(-transform_vec.x,
+                            -transform_vec.y,
+                            -transform_vec.z);
                 break;
             case _TransformT::tMirror:
                 part.mirror(transform_vec.x,

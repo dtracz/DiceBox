@@ -154,7 +154,7 @@ class FlatPart : public Part3D {
 
     FlatPart& rotate(Vec3 vec) override {
         if (vec != Vec3::ZERO())
-            _transforms.emplace_back(_TransformT::tRotate, -vec);
+            _transforms.emplace_back(_TransformT::tRotate, vec);
         return *this;
     }
 
@@ -162,7 +162,7 @@ class FlatPart : public Part3D {
 
     FlatPart& mirror(Vec3 vec) override {
         if (vec != Vec3::ZERO())
-            _transforms.emplace_back(_TransformT::tMirror, -vec);
+            _transforms.emplace_back(_TransformT::tMirror, vec);
         return *this;
     }
 
@@ -212,7 +212,7 @@ class HelperPart : public Part3D,
     }
 
     HelperPart& rotate(Vec3 vec) override {
-        Component::rotate(vec.x, vec.y, vec.z);
+        Component::rotate(-vec.x, -vec.y, -vec.z);
         return *this;
     }
 
