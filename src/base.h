@@ -297,6 +297,20 @@ class Module3D : public Part3D {
         writer << _get_final_form();
     }
 
+
+    template <typename T>
+        requires std::derived_from<typename std::remove_reference<T>::type, Part3D>
+    Module3D& operator+=(T&& part) {
+        return _append(std::forward<T>(part), _CompositionT::tAdd);
+    }
+
+    template <typename T>
+        requires std::derived_from<typename std::remove_reference<T>::type, Part3D>
+    Module3D& operator-=(T&& part) {
+        return _append(std::forward<T>(part), _CompositionT::tCut);
+    }
+
+
   protected:
     Component _get_final_form() override;
 
@@ -313,24 +327,25 @@ class Module3D : public Part3D {
     template <typename T>
         requires std::derived_from<typename std::remove_reference<T>::type, Part3D>
     Module3D(T&& part) {
-        auto shp = std::make_shared<typename std::remove_reference<T>::type>(
-                std::forward<T>(part)
-        );
-        _parts.emplace_back(_CompositionT::tAdd, shp);
+        _append(std::forward<T>(part), _CompositionT::tAdd);
     }
 
     template <typename T1, typename T2>
         requires std::derived_from<typename std::remove_reference<T1>::type, Part3D>
               && std::derived_from<typename std::remove_reference<T2>::type, Part3D>
-    Module3D (T1&& part1, T2&& part2, _CompositionT ctype) {
-        auto shp1 = std::make_shared<typename std::remove_reference<T1>::type>(
-                std::forward<T1>(part1)
+    Module3D(T1&& part1, T2&& part2, _CompositionT ctype) {
+        _append(std::forward<T1>(part1), _CompositionT::tAdd);
+        _append(std::forward<T2>(part2), ctype);
+    }
+
+    template <typename T>
+        requires std::derived_from<typename std::remove_reference<T>::type, Part3D>
+    Module3D& _append(T&& part, _CompositionT ctype) {
+        auto shp = std::make_shared<typename std::remove_reference<T>::type>(
+                std::forward<T>(part)
         );
-        _parts.emplace_back(_CompositionT::tAdd, shp1);
-        auto shp2 = std::make_shared<typename std::remove_reference<T2>::type>(
-                std::forward<T2>(part2)
-        );
-        _parts.emplace_back(ctype, shp2);
+        _parts.emplace_back(ctype, shp);
+        return *this;
     }
 
     template <typename T1, typename T2>
@@ -353,11 +368,7 @@ template <typename T1, typename T2>
 Module3D operator+(T1&& part1, T2&& part2) {
     if (std::same_as<typename std::remove_reference<T1>::type, Module3D>) {
         Module3D mod {std::forward<T1>(part1)};
-        auto shp = std::make_shared<typename std::remove_reference<T2>::type>(
-                std::forward<T2>(part2)
-        );
-        mod._parts.emplace_back(Module3D::_CompositionT::tAdd, shp);
-        return mod;
+        return mod._append(std::forward<T2>(part2), Module3D::_CompositionT::tAdd);
     } else {
         return Module3D(
                 std::forward<T1>(part1),
