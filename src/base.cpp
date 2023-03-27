@@ -93,6 +93,13 @@ HelperPart& HelperPart::mirror(Vec3 vec, Vec3 center) {
 }
 
 
+Module3D::Module3D(Module3D& other) {
+    for (auto& pair : other._parts) {
+        auto type = pair.first;
+        std::shared_ptr<Part3D> shp = pair.second;
+        _parts.emplace_back(type, shp->_clone());
+    }
+}
 
 Module3D& Module3D::rotate(Vec3 vec, Vec3 center) {
     translate(-center);

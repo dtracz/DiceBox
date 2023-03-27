@@ -85,6 +85,8 @@ class Part3D {
   protected:
     virtual Component _get_final_form() = 0;
 
+    virtual std::shared_ptr<Part3D> _clone() = 0;
+
     friend class Module3D;
 };
 
@@ -172,12 +174,17 @@ class FlatPart : public Part3D {
     }
 
 
-    Component _get_final_form() override;
 
     void render3D(IndentWriter& writer) override {
         writer << _get_final_form();
     }
 
+  protected:
+    Component _get_final_form() override;
+
+    std::shared_ptr<Part3D> _clone() override {
+        return std::make_shared<FlatPart>(*this);
+    }
 
   private:
     Component2D _shape;
@@ -227,6 +234,10 @@ class HelperPart : public Part3D,
         return *this;
     }
 
+    std::shared_ptr<Part3D> _clone() override {
+        return std::make_shared<HelperPart>(*this);
+    }
+
 };  // class HelperPart
 
 
@@ -237,9 +248,7 @@ class Module3D : public Part3D {
     };
 
   public:
-    // TODO: deep-copy constructor
-    // Module3D(Module3D& other);
-    Module3D(Module3D&) = default;
+    Module3D(Module3D&);
     Module3D(Module3D&&) = default;
 
     static Module3D Union(std::derived_from<Part3D> auto... args) {
@@ -290,6 +299,10 @@ class Module3D : public Part3D {
 
   protected:
     Component _get_final_form() override;
+
+    std::shared_ptr<Part3D> _clone() override {
+        return std::make_shared<Module3D>(*this);
+    }
 
   private:
     std::vector<std::pair<
