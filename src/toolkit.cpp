@@ -66,8 +66,8 @@ Component2D crenellated_wall(std::pair<double, double> dims,
                 {left_crenel_params.x, left_crenel_params.y},
                 dims.second, left_crenel_params.z
         );
-        left_crenels.rotate(0, 0, 90);
-        left_crenels.translate(left_crenel_params.y, 0, 0);
+        left_crenels.rotate(0, 0, -90);
+        left_crenels.translate(0, dims.second, 0);
         wall = wall + left_crenels;
     }
     if (right_crenel_params.y > 0) {
