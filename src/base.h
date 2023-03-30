@@ -134,7 +134,7 @@ class FlatPart : public Part3D {
         return *this;
     }
 
-    FlatPart& operator+(std::convertible_to<Component2D> auto&& shape) {
+    FlatPart& operator+=(std::convertible_to<Component2D> auto&& shape) {
         return this->add(std::forward<decltype(shape)>(shape));
     }
 
@@ -145,7 +145,7 @@ class FlatPart : public Part3D {
         return *this;
     }
 
-    FlatPart& operator-(std::convertible_to<Component2D> auto&& shape) {
+    FlatPart& operator-=(std::convertible_to<Component2D> auto&& shape) {
         return this->cut(std::forward<decltype(shape)>(shape));
     }
 
@@ -248,6 +248,12 @@ class Module3D : public Part3D {
     };
 
   public:
+    template <typename T>
+        requires std::derived_from<typename std::remove_reference<T>::type, Part3D>
+    Module3D(T&& part) {
+        _append(std::forward<T>(part), _CompositionT::tAdd);
+    }
+
     Module3D(Module3D&);
     Module3D(Module3D&&) = default;
 
@@ -325,12 +331,6 @@ class Module3D : public Part3D {
 
     Color _color = {-1,0,0};
 
-
-    template <typename T>
-        requires std::derived_from<typename std::remove_reference<T>::type, Part3D>
-    Module3D(T&& part) {
-        _append(std::forward<T>(part), _CompositionT::tAdd);
-    }
 
     template <typename T1, typename T2>
         requires std::derived_from<typename std::remove_reference<T1>::type, Part3D>
