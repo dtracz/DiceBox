@@ -267,8 +267,7 @@ class Module3D : public Part3D {
     }
 
     void set_color(Color color) override {
-        for (auto pair : _parts)
-            pair.second->set_color(color);
+        _color = color;
     }
 
     Module3D& translate(Vec3 vec) override {
@@ -323,6 +322,9 @@ class Module3D : public Part3D {
         _CompositionT,
         std::shared_ptr<Part3D>>
     > _parts;
+
+    Color _color = {-1,0,0};
+
 
     template <typename T>
         requires std::derived_from<typename std::remove_reference<T>::type, Part3D>

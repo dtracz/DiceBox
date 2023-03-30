@@ -90,20 +90,22 @@ Component Module3D::_get_final_form() {
         throw std::runtime_error("this Module3D is empty");
     if (_parts.front().first == _CompositionT::tCut)
         throw std::runtime_error("first Part3D of the Module3D needs to be added");
-    auto component = _parts.front().second->_get_final_form();
+    auto part = _parts.front().second->_get_final_form();
     for (size_t i = 0; i < _parts.size(); i++) {
         auto pair = _parts[i];
         _CompositionT ctype = pair.first;
         auto shp = pair.second;
         switch (ctype) {
             case _CompositionT::tAdd:
-                component = component + shp->_get_final_form();
+                part = part + shp->_get_final_form();
                 break;
             case _CompositionT::tCut:
-                component = component - shp->_get_final_form();
+                part = part - shp->_get_final_form();
                 break;
         }
     }
-    return component;
+    if (_color.is_valid())
+        part.color(_color.x, _color.y, _color.z, _color.alpha);
+    return part;
 }
 
