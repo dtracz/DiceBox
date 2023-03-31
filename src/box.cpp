@@ -179,12 +179,131 @@ Module3D get(Color c0, Color c1, Color c2, Color c3) {
 }  // namespace LowerPart
 
 
-int main() {
+namespace UpperPart {
 
+const double RS = 15;
+const double DZ = (SLOT_SIZE.z-RS)/2;
+const double TLHD = 3; // top lever hole diameter;
+
+const double MP_X = RS*3/5;
+const double MP_Y = RS*2/5;
+
+
+FlatPart get_deck(Color color) {
+    FlatPart deck {crenellated_wall(
+            {SLOT_SIZE.x + IW_THICC, FULL_DIMS.y},
+            {DX, OW_THICC, DX}, {DX, OW_THICC, DX},
+            Vec3::ZERO(), {CY, IW_THICC, CY}
+    )};
+    deck -= Square::create(BOTT_CUT, IW_THICC, false).translate(
+            0, OW_THICC + SLOT_SIZE.y, 0
+    );
+    deck -= Square::create(BOTT_CUT, IW_THICC, false).translate(
+            SLOT_SIZE.x - BOTT_CUT, OW_THICC + SLOT_SIZE.y, 0
+    );
+    deck.set_thickness(OW_THICC);
+    deck.set_color(color);
+    return deck;
+}
+
+
+FlatPart get_x_wall(Color color) {
+    auto trapezoid = Polygon2D::create();
+    auto& polygon = trapezoid.getRef<Polygon2D>();
+    polygon << Point2D(0, FULL_DIMS.z - RS)
+            << Point2D(SLOT_SIZE.x + IW_THICC, FULL_DIMS.z - RS)
+            << Point2D(SLOT_SIZE.x + IW_THICC - RS, FULL_DIMS.z)
+            << Point2D(RS, FULL_DIMS.z);
+    auto crenellated_part = crenellated_wall(
+            {FULL_DIMS.z - RS, SLOT_SIZE.x + IW_THICC},
+            {DZ, IW_THICC, DZ}, Vec3::ZERO(),
+            Vec3::ZERO(), {DX, OW_THICC, IW_THICC}
+    );
+    crenellated_part.rotate(0, 0, -90);
+    crenellated_part.translate(0, FULL_DIMS.z - RS, 0);
+    FlatPart wall {trapezoid + crenellated_part};
+    wall.set_thickness(OW_THICC);
+    wall.set_color(color);
+    return wall;
+}
+
+
+FlatPart get_y_separator(Color color) {
+    FlatPart sep {crenellated_wall(
+            {FULL_DIMS.z - RS, FULL_DIMS.y},
+            {DZ, OW_THICC, 0}, {DZ, OW_THICC, 0},
+            Vec3::ZERO(), {CY, OW_THICC, 0}
+    )};
+    sep -= Square::create(DZ, IW_THICC, false).translate(
+            0, OW_THICC + SLOT_SIZE.y, 0
+    );
+    sep.set_thickness(IW_THICC);
+    sep.set_color(color);
+    return sep;
+}
+
+
+FlatPart get_x_separator(Color color) {
+    auto sep_base = Polygon2D::create();
+    auto& polygon = sep_base.getRef<Polygon2D>();
+    polygon << Point2D(SLOT_SIZE.x + IW_THICC, FULL_DIMS.z - RS)
+            << Point2D(SLOT_SIZE.x+IW_THICC-RS, FULL_DIMS.z)
+            << Point2D(RS, FULL_DIMS.z)
+            << Point2D(0, FULL_DIMS.z-RS)
+            << Point2D(0, 0)
+            << Point2D(BOTT_CUT, 0)
+            << Point2D(BOTT_CUT, OW_THICC)
+            << Point2D(SLOT_SIZE.x-BOTT_CUT, OW_THICC)
+            << Point2D(SLOT_SIZE.x-BOTT_CUT, 0)
+            << Point2D(SLOT_SIZE.x, 0)
+            << Point2D(SLOT_SIZE.x, OW_THICC+DZ)
+            << Point2D(SLOT_SIZE.x+IW_THICC, OW_THICC+DZ);
+    FlatPart sep {sep_base};
+    sep.set_thickness(IW_THICC);
+    sep.set_color(color);
+    return sep;
+}
+
+
+Module3D get(Color c0, Color c1, Color c2, Color c3) {
+    auto deck = get_deck(c0)
+            .translate({OW_THICC, 0, 0});
+    auto front_x_wall = get_x_wall(c1)
+            .rotate({-90, 0, 0})
+            .translate({OW_THICC, OW_THICC, 0});
+    auto back_x_wall = get_x_wall(c1)
+            .rotate({-90, 0, 0})
+            .translate({OW_THICC, FULL_DIMS.y, 0});
+    auto y_separator = get_y_separator(c2)
+            .rotate({0, -90, 0})
+            .translate({OW_THICC + SLOT_SIZE.x, 0, FULL_DIMS.z - RS});
+    auto x_separator = get_x_separator(c1)
+            .rotate({-90, 0, 0})
+            .translate({OW_THICC, IW_THICC + OW_THICC + SLOT_SIZE.y, 0});
+    auto lower_part = Module3D::Union(
+            deck,
+            front_x_wall,
+            back_x_wall,
+            y_separator,
+            x_separator
+    );
+    return lower_part;
+}
+
+}  // namespace UpperPart
+
+
+int main() {
     auto lp = LowerPart::get({0,1,0}, {1,0,0}, {0,0,1}, {0.5,0,1});
+    auto up1 = UpperPart::get({0,1,0}, {1,0,0}, {0,0,1}, {0.5,0,1});
+    up1.translate({-FULL_DIMS.x/2, 0, FULL_DIMS.z});
+    auto up2 = up1;
+    up2.mirror({1,0,0}, {FULL_DIMS.x/2, 0, 0});
 
     IndentWriter writer;
     lp.render3D(writer);
+    up1.render3D(writer);
+    up2.render3D(writer);
     std::cout << writer << std::flush;
     return 0;
 }
