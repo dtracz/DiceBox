@@ -92,29 +92,225 @@ FlatPart get_x_separator(Color color) {
 }
 
 
-Module3D get(const IColorGenerator& colors) {
+Module3D get_base(const IColorGenerator& colors) {
     auto deck = get_deck(colors[0])
-            .translate({OW_THICC, 0, 0});
-    auto front_x_wall = get_x_wall(colors[1])
+            .translate({0, 0, 0});
+    auto front_x_wall = get_x_wall(colors[3])
             .rotate({-90, 0, 0})
-            .translate({OW_THICC, OW_THICC, 0});
-    auto back_x_wall = get_x_wall(colors[1])
+            .translate({0, OW_THICC, 0});
+    auto back_x_wall = get_x_wall(colors[3])
             .rotate({-90, 0, 0})
-            .translate({OW_THICC, FULL_DIMS.y, 0});
+            .translate({0, FULL_DIMS.y, 0});
     auto y_separator = get_y_separator(colors[2])
             .rotate({0, -90, 0})
-            .translate({OW_THICC + SLOT_SIZE.x, 0, FULL_DIMS.z - RS});
-    auto x_separator = get_x_separator(colors[1])
+            .translate({0 + SLOT_SIZE.x, 0, FULL_DIMS.z - RS});
+    auto x_separator = get_x_separator(colors[3])
             .rotate({-90, 0, 0})
-            .translate({OW_THICC, IW_THICC + OW_THICC + SLOT_SIZE.y, 0});
-    auto lower_part = Module3D::Union(
+            .translate({0, IW_THICC + OW_THICC + SLOT_SIZE.y, 0});
+    auto base = Module3D::Union(
             deck,
             front_x_wall,
             back_x_wall,
             y_separator,
             x_separator
     );
-    return lower_part;
+    return base;
+}
+
+
+FlatPart get_top_cover(Color color) {
+    FlatPart top_cover {crenellated_wall(
+            {OW_THICC + RS, FULL_DIMS.y},
+            {RS/3, OW_THICC, RS/3}, {RS/3, OW_THICC, RS/3},
+            {CY, OW_THICC, CY}, Vec3::ZERO()
+    )};
+    top_cover += Square::create(
+            SLOT_SIZE.x + IW_THICC - 2*RS, FULL_DIMS.y, false
+    ).translate(OW_THICC + RS, 0, 0);
+    top_cover += crenellated_wall(
+            {RS, FULL_DIMS.y},
+            {RS/3, OW_THICC, RS/3}, {RS/3, OW_THICC, RS/3},
+            Vec3::ZERO(), {CY, IW_THICC, CY}
+    ).translate(FULL_DIMS.x/2 - RS, 0, 0);
+    top_cover -= Square::create(RS/2, IW_THICC, false).translate(
+            OW_THICC, OW_THICC + SLOT_SIZE.y, 0
+    );
+    top_cover -= Square::create(RS/3, IW_THICC, false).translate(
+            OW_THICC + SLOT_SIZE.x - RS/3, OW_THICC + SLOT_SIZE.y, 0
+    );
+    top_cover.set_thickness(OW_THICC);
+    top_cover.set_color(color);
+    return top_cover;
+}
+
+
+FlatPart get_back_wall(Color color) {
+    auto wall_upper = crenellated_wall(
+        {RS + OW_THICC, FULL_DIMS.y},
+        {RS/3, OW_THICC, RS/3}, {RS/3, OW_THICC, RS/3},
+        Vec3::ZERO(), {CY, OW_THICC, 0}
+    );
+    FlatPart wall {wall_upper.translate(FULL_DIMS.z - RS, 0, 0)};
+    wall -= Square::create(RS/2, IW_THICC, false).translate(
+            FULL_DIMS.z - RS, OW_THICC + SLOT_SIZE.y, 0
+    );
+    wall += Square::create(FULL_DIMS.z - RS, FULL_DIMS.y, false);
+    wall.set_thickness(OW_THICC);
+    wall.set_color(color);
+    return wall;
+}
+
+
+FlatPart get_front_sep(Color color) {
+    FlatPart sep {crenellated_wall(
+        {OW_THICC + RS, FULL_DIMS.y - 2*OW_THICC},
+        Vec3::ZERO(), Vec3::ZERO(),
+        {CY, OW_THICC, -OW_THICC}, Vec3::ZERO()
+    ).translate(0, OW_THICC, 0)};
+    sep += Square::create(RS/3, OW_THICC, false).translate(
+            RS/2, 0, 0
+    );
+    sep += Square::create(RS/3, OW_THICC, false).translate(
+            RS/2, FULL_DIMS.y - OW_THICC, 0
+    );
+    sep -= Square::create(RS/2, IW_THICC, false).translate(
+            OW_THICC + RS/2, OW_THICC + SLOT_SIZE.y, 0
+    );
+    sep.set_thickness(IW_THICC);
+    sep.set_color(color);
+    return sep;
+}
+
+
+FlatPart get_outer_back_reinforcement(Color color) {
+    auto reinf_base = Polygon2D::create();
+    auto& polygon = reinf_base.getRef<Polygon2D>();
+    polygon << Point2D(0, 0)
+            << Point2D(RS, RS)
+            << Point2D(0, RS);
+    reinf_base.translate(OW_THICC, 0, 0);
+    FlatPart reinf {reinf_base};
+    reinf += crenels({RS/3, OW_THICC}, RS)
+            .translate(OW_THICC, RS, 0);
+    reinf += crenels({RS/3, OW_THICC}, RS)
+            .rotate(0, 0, -90)
+            .translate(0, RS, 0);
+    reinf.set_thickness(OW_THICC);
+    reinf.set_color(color);
+    return reinf;
+}
+
+
+FlatPart get_outer_front_reinforcement(Color color) {
+    auto reinf_base = Polygon2D::create();
+    auto& polygon = reinf_base.getRef<Polygon2D>();
+    polygon << Point2D(RS, 0)
+            << Point2D(RS, RS)
+            << Point2D(0, RS);
+    FlatPart reinf {reinf_base};
+    reinf += crenels({RS/3, OW_THICC}, RS)
+            .translate(0, RS, 0);
+    reinf -= Square::create(IW_THICC, RS/3, false)
+            .translate(RS - IW_THICC, RS + OW_THICC - RS/2 -RS/3, 0);
+    reinf.set_thickness(OW_THICC);
+    reinf.set_color(color);
+    return reinf;
+}
+
+
+FlatPart get_central_back_reinforcement(Color color) {
+    auto reinf_base = Polygon2D::create();
+    auto& polygon = reinf_base.getRef<Polygon2D>();
+    polygon << Point2D(0, 0)
+            << Point2D(OW_THICC, 0)
+            << Point2D(OW_THICC+RS, RS)
+            << Point2D(OW_THICC+RS/2, RS)
+            << Point2D(OW_THICC+RS/2, OW_THICC+RS)
+            << Point2D(RS-IW_THICC-RS/3, RS+OW_THICC)
+            << Point2D(RS-IW_THICC-RS/3, RS/2)
+            << Point2D(0, RS/2);
+    FlatPart reinf {reinf_base};
+    reinf.set_thickness(IW_THICC);
+    reinf.set_color(color);
+    return reinf;
+}
+
+
+FlatPart get_central_front_reinforcement(Color color) {
+    auto reinf_base = Polygon2D::create();
+    auto& polygon = reinf_base.getRef<Polygon2D>();
+    polygon << Point2D(RS, 0)
+            << Point2D(RS, RS/2)
+            << Point2D(RS-IW_THICC, RS/2)
+            << Point2D(RS-IW_THICC, RS+OW_THICC)
+            << Point2D(RS-IW_THICC-RS/3, RS+OW_THICC)
+            << Point2D(RS-IW_THICC-RS/3, RS)
+            << Point2D(0, RS);
+    FlatPart reinf {reinf_base};
+    reinf.set_thickness(IW_THICC);
+    reinf.set_color(color);
+    return reinf;
+}
+
+
+Module3D get_cover(const IColorGenerator& colors) {
+    auto top_cover = get_top_cover(colors[0])
+            .translate({0, 0, FULL_DIMS.z});
+    auto back_wall = get_back_wall(colors[1])
+            .rotate({0, 90, 0})
+            .translate({OW_THICC, 0, 0});
+    auto front_sep = get_front_sep(colors[1])
+            .rotate({0, -90, 0})
+            .translate({OW_THICC + SLOT_SIZE.x, 0, FULL_DIMS.z + OW_THICC});
+    auto outer_back_reinf1 = get_outer_back_reinforcement(colors[4])
+            .rotate({-90, 0, 0})
+            .translate({0, OW_THICC, FULL_DIMS.z - RS});
+    auto outer_back_reinf2 = outer_back_reinf1;
+    outer_back_reinf2.mirror({0, 1, 0}, {0, FULL_DIMS.y/2, 0});
+    auto outer_front_reinf1 = get_outer_front_reinforcement(colors[4])
+            .rotate({-90, 0, 0})
+            .translate({FULL_DIMS.x/2 - RS, OW_THICC, FULL_DIMS.z - RS});
+    auto outer_front_reinf2 = outer_front_reinf1;
+    outer_front_reinf2.mirror({0, 1, 0}, {0, FULL_DIMS.y/2, 0});
+    auto central_back_reinf = get_central_back_reinforcement(colors[4])
+            .rotate({-90, 0, 0})
+            .translate({
+                    0,
+                    IW_THICC + OW_THICC + SLOT_SIZE.y,
+                    FULL_DIMS.z - RS
+             });
+    auto central_front_reinf = get_central_front_reinforcement(colors[4])
+            .rotate({-90, 0, 0})
+            .translate({
+                    FULL_DIMS.x/2 - RS,
+                    IW_THICC + OW_THICC + SLOT_SIZE.y,
+                    FULL_DIMS.z - RS
+             });
+    auto cover = Module3D::Union(
+            top_cover,
+            back_wall,
+            front_sep,
+            outer_back_reinf1,
+            outer_back_reinf2,
+            outer_front_reinf1,
+            outer_front_reinf2,
+            central_back_reinf,
+            central_front_reinf
+    );
+    return cover;
+}
+
+
+Module3D get(const IColorGenerator& colors) {
+    auto base = get_base(colors)
+            .translate({OW_THICC, 0, 0});
+    Module3D cover = get_cover(colors)
+            .translate({-SLOT_SIZE.x, 0, SLOT_SIZE.z});
+    auto upper_part = Module3D::Union(
+            base,
+            cover
+    );
+    return upper_part;
 }
 
 }  // namespace UpperPart
