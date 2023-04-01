@@ -122,27 +122,27 @@ FlatPart get_x_separator(Color color) {
 }
 
 
-Module3D get(Color c0, Color c1, Color c2, Color c3) {
-    auto deck = get_deck(c0);
-    auto front_x_wall = get_x_wall(c1)
+Module3D get(const IColorGenerator& colors) {
+    auto deck = get_deck(colors[0]);
+    auto front_x_wall = get_x_wall(colors[1])
             .rotate({-90, 0, 0})
             .translate({0, OW_THICC, 0});
-    auto back_x_wall = get_x_wall(c1)
+    auto back_x_wall = get_x_wall(colors[1])
             .rotate({-90, 0, 0})
             .translate({0, FULL_DIMS.y, 0});
-    auto left_y_wall = get_left_y_wall(c2)
+    auto left_y_wall = get_left_y_wall(colors[2])
             .rotate({0, -90, 0})
             .translate({0, 0, FULL_DIMS.z});
-    auto right_y_wall = get_right_y_wall(c2)
+    auto right_y_wall = get_right_y_wall(colors[2])
             .rotate({0, -90, 0})
             .translate({FULL_DIMS.x - OW_THICC, 0, FULL_DIMS.z});
-    auto y_separator1 = get_y_separator(c2)
+    auto y_separator1 = get_y_separator(colors[2])
             .rotate({-90, 0, -90})
             .translate({FULL_DIMS.x/2 - IW_THICC, 0, 0});
-    auto y_separator2 = get_y_separator(c3)
+    auto y_separator2 = get_y_separator(colors[3])
             .rotate({-90, 0, -90})
             .translate({FULL_DIMS.x/2, 0, 0});
-    auto x_separator = get_x_separator(c1)
+    auto x_separator = get_x_separator(colors[1])
             .rotate({-90, 0, 0})
             .translate({0, OW_THICC + SLOT_SIZE.y + IW_THICC, 0});
 

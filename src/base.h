@@ -28,6 +28,13 @@ struct Vec3 {
         return {x+other.x, y+other.y, z+other.z};
     }
 
+    Vec3& operator*=(double value) {
+        x *= value;
+        y *= value;
+        z *= value;
+        return *this;
+    }
+
     Vec3& operator+=(Vec3 other) {
         x += other.x;
         y += other.y;
@@ -61,6 +68,13 @@ struct Color : Vec3 {
         return std::min({x,y,z,alpha}) >= 0
             && std::max({x,y,z,alpha}) <= 1;
     }
+};
+
+
+class IColorGenerator {
+  public:
+    virtual Color next() = 0;
+    virtual Color operator[](size_t idx) const = 0;
 };
 
 

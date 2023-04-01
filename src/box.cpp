@@ -8,8 +8,10 @@
 
 
 Module3D get_box() {
-    auto lp = LowerPart::get({0,1,0}, {1,0,0}, {0,0,1}, {0.5,0,1});
-    auto up1 = UpperPart::get({0,1,0}, {1,0,0}, {0,0,1}, {0.5,0,1});
+    DistinguishableColorGenerator gen;
+    auto lp = LowerPart::get(gen);
+    gen.set_offset(6);
+    auto up1 = UpperPart::get(gen);
     up1.translate({-FULL_DIMS.x/2, 0, FULL_DIMS.z});
     auto up2 = up1;
     up2.mirror({1,0,0}, {FULL_DIMS.x/2, 0, 0});

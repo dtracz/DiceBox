@@ -92,19 +92,19 @@ FlatPart get_x_separator(Color color) {
 }
 
 
-Module3D get(Color c0, Color c1, Color c2, Color c3) {
-    auto deck = get_deck(c0)
+Module3D get(const IColorGenerator& colors) {
+    auto deck = get_deck(colors[0])
             .translate({OW_THICC, 0, 0});
-    auto front_x_wall = get_x_wall(c1)
+    auto front_x_wall = get_x_wall(colors[1])
             .rotate({-90, 0, 0})
             .translate({OW_THICC, OW_THICC, 0});
-    auto back_x_wall = get_x_wall(c1)
+    auto back_x_wall = get_x_wall(colors[1])
             .rotate({-90, 0, 0})
             .translate({OW_THICC, FULL_DIMS.y, 0});
-    auto y_separator = get_y_separator(c2)
+    auto y_separator = get_y_separator(colors[2])
             .rotate({0, -90, 0})
             .translate({OW_THICC + SLOT_SIZE.x, 0, FULL_DIMS.z - RS});
-    auto x_separator = get_x_separator(c1)
+    auto x_separator = get_x_separator(colors[1])
             .rotate({-90, 0, 0})
             .translate({OW_THICC, IW_THICC + OW_THICC + SLOT_SIZE.y, 0});
     auto lower_part = Module3D::Union(
