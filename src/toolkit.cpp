@@ -2,11 +2,15 @@
 #include <vector>
 #include <numeric>
 #include <iterator>
+#include <cmath>
+#include <numbers>
 #include "core/Component2D.h"
 #include "components/Square.h"
+#include "components/Cylinder.h"
 #include "core/Union.h"
 #include "toolkit.h"
 #include "base.h"
+#include "globals.h"
 
 
 
@@ -117,4 +121,174 @@ const Color DistinguishableColorGenerator::_basic_colors[] = {
         {1,0,1},
         {0,1,1}
 };
+
+
+Component nail(
+        Vec3 position=Vec3::ZERO(), Color color={1,0,0},
+        double r=1, double h=8
+) {
+    auto cylinder = Cylinder::create(r, r, h);
+    cylinder.translate(position.x, position.y, position.z);
+    cylinder.color(color.x, color.y, color.z, color.alpha);
+    return cylinder;
+}
+
+
+double NonLinearLeverCalculator::get_upper_lever_angle(
+        double open,
+        bool radians
+) const {
+    Vec3 ax = _vec3(_upper_axis);
+    Vec3 mp0 = _vec3(_upper_mp0);
+    Vec3 mp1 = _vec3(_upper_mp1);
+    double offset = _angle2D(mp0 - ax);
+    double range = _angle2D(mp1 - ax) - offset;
+    double angle = offset + open*range;
+    return radians ? angle : angle * 360 / (2*std::numbers::pi);
+}
+
+
+double NonLinearLeverCalculator::get_lower_lever_angle(
+        double open,
+        bool radians
+) const {
+    double upper_angle = get_upper_lever_angle(open, true);
+    Vec3 upper_ax = _vec3(_upper_axis);
+    Vec3 upper_mp = upper_ax + Vec3(upper_lever_length(), 0, 0);
+    upper_mp = _rotate2D(upper_ax, upper_mp, upper_angle);
+    Vec3 lower_ax = _vec3(_lower_axis);
+    auto intersects = _circles_cross(
+            upper_mp, cover_mp_distance(),
+            lower_ax, lower_lever_length()
+    );
+    double angle = _angle2D(intersects.second - lower_ax);
+    return radians ? angle : angle * 360 / (2*std::numbers::pi);
+}
+
+
+double NonLinearLeverCalculator::get_cover_angle(
+        double open,
+        bool radians
+) const {
+    double upper_angle = get_upper_lever_angle(open, true);
+    Vec3 upper_ax = _vec3(_upper_axis);
+    Vec3 upper_mp = upper_ax + Vec3(upper_lever_length(), 0, 0);
+    upper_mp = _rotate2D(upper_ax, upper_mp, upper_angle);
+    Vec3 lower_mp = _vec3(get_cover_shift(open));
+    double angle0 = _angle2D(_vec3(_upper_mp0) - _vec3(_lower_mp));
+    double angle = _angle2D(upper_mp - lower_mp);
+    return radians ? angle : angle * 360 / (2*std::numbers::pi);
+}
+
+
+std::pair<double, double> NonLinearLeverCalculator::get_cover_shift(
+        double open
+) const {
+    double lower_lever_angle = get_lower_lever_angle(open);
+    Vec3 lower_mp = _rotate2D(
+            _vec3(_lower_axis),
+            _vec3(_lower_mp),
+            lower_lever_angle
+    );
+    return {lower_mp.x, lower_mp.y};
+}
+
+
+Module3D NonLinearLeverCalculator::get_visualisation(
+        double open,
+        double height,
+        double pin_r,
+        double pin_h
+) const {
+    auto upper_lever_wheel = _pinned_wheel_with_arc(
+            upper_lever_length(), height,
+            pin_r, pin_h,
+            { 0, 1, 0, 0.4 }
+    );
+    upper_lever_wheel.translate(_vec3(_upper_axis));
+    auto moving_wheel = _pinned_wheel_with_arc(
+            cover_mp_distance(), height,
+            pin_r, pin_h,
+            { 1, 0, 1, 0.4 }
+    );
+    double upper_angle = get_upper_lever_angle(open, true);
+    Vec3 upper_ax = _vec3(_upper_axis);
+    Vec3 upper_mp = upper_ax + Vec3(upper_lever_length(), 0, 0);
+    upper_mp = _rotate2D(upper_ax, upper_mp, upper_angle);
+    moving_wheel.translate(upper_mp);
+    auto lower_lever_wheel = _pinned_wheel_with_arc(
+            lower_lever_length(), height,
+            pin_r, pin_h,
+            { 0, 0, 1, 0.4 }
+    );
+    lower_lever_wheel.translate(_vec3(_lower_axis));
+    double lower_angle = get_lower_lever_angle(open, true);
+    Vec3 lower_ax = _vec3(_lower_axis);
+    Vec3 lower_mp = lower_ax + Vec3(lower_lever_length(), 0, 0);
+    lower_mp = _rotate2D(lower_ax, lower_mp, lower_angle);
+    auto n0 = nail(lower_mp, {1,1,1});
+    auto n1 = nail(_vec3(_upper_axis));
+    auto n2 = nail(_vec3(_upper_mp0));
+    auto n3 = nail(_vec3(_upper_mp1));
+    auto n4 = nail(_vec3(_lower_axis));
+    auto n5 = nail(_vec3(_lower_mp));
+    HelperPart nails = n0 + n1 + n2 + n3 + n4 + n5;
+    return nails + lower_lever_wheel + upper_lever_wheel + moving_wheel;
+}
+
+
+Vec3 NonLinearLeverCalculator::_rotate2D(
+        Vec3 axis,
+        Vec3 point,
+        double angle
+) {
+    return axis + Vec3(
+        (point.x - axis.x) * std::cos(angle)
+            - (point.y - axis.y) * std::sin(angle),
+        (point.x - axis.x) * std::sin(angle)
+            + (point.y - axis.y) * std::cos(angle),
+        0
+    );
+}
+
+std::pair<Vec3, Vec3> NonLinearLeverCalculator::_circles_cross(
+        Vec3 center1,
+        double r1,
+        Vec3 center2,
+        double r2
+) {
+    double centers_dist = (center2 - center1).length();
+    if (centers_dist > r1 + r2
+     || centers_dist < std::abs(r2 - r1))
+        throw std::runtime_error("given circles dont intersect");
+    double cos_theta = centers_dist*centers_dist + r1*r1 - r2*r2;
+    cos_theta /= 2 * centers_dist * r1;
+    double sin_theta = std::sqrt(1 - cos_theta*cos_theta);
+    Vec3 vp = (center2 - center1) * (r1 / centers_dist);
+    Vec3 intersect1 = {
+        vp.x*cos_theta - vp.y*sin_theta + center1.x,
+        vp.x*sin_theta + vp.y*cos_theta + center1.y,
+        0
+    };
+    Vec3 intersect2 = {
+        vp.x*cos_theta + vp.y*sin_theta + center1.x,
+        - vp.x*sin_theta + vp.y*cos_theta + center1.y,
+        0
+    };
+    return {intersect1, intersect2};
+}
+
+
+HelperPart NonLinearLeverCalculator::_pinned_wheel_with_arc(
+        double r, double h,
+        double pin_r, double pin_h,
+        Color color
+) {
+    auto wheel = Cylinder::create(r, r, h);
+    wheel.color(color.x, color.y, color.z, color.alpha);
+    color.alpha = 1;
+    auto center = nail(Vec3::ZERO(), color, pin_r, pin_h);
+    center.color(color.x, color.y, color.z, color.alpha);
+    return wheel + center;
+}
 

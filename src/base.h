@@ -28,6 +28,14 @@ struct Vec3 {
         return {x+other.x, y+other.y, z+other.z};
     }
 
+    Vec3 operator+(double other) const {
+        return {x+other, y+other, z+other};
+    }
+
+    Vec3 operator*(double other) const {
+        return {x*other, y*other, z*other};
+    }
+
     Vec3& operator*=(double value) {
         x *= value;
         y *= value;
@@ -54,6 +62,10 @@ struct Vec3 {
     }
 
     bool operator==(Vec3 other) const;
+
+    double length() const {
+        return std::sqrt(x*x + y*y + z*z);
+    }
 
 };  // class Vec3
 
