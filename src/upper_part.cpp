@@ -10,10 +10,61 @@
 namespace UpperPart {
 
 const double DZ = (SLOT_SIZE.z-RS)/2;
-const double TLHD = 3; // top lever hole diameter;
+// const double TLHD = 3; // top lever hole diameter;
 
 const double MP_X = RS*3/5;
 const double MP_Y = RS*2/5;
+const double BMP_DEV = -3;
+
+constexpr double sqr(double x) {
+    return x*x;
+}
+
+// UpperLever Cover Mount Point
+const std::pair<double, double> UCMP {
+    FULL_DIMS.x/2 - RS + MP_X,
+    FULL_DIMS.z - MP_Y
+};
+// UpperLever Cover Mount Point while Open
+const std::pair<double, double> UCMP_O {
+    OW_THICC + MP_Y,
+    FULL_DIMS.z - RS + MP_X
+};
+
+constexpr std::pair<double, double> point_on_bisection(
+        const std::pair<double, double>& pt1,
+        const std::pair<double, double>& pt2,
+        double value
+) {
+    double x = (pt1.first + pt2.first) / 2;
+    double y = (pt1.second + pt2.second) / 2;
+    x += -value*(y - pt1.second)/(x - pt1.first);
+    y += value;
+    return { x, y };
+}
+
+// UpperLever Base Mount Point
+const auto UBMP = point_on_bisection(UCMP_O, UCMP, BMP_DEV);
+
+// Upper Lever Length
+const double ULL = std::sqrt(
+        sqr(UCMP.first - UBMP.first) + sqr(UCMP.second - UBMP.second)
+);
+
+// LowerLever Cover Mount Point while Open
+const std::pair<double, double> LCMP { OW_THICC/2, OW_THICC/2 };
+// LowerLever Cover Mount Point while Open
+const std::pair<double, double> LCMP_O {
+    LCMP.first + FULL_DIMS.z,
+    LCMP.second + FULL_DIMS.x/2 - FULL_DIMS.z
+};
+
+// Lower Lever Length
+const double LLL = (sqr(FULL_DIMS.z) + sqr(FULL_DIMS.x/2 - FULL_DIMS.z))
+                 / (2*FULL_DIMS.z);
+// LowerLever Base Mount Point
+const std::pair<double, double> LBMP { LCMP.first + LLL, LCMP.second };
+
 
 
 FlatPart get_deck(Color color) {
@@ -301,16 +352,26 @@ Module3D get_cover(const IColorGenerator& colors) {
 }
 
 
-Module3D get(const IColorGenerator& colors) {
+Module3D get(const IColorGenerator& colors, double open) {
+    NonLinearLeverCalculator calc {
+        UBMP, UCMP, UCMP_O,
+        LBMP, LCMP
+    };
+    auto cover_shift = calc.get_cover_shift(open);
+    auto cover_angle = calc.get_cover_angle(open);
     auto base = get_base(colors)
             .translate({OW_THICC, 0, 0});
-    Module3D cover = get_cover(colors)
-            .translate({-SLOT_SIZE.x, 0, SLOT_SIZE.z});
+    Module3D cover = get_cover(colors);
+    cover.rotate({0, cover_angle, 0}, {LCMP.first, 0, LCMP.second});
+    cover.translate({cover_shift.first, 0, cover_shift.second});
     auto upper_part = Module3D::Union(
             base,
             cover
     );
-    return upper_part;
+    auto vis = calc.get_visualisation(open)
+            .rotate({-90, 0, 0})
+            .translate({0, -3, 0});
+    return upper_part + vis;
 }
 
 }  // namespace UpperPart

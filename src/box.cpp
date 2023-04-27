@@ -7,11 +7,11 @@
 #include "upper_part.h"
 
 
-Module3D get_box() {
+Module3D get_box(double open) {
     DistinguishableColorGenerator gen;
     auto lp = LowerPart::get(gen);
     gen.set_offset(6);
-    auto up1 = UpperPart::get(gen);
+    auto up1 = UpperPart::get(gen, open);
     up1.translate({-FULL_DIMS.x/2, 0, FULL_DIMS.z});
     auto up2 = up1;
     up2.mirror({1,0,0}, {FULL_DIMS.x/2, 0, 0});
@@ -24,7 +24,9 @@ Module3D get_box() {
 
 
 int main() {
-    auto box = get_box();
+    DistinguishableColorGenerator gen;
+    // auto box = UpperPart::get(gen, 0.5);
+    auto box = get_box(0.5);
 
     IndentWriter writer;
     box.render3D(writer);
