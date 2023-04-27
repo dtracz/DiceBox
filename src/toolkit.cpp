@@ -174,9 +174,10 @@ double NonLinearLeverCalculator::get_cover_angle(
     Vec3 upper_ax = _vec3(_upper_axis);
     Vec3 upper_mp = upper_ax + Vec3(upper_lever_length(), 0, 0);
     upper_mp = _rotate2D(upper_ax, upper_mp, upper_angle);
-    Vec3 lower_mp = _vec3(get_cover_shift(open));
-    double angle0 = _angle2D(_vec3(_upper_mp0) - _vec3(_lower_mp));
-    double angle = _angle2D(upper_mp - lower_mp);
+    Vec3 lower_mp = _vec3(_lower_mp) + _vec3(get_cover_shift(open));
+    double angle0 = _angle2D(_vec3(_lower_mp) - _vec3(_upper_mp0));
+    double angle = _angle2D(lower_mp - upper_mp);
+    angle = std::fmod(angle - angle0 + 2*std::numbers::pi, 2*std::numbers::pi);
     return radians ? angle : angle * 360 / (2*std::numbers::pi);
 }
 
@@ -184,13 +185,11 @@ double NonLinearLeverCalculator::get_cover_angle(
 std::pair<double, double> NonLinearLeverCalculator::get_cover_shift(
         double open
 ) const {
-    double lower_lever_angle = get_lower_lever_angle(open);
-    Vec3 lower_mp = _rotate2D(
-            _vec3(_lower_axis),
-            _vec3(_lower_mp),
-            lower_lever_angle
-    );
-    return {lower_mp.x, lower_mp.y};
+    double lower_angle = get_lower_lever_angle(open, true);
+    Vec3 lower_ax = _vec3(_lower_axis);
+    Vec3 lower_mp = lower_ax + Vec3(lower_lever_length(), 0, 0);
+    lower_mp = _rotate2D(lower_ax, lower_mp, lower_angle);
+    return {lower_mp.x - _lower_mp.first, lower_mp.y - _lower_mp.second};
 }
 
 
@@ -200,12 +199,13 @@ Module3D NonLinearLeverCalculator::get_visualisation(
         double pin_r,
         double pin_h
 ) const {
+    Vec3 veps = { 0, 0, 0.001 };
     auto upper_lever_wheel = _pinned_wheel_with_arc(
             upper_lever_length(), height,
             pin_r, pin_h,
             { 0, 1, 0, 0.4 }
     );
-    upper_lever_wheel.translate(_vec3(_upper_axis));
+    upper_lever_wheel.translate(_vec3(_upper_axis) + veps*2);
     auto moving_wheel = _pinned_wheel_with_arc(
             cover_mp_distance(), height,
             pin_r, pin_h,
@@ -221,7 +221,7 @@ Module3D NonLinearLeverCalculator::get_visualisation(
             pin_r, pin_h,
             { 0, 0, 1, 0.4 }
     );
-    lower_lever_wheel.translate(_vec3(_lower_axis));
+    lower_lever_wheel.translate(_vec3(_lower_axis) + veps);
     double lower_angle = get_lower_lever_angle(open, true);
     Vec3 lower_ax = _vec3(_lower_axis);
     Vec3 lower_mp = lower_ax + Vec3(lower_lever_length(), 0, 0);
@@ -289,6 +289,6 @@ HelperPart NonLinearLeverCalculator::_pinned_wheel_with_arc(
     color.alpha = 1;
     auto center = nail(Vec3::ZERO(), color, pin_r, pin_h);
     center.color(color.x, color.y, color.z, color.alpha);
-    return wheel + center;
+    return center + wheel;
 }
 
