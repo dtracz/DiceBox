@@ -381,7 +381,7 @@ Module3D get_levers(
 }
 
 
-Module3D get(const IColorGenerator& colors, double open) {
+Module3D get(const IColorGenerator& colors, double open, bool vis) {
     NonLinearLeverCalculator calc {
         UBMP, UCMP, UCMP_O,
         LBMP, LCMP
@@ -399,10 +399,12 @@ Module3D get(const IColorGenerator& colors, double open) {
             cover,
             levers
     );
-    auto vis = calc.get_visualisation(open)
+    if (vis == false)
+        return upper_part;
+    auto visualisation = calc.get_visualisation(open)
             .rotate({-90, 0, 0})
             .translate({0, -3, 0});
-    return upper_part + vis;
+    return upper_part + visualisation;
 }
 
 }  // namespace UpperPart

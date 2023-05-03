@@ -8,7 +8,7 @@ namespace UpperPart {
 
 const double RS = 15;
 
-Module3D get(const IColorGenerator&, double open);
+Module3D get(const IColorGenerator&, double open, bool vis=false);
 
 }  // namespace UpperPart
 
