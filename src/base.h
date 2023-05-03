@@ -36,6 +36,10 @@ struct Vec3 {
         return {x*other, y*other, z*other};
     }
 
+    Vec3 operator/(double other) const {
+        return {x/other, y/other, z/other};
+    }
+
     Vec3& operator*=(double value) {
         x *= value;
         y *= value;

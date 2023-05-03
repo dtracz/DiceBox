@@ -5,6 +5,7 @@
 #include "toolkit.h"
 #include "globals.h"
 #include "upper_part.h"
+#include "levers.h"
 
 
 namespace UpperPart {
@@ -352,6 +353,34 @@ Module3D get_cover(const IColorGenerator& colors) {
 }
 
 
+Module3D get_levers(
+        const NonLinearLeverCalculator& calc, double open,
+        double width, double thicc, double pin_r,
+        const IColorGenerator& colors
+) {
+    double pin_length = OW_THICC;
+    auto lever1 = levers::simple(
+            calc.upper_lever_length(), thicc, width/2,
+            pin_r, pin_length, colors
+    );
+    lever1.rotate({0, 0, -calc.get_upper_lever_angle(open)});
+    lever1.translate(calc.upper_axis());
+    lever1.rotate({-90, 0, 0});
+    auto lever2 = lever1;
+    lever2.mirror({0, 1, 0}, FULL_DIMS/2);
+    auto lever3 = levers::simple(
+            calc.lower_lever_length(), thicc, width/2,
+            pin_r, pin_length, colors
+    );
+    lever3.rotate({0, 0, -calc.get_lower_lever_angle(open)});
+    lever3.translate(calc.lower_axis());
+    lever3.rotate({-90, 0, 0});
+    auto lever4 = lever3;
+    lever4.mirror({0, 1, 0}, FULL_DIMS/2);
+    return lever1 + lever2 + lever3 + lever4;
+}
+
+
 Module3D get(const IColorGenerator& colors, double open) {
     NonLinearLeverCalculator calc {
         UBMP, UCMP, UCMP_O,
@@ -364,9 +393,11 @@ Module3D get(const IColorGenerator& colors, double open) {
     Module3D cover = get_cover(colors);
     cover.rotate({0, cover_angle, 0}, {LCMP.first, 0, LCMP.second});
     cover.translate({cover_shift.first, 0, cover_shift.second});
+    auto levers = get_levers(calc, open, 5, IW_THICC, 1, colors);
     auto upper_part = Module3D::Union(
             base,
-            cover
+            cover,
+            levers
     );
     auto vis = calc.get_visualisation(open)
             .rotate({-90, 0, 0})

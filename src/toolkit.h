@@ -63,8 +63,16 @@ class NonLinearLeverCalculator {
         return (_vec3(_upper_mp0) - _vec3(_upper_axis)).length();
     }
 
+    Vec3 upper_axis() const {
+        return _vec3(_upper_axis);
+    }
+
     double lower_lever_length() const {
         return (_vec3(_lower_mp) - _vec3(_lower_axis)).length();
+    }
+
+    Vec3 lower_axis() const {
+        return _vec3(_lower_axis);
     }
 
     double cover_mp_distance() const {
