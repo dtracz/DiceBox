@@ -12,6 +12,17 @@
 
 
 
+inline constexpr double sqr(double x) {
+    return x*x;
+}
+
+
+inline double angle2D(double x, double y) {
+    double angle = std::atan2(y, x);
+    return std::fmod(angle + 2*std::numbers::pi, 2*std::numbers::pi);
+}
+
+
 Component2D crenels(std::pair<double, double> crenel_dims,
                     double length, double offset=0);
 
@@ -106,8 +117,7 @@ class NonLinearLeverCalculator {
     }
 
     static double _angle2D(Vec3 vec) {
-        double angle = std::atan2(vec.y, vec.x);
-        return std::fmod(angle + 2*std::numbers::pi, 2*std::numbers::pi);
+        return angle2D(vec.x, vec.y);
     }
 
     static Vec3 _rotate2D(Vec3, Vec3, double);

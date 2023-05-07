@@ -17,10 +17,6 @@ const double MP_X = RS*3/5;
 const double MP_Y = RS*2/5;
 const double BMP_DEV = -3;
 
-constexpr double sqr(double x) {
-    return x*x;
-}
-
 // UpperLever Cover Mount Point
 const std::pair<double, double> UCMP {
     FULL_DIMS.x/2 - RS + MP_X,
