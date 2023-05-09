@@ -1,7 +1,6 @@
-#include <iostream>
 #include <cmath>
 #include <numbers>
-#include "core/IndentWriter.h"
+#include "box.h"
 #include "base.h"
 #include "toolkit.h"
 #include "globals.h"
@@ -9,6 +8,8 @@
 #include "upper_part.h"
 #include "levers.h"
 
+
+namespace box {
 
 Module3D get_levers(
         std::pair<double, double> lower_mp,
@@ -48,7 +49,7 @@ Module3D get_levers(
 }
 
 
-Module3D get_box(double open, double cover_open) {
+Module3D get(double open, double cover_open) {
     DistinguishableColorGenerator gen;
     auto lp = LowerPart::get(gen);
     gen.set_offset(6);
@@ -69,15 +70,5 @@ Module3D get_box(double open, double cover_open) {
     );
 }
 
-
-int main() {
-    DistinguishableColorGenerator gen;
-    // auto box = UpperPart::get(gen, 0.5);
-    auto box = get_box(1, 1);
-
-    IndentWriter writer;
-    box.render3D(writer);
-    std::cout << writer << std::flush;
-    return 0;
-}
+}  // namespace box
 
