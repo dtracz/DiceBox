@@ -11,67 +11,139 @@
 #include "core/Component.h"
 
 
+struct Vec2 {
+    double x, y;
+
+    constexpr Vec2(double x, double y): x{x}, y{y} { }
+
+    constexpr static const Vec2 ZERO() {
+        return {0, 0};
+    }
+
+    constexpr Vec2 operator-() const {
+        return {-x, -y};
+    }
+
+    constexpr Vec2 operator+(Vec2 other) const {
+        return {x+other.x, y+other.y};
+    }
+
+    constexpr Vec2 operator+(double other) const {
+        return {x+other, y+other};
+    }
+
+    constexpr Vec2 operator*(double other) const {
+        return {x*other, y*other};
+    }
+
+    constexpr Vec2 operator/(double other) const {
+        return {x/other, y/other};
+    }
+
+    constexpr Vec2& operator*=(double value) {
+        x *= value;
+        y *= value;
+        return *this;
+    }
+
+    constexpr Vec2& operator+=(Vec2 other) {
+        x += other.x;
+        y += other.y;
+        return *this;
+    }
+
+    constexpr Vec2 operator-(Vec2 other) const {
+        return {x-other.x, y-other.y};
+    }
+
+    constexpr Vec2& operator-=(Vec2 other) {
+        x -= other.x;
+        y -= other.y;
+        return *this;
+    }
+
+    constexpr bool operator==(Vec2 other) const;
+
+    constexpr double length() const {
+        return std::sqrt(x*x + y*y);
+    }
+
+};  // struct Vec2
+
+
 struct Vec3 {
     double x, y, z;
 
-    Vec3(double x, double y, double z): x{x}, y{y}, z{z} { }
+    constexpr Vec3(double x, double y, double z): x{x}, y{y}, z{z} { }
 
-    static const Vec3 ZERO() {
+    constexpr static const Vec3 ZERO() {
         return {0, 0, 0};
     }
 
-    Vec3 operator-() const {
+    constexpr static Vec3 fromXY(Vec2 vec) {
+        return {vec.x, vec.y, 0};
+    }
+
+    constexpr static Vec3 fromXZ(Vec2 vec) {
+        return {vec.x, 0, vec.y};
+    }
+
+    constexpr static Vec3 fromYZ(Vec2 vec) {
+        return {0, vec.x, vec.y};
+    }
+
+    constexpr Vec3 operator-() const {
         return {-x, -y, -z};
     }
 
-    Vec3 operator+(Vec3 other) const {
+    constexpr Vec3 operator+(Vec3 other) const {
         return {x+other.x, y+other.y, z+other.z};
     }
 
-    Vec3 operator+(double other) const {
+    constexpr Vec3 operator+(double other) const {
         return {x+other, y+other, z+other};
     }
 
-    Vec3 operator*(double other) const {
+    constexpr Vec3 operator*(double other) const {
         return {x*other, y*other, z*other};
     }
 
-    Vec3 operator/(double other) const {
+    constexpr Vec3 operator/(double other) const {
         return {x/other, y/other, z/other};
     }
 
-    Vec3& operator*=(double value) {
+    constexpr Vec3& operator*=(double value) {
         x *= value;
         y *= value;
         z *= value;
         return *this;
     }
 
-    Vec3& operator+=(Vec3 other) {
+    constexpr Vec3& operator+=(Vec3 other) {
         x += other.x;
         y += other.y;
         z += other.z;
         return *this;
     }
 
-    Vec3 operator-(Vec3 other) const {
+    constexpr Vec3 operator-(Vec3 other) const {
         return {x-other.x, y-other.y, z-other.z};
     }
 
-    Vec3& operator-=(Vec3 other) {
+    constexpr Vec3& operator-=(Vec3 other) {
         x -= other.x;
         y -= other.y;
         z -= other.z;
         return *this;
     }
 
-    bool operator==(Vec3 other) const;
+    constexpr bool operator==(Vec3 other) const;
 
-    double length() const {
+    constexpr double length() const {
         return std::sqrt(x*x + y*y + z*z);
     }
 
-};  // class Vec3
+};  // struct Vec3
 
 
 struct Color : Vec3 {
@@ -202,7 +274,6 @@ class FlatPart : public Part3D {
     void render2D(IndentWriter& writer) const {
         writer << _shape;
     }
-
 
 
     void render3D(IndentWriter& writer) override {

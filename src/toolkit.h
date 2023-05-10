@@ -22,6 +22,11 @@ inline double angle2D(double x, double y) {
     return std::fmod(angle + 2*std::numbers::pi, 2*std::numbers::pi);
 }
 
+inline double angle2D(Vec2 vec) {
+    double angle = std::atan2(vec.y, vec.x);
+    return std::fmod(angle + 2*std::numbers::pi, 2*std::numbers::pi);
+}
+
 
 Component2D crenels(std::pair<double, double> crenel_dims,
                     double length, double offset=0);
@@ -59,11 +64,8 @@ class DistinguishableColorGenerator : public IColorGenerator {
 class NonLinearLeverCalculator {
   public:
     NonLinearLeverCalculator(
-            const std::pair<double, double>& upper_axis,
-            const std::pair<double, double>& upper_mp0,
-            const std::pair<double, double>& upper_mp1,
-            const std::pair<double, double>& lower_axis,
-            const std::pair<double, double>& lower_mp
+            Vec2 upper_axis, Vec2 upper_mp0, Vec2 upper_mp1,
+            Vec2 lower_axis, Vec2 lower_mp
     ):  _upper_axis(upper_axis),
         _upper_mp0(upper_mp0),
         _upper_mp1(upper_mp1),
@@ -71,23 +73,23 @@ class NonLinearLeverCalculator {
         _lower_mp(lower_mp) { }
 
     double upper_lever_length() const {
-        return (_vec3(_upper_mp0) - _vec3(_upper_axis)).length();
+        return (_upper_mp0 - _upper_axis).length();
     }
 
-    Vec3 upper_axis() const {
-        return _vec3(_upper_axis);
+    Vec2 upper_axis() const {
+        return _upper_axis;
     }
 
     double lower_lever_length() const {
-        return (_vec3(_lower_mp) - _vec3(_lower_axis)).length();
+        return (_lower_mp - _lower_axis).length();
     }
 
-    Vec3 lower_axis() const {
-        return _vec3(_lower_axis);
+    Vec2 lower_axis() const {
+        return _lower_axis;
     }
 
     double cover_mp_distance() const {
-        return (_vec3(_upper_mp0) - _vec3(_lower_mp)).length();
+        return (_upper_mp0 - _lower_mp).length();
     }
 
     double get_upper_lever_angle(double open, bool radians=false) const;
@@ -96,7 +98,7 @@ class NonLinearLeverCalculator {
 
     double get_cover_angle(double open, bool radians=false) const;
 
-    std::pair<double, double> get_cover_shift(double open) const;
+    Vec2 get_cover_shift(double open) const;
 
     Module3D get_visualisation(
             double open,
@@ -106,23 +108,15 @@ class NonLinearLeverCalculator {
     ) const;
 
   private:
-    std::pair<double, double> _upper_axis;
-    std::pair<double, double> _upper_mp0;
-    std::pair<double, double> _upper_mp1;
-    std::pair<double, double> _lower_axis;
-    std::pair<double, double> _lower_mp;
+    Vec2 _upper_axis;
+    Vec2 _upper_mp0;
+    Vec2 _upper_mp1;
+    Vec2 _lower_axis;
+    Vec2 _lower_mp;
 
-    static Vec3 _vec3(const std::pair<double, double>& vec2) {
-        return {vec2.first, vec2.second, 0};
-    }
+    static Vec2 _rotate2D(Vec2, Vec2, double);
 
-    static double _angle2D(Vec3 vec) {
-        return angle2D(vec.x, vec.y);
-    }
-
-    static Vec3 _rotate2D(Vec3, Vec3, double);
-
-    static std::pair<Vec3, Vec3> _circles_cross(Vec3, double, Vec3, double);
+    static std::pair<Vec2, Vec2> _circles_cross(Vec2, double, Vec2, double);
 
     static HelperPart _pinned_wheel_with_arc(
             double r, double h,

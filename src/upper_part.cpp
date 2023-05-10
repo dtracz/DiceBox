@@ -10,57 +10,54 @@
 
 namespace UpperPart {
 
-const double DZ = (SLOT_SIZE.z-RS)/2;
+constexpr double DZ = (SLOT_SIZE.z-RS)/2;
 // const double TLHD = 3; // top lever hole diameter;
 
-const double MP_X = RS*3/5;
-const double MP_Y = RS*2/5;
-const double BMP_DEV = -3;
+constexpr double MP_X = RS*3/5;
+constexpr double MP_Y = RS*2/5;
+constexpr double BMP_DEV = -3;
 
 // UpperLever Cover Mount Point
-const std::pair<double, double> UCMP {
+constexpr Vec2 UCMP {
     FULL_DIMS.x/2 - RS + MP_X,
     FULL_DIMS.z - MP_Y
 };
 // UpperLever Cover Mount Point while Open
-const std::pair<double, double> UCMP_O {
+constexpr const Vec2 UCMP_O {
     OW_THICC + MP_Y,
     FULL_DIMS.z - RS + MP_X
 };
 
-constexpr std::pair<double, double> point_on_bisection(
-        const std::pair<double, double>& pt1,
-        const std::pair<double, double>& pt2,
+constexpr Vec2 point_on_bisection(
+        Vec2 pt1,
+        Vec2 pt2,
         double value
 ) {
-    double x = (pt1.first + pt2.first) / 2;
-    double y = (pt1.second + pt2.second) / 2;
-    x += -value*(y - pt1.second)/(x - pt1.first);
-    y += value;
-    return { x, y };
+    Vec2 result = (pt1 + pt2)/2;
+    result.x += -value*(result.y - pt1.y)/(result.x - pt1.x);
+    result.y += value;
+    return result;
 }
 
 // UpperLever Base Mount Point
-const auto UBMP = point_on_bisection(UCMP_O, UCMP, BMP_DEV);
+constexpr Vec2 UBMP { point_on_bisection(UCMP_O, UCMP, BMP_DEV) };
 
 // Upper Lever Length
-const double ULL = std::sqrt(
-        sqr(UCMP.first - UBMP.first) + sqr(UCMP.second - UBMP.second)
-);
+constexpr double ULL = (UCMP - UBMP).length();
 
 // LowerLever Cover Mount Point while Open
-const std::pair<double, double> LCMP { OW_THICC/2, OW_THICC/2 };
+constexpr Vec2 LCMP { OW_THICC/2, OW_THICC/2 };
 // LowerLever Cover Mount Point while Open
-const std::pair<double, double> LCMP_O {
-    LCMP.first + FULL_DIMS.z,
-    LCMP.second + FULL_DIMS.x/2 - FULL_DIMS.z
+constexpr Vec2 LCMP_O {
+    LCMP.x + FULL_DIMS.z,
+    LCMP.y + FULL_DIMS.x/2 - FULL_DIMS.z
 };
 
 // Lower Lever Length
 const double LLL = (sqr(FULL_DIMS.z) + sqr(FULL_DIMS.x/2 - FULL_DIMS.z))
                  / (2*FULL_DIMS.z);
 // LowerLever Base Mount Point
-const std::pair<double, double> LBMP { LCMP.first + LLL, LCMP.second };
+constexpr Vec2 LBMP { LCMP.x + LLL, LCMP.y };
 
 
 
@@ -360,7 +357,7 @@ Module3D get_levers(
             pin_r, pin_length, colors
     );
     lever1.rotate({0, 0, -calc.get_upper_lever_angle(open)});
-    lever1.translate(calc.upper_axis());
+    lever1.translate(Vec3::fromXY(calc.upper_axis()));
     lever1.rotate({-90, 0, 0});
     auto lever2 = lever1;
     lever2.mirror({0, 1, 0}, FULL_DIMS/2);
@@ -369,7 +366,7 @@ Module3D get_levers(
             pin_r, pin_length, colors
     );
     lever3.rotate({0, 0, -calc.get_lower_lever_angle(open)});
-    lever3.translate(calc.lower_axis());
+    lever3.translate(Vec3::fromXY(calc.lower_axis()));
     lever3.rotate({-90, 0, 0});
     auto lever4 = lever3;
     lever4.mirror({0, 1, 0}, FULL_DIMS/2);
@@ -387,8 +384,8 @@ Module3D get(const IColorGenerator& colors, double open, bool vis) {
     auto base = get_base(colors)
             .translate({OW_THICC, 0, 0});
     Module3D cover = get_cover(colors);
-    cover.rotate({0, cover_angle, 0}, {LCMP.first, 0, LCMP.second});
-    cover.translate({cover_shift.first, 0, cover_shift.second});
+    cover.rotate({0, cover_angle, 0}, Vec3::fromXZ(LCMP));
+    cover.translate(Vec3::fromXZ(cover_shift));
     auto levers = get_levers(calc, open, 5, IW_THICC, 1, colors);
     auto upper_part = Module3D::Union(
             base,
