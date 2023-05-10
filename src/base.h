@@ -80,6 +80,18 @@ struct Vec3 {
         return {0, 0, 0};
     }
 
+    static Vec3 fromXY(Vec2 vec) {
+        return {vec.x, vec.y, 0};
+    }
+
+    static Vec3 fromXZ(Vec2 vec) {
+        return {vec.x, 0, vec.y};
+    }
+
+    static Vec3 fromYZ(Vec2 vec) {
+        return {0, vec.x, vec.y};
+    }
+
     Vec3 operator-() const {
         return {-x, -y, -z};
     }
