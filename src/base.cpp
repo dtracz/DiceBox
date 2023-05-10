@@ -7,6 +7,12 @@
 const double EPS = 1e-8;
 
 
+bool Vec2::operator==(Vec2 other) const {
+    return std::abs(x - other.x) < EPS
+        && std::abs(y - other.y) < EPS;
+}
+
+
 bool Vec3::operator==(Vec3 other) const {
     return std::abs(x - other.x) < EPS
         && std::abs(y - other.y) < EPS

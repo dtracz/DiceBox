@@ -11,6 +11,66 @@
 #include "core/Component.h"
 
 
+struct Vec2 {
+    double x, y;
+
+    Vec2(double x, double y): x{x}, y{y} { }
+
+    static const Vec2 ZERO() {
+        return {0, 0};
+    }
+
+    Vec2 operator-() const {
+        return {-x, -y};
+    }
+
+    Vec2 operator+(Vec2 other) const {
+        return {x+other.x, y+other.y};
+    }
+
+    Vec2 operator+(double other) const {
+        return {x+other, y+other};
+    }
+
+    Vec2 operator*(double other) const {
+        return {x*other, y*other};
+    }
+
+    Vec2 operator/(double other) const {
+        return {x/other, y/other};
+    }
+
+    Vec2& operator*=(double value) {
+        x *= value;
+        y *= value;
+        return *this;
+    }
+
+    Vec2& operator+=(Vec2 other) {
+        x += other.x;
+        y += other.y;
+        return *this;
+    }
+
+    Vec2 operator-(Vec2 other) const {
+        return {x-other.x, y-other.y};
+    }
+
+    Vec2& operator-=(Vec2 other) {
+        x -= other.x;
+        y -= other.y;
+        return *this;
+    }
+
+    bool operator==(Vec2 other) const;
+
+    double length() const {
+        return std::sqrt(x*x + y*y);
+    }
+
+};  // struct Vec2
+
+
 struct Vec3 {
     double x, y, z;
 
@@ -71,7 +131,7 @@ struct Vec3 {
         return std::sqrt(x*x + y*y + z*z);
     }
 
-};  // class Vec3
+};  // struct Vec3
 
 
 struct Color : Vec3 {
@@ -202,7 +262,6 @@ class FlatPart : public Part3D {
     void render2D(IndentWriter& writer) const {
         writer << _shape;
     }
-
 
 
     void render3D(IndentWriter& writer) override {
