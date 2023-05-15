@@ -11,6 +11,9 @@
 #include "core/Component.h"
 
 
+constexpr double _EPS = 1e-8;
+
+
 struct Vec2 {
     double x, y;
 
@@ -62,7 +65,10 @@ struct Vec2 {
         return *this;
     }
 
-    constexpr bool operator==(Vec2 other) const;
+    constexpr bool operator==(Vec2 other) const {
+        return std::abs(x - other.x) < _EPS
+            && std::abs(y - other.y) < _EPS;
+    }
 
     constexpr double length() const {
         return std::sqrt(x*x + y*y);
@@ -137,7 +143,11 @@ struct Vec3 {
         return *this;
     }
 
-    constexpr bool operator==(Vec3 other) const;
+    constexpr bool operator==(Vec3 other) const {
+        return std::abs(x - other.x) < _EPS
+            && std::abs(y - other.y) < _EPS
+            && std::abs(z - other.z) < _EPS;
+    }
 
     constexpr double length() const {
         return std::sqrt(x*x + y*y + z*z);

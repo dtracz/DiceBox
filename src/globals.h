@@ -23,8 +23,8 @@ constexpr double CENT_CUT = CZ;
 constexpr double OPEN_SIZE = FULL_DIMS.z + OW_THICC;
 constexpr double UHP_Z = FULL_DIMS.z + OW_THICC + 4;
 constexpr double LHP_Z = UHP_Z - 26;
-constexpr std::pair<double, double> UHP = {OW_THICC + 39, UHP_Z};
-constexpr std::pair<double, double> LHP = {OW_THICC + 39 - OPEN_SIZE/2, LHP_Z};
+constexpr Vec2 UHP = {OW_THICC + 39, UHP_Z};
+constexpr Vec2 LHP = {OW_THICC + 39 - OPEN_SIZE/2, LHP_Z};
 constexpr double SHIFT_TO_2ND = 10;
 
 #endif  // GLOBALS_H_INCLUDED

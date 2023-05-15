@@ -28,11 +28,11 @@ inline double angle2D(Vec2 vec) {
 }
 
 
-Component2D crenels(std::pair<double, double> crenel_dims,
+Component2D crenels(Vec2 crenel_dims,
                     double length, double offset=0);
 
 
-Component2D crenellated_wall(std::pair<double, double> dims,
+Component2D crenellated_wall(Vec2 dims,
                              Vec3 top_crenel_params = Vec3::ZERO(),
                              Vec3 bottom_crenel_params = Vec3::ZERO(),
                              Vec3 left_crenel_params = Vec3::ZERO(),

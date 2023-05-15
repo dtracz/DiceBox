@@ -12,20 +12,14 @@
 namespace box {
 
 Module3D get_levers(
-        std::pair<double, double> lower_mp,
-        std::pair<double, double> upper_mp,
+        Vec2 lower_mp,
+        Vec2 upper_mp,
         double shift_to_2nd, double open,
         double width, double thicc, double pin_r,
         const IColorGenerator& colors
 ) {
-    double length = std::sqrt(
-            sqr(upper_mp.first - lower_mp.first) +
-            sqr(upper_mp.second - lower_mp.second)
-    );
-    double angle0 = angle2D(
-            std::abs(upper_mp.first - lower_mp.first),
-            std::abs(upper_mp.second - lower_mp.second)
-    );
+    double length = (upper_mp - lower_mp).length();
+    double angle0 = angle2D(upper_mp - lower_mp);
     double angle1 = std::numbers::pi - angle0;
     double angle = angle0 + open*(angle1 - angle0);
     double pin_length = OW_THICC;
@@ -34,7 +28,7 @@ Module3D get_levers(
             pin_r, pin_length, colors
     );
     lever1.rotate({0, 0, -angle * 180 / std::numbers::pi});
-    lever1.translate({lower_mp.first, lower_mp.second, 0});
+    lever1.translate(Vec3::fromXY(lower_mp));
     lever1.rotate({-90, 0, 0});
     auto lever2 = lever1;
     lever2.mirror({0, 1, 0}, FULL_DIMS/2);

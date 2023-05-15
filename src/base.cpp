@@ -4,21 +4,6 @@
 #include "core.h"
 
 
-constexpr double EPS = 1e-8;
-
-
-constexpr bool Vec2::operator==(Vec2 other) const {
-    return std::abs(x - other.x) < EPS
-        && std::abs(y - other.y) < EPS;
-}
-
-
-constexpr bool Vec3::operator==(Vec3 other) const {
-    return std::abs(x - other.x) < EPS
-        && std::abs(y - other.y) < EPS
-        && std::abs(z - other.z) < EPS;
-}
-
 
 Part3D& Part3D::rotate(Vec3 vec, Vec3 center) {
     translate(-center);
