@@ -14,6 +14,20 @@
 
 
 
+Vec2 rotate2D(
+        Vec2 axis,
+        Vec2 point,
+        double angle
+) {
+    return axis + Vec2(
+        (point.x - axis.x) * std::cos(angle)
+            - (point.y - axis.y) * std::sin(angle),
+        (point.x - axis.x) * std::sin(angle)
+            + (point.y - axis.y) * std::cos(angle)
+    );
+}
+
+
 Component2D crenels(Vec2 crenel_dims,
                     double length, double offset) {
     std::vector<Component2D> crenels_v;
@@ -137,6 +151,13 @@ Component nail(
 }
 
 
+Vec2 LinearLeverCalculator::cover_position(double open) const {
+    double angle = open * _range;
+    Vec2 curr_upper_mp = rotate2D(_lower_mp, _upper_mp0, angle);
+    return curr_upper_mp - _upper_mp0;
+}
+
+
 double NonLinearLeverCalculator::get_upper_lever_angle(
         double open,
         bool radians
@@ -154,7 +175,7 @@ double NonLinearLeverCalculator::get_lower_lever_angle(
 ) const {
     double upper_angle = get_upper_lever_angle(open, true);
     Vec2 curr_upper_mp = _upper_axis + Vec2(upper_lever_length(), 0);
-    curr_upper_mp = _rotate2D(_upper_axis, curr_upper_mp, upper_angle);
+    curr_upper_mp = rotate2D(_upper_axis, curr_upper_mp, upper_angle);
     auto intersects = _circles_cross(
             curr_upper_mp, cover_mp_distance(),
             _lower_axis, lower_lever_length()
@@ -170,7 +191,7 @@ double NonLinearLeverCalculator::get_cover_angle(
 ) const {
     double upper_angle = get_upper_lever_angle(open, true);
     Vec2 curr_upper_mp = _upper_axis + Vec2(upper_lever_length(), 0);
-    curr_upper_mp = _rotate2D(_upper_axis, curr_upper_mp, upper_angle);
+    curr_upper_mp = rotate2D(_upper_axis, curr_upper_mp, upper_angle);
     Vec2 curr_lower_mp = _lower_mp + get_cover_shift(open);
     double angle0 = angle2D(_lower_mp - _upper_mp0);
     double angle = angle2D(curr_lower_mp - curr_upper_mp);
@@ -184,7 +205,7 @@ Vec2 NonLinearLeverCalculator::get_cover_shift(
 ) const {
     double lower_angle = get_lower_lever_angle(open, true);
     Vec2 curr_lower_mp = _lower_axis + Vec2(lower_lever_length(), 0);
-    curr_lower_mp = _rotate2D(_lower_axis, curr_lower_mp, lower_angle);
+    curr_lower_mp = rotate2D(_lower_axis, curr_lower_mp, lower_angle);
     return curr_lower_mp - _lower_mp;
 }
 
@@ -209,7 +230,7 @@ Module3D NonLinearLeverCalculator::get_visualisation(
     );
     double upper_angle = get_upper_lever_angle(open, true);
     Vec2 curr_upper_mp = _upper_axis + Vec2(upper_lever_length(), 0);
-    curr_upper_mp = _rotate2D(_upper_axis, curr_upper_mp, upper_angle);
+    curr_upper_mp = rotate2D(_upper_axis, curr_upper_mp, upper_angle);
     moving_wheel.translate(Vec3::fromXY(curr_upper_mp));
     auto lower_lever_wheel = _pinned_wheel_with_arc(
             lower_lever_length(), height,
@@ -219,7 +240,7 @@ Module3D NonLinearLeverCalculator::get_visualisation(
     lower_lever_wheel.translate(Vec3::fromXY(_lower_axis) + veps);
     double lower_angle = get_lower_lever_angle(open, true);
     Vec2 curr_lower_mp = _lower_axis + Vec2(lower_lever_length(), 0);
-    curr_lower_mp = _rotate2D(_lower_axis, curr_lower_mp, lower_angle);
+    curr_lower_mp = rotate2D(_lower_axis, curr_lower_mp, lower_angle);
     auto n0 = nail(Vec3::fromXY(curr_lower_mp), {1,1,1});
     auto n1 = nail(Vec3::fromXY(_upper_axis));
     auto n2 = nail(Vec3::fromXY(_upper_mp0));
@@ -230,19 +251,6 @@ Module3D NonLinearLeverCalculator::get_visualisation(
     return nails + lower_lever_wheel + upper_lever_wheel + moving_wheel;
 }
 
-
-Vec2 NonLinearLeverCalculator::_rotate2D(
-        Vec2 axis,
-        Vec2 point,
-        double angle
-) {
-    return axis + Vec2(
-        (point.x - axis.x) * std::cos(angle)
-            - (point.y - axis.y) * std::sin(angle),
-        (point.x - axis.x) * std::sin(angle)
-            + (point.y - axis.y) * std::cos(angle)
-    );
-}
 
 std::pair<Vec2, Vec2> NonLinearLeverCalculator::_circles_cross(
         Vec2 center1,
