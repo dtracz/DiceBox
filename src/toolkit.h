@@ -28,6 +28,9 @@ inline double angle2D(Vec2 vec) {
 }
 
 
+Vec2 rotate2D(Vec2, Vec2, double);
+
+
 Component2D crenels(Vec2 crenel_dims,
                     double length, double offset=0);
 
@@ -59,6 +62,47 @@ class DistinguishableColorGenerator : public IColorGenerator {
     const static Color _basic_colors[6];
 };  // DistinguishableColorGenerator
 
+
+
+class LinearLeverCalculator {
+  public:
+    LinearLeverCalculator(
+            Vec2 lower_mp, Vec2 upper_mp0, double shift_to_2nd
+    ):  _lower_mp { lower_mp },
+        _upper_mp0 { upper_mp0 },
+        _shift_to_2nd { shift_to_2nd },
+        _angle0 { angle2D(upper_mp0 - lower_mp) },
+        _range { std::numbers::pi - 2*_angle0 }
+    { }
+
+    double lever_length() const {
+        return (_upper_mp0 - _lower_mp).length();
+    }
+
+    double get_lever_angle(double open, bool radians=false) const {
+        double angle = _angle0 + open*_range;
+        return radians ? angle : angle * 360 / (2*std::numbers::pi);
+    }
+
+    Vec2 lever1_position() const {
+        return _lower_mp;
+    }
+
+    Vec2 lever2_position() const {
+        return lever1_position() + Vec2(_shift_to_2nd, 0);
+    }
+
+    Vec2 cover_position(double open) const;
+
+  private:
+    Vec2 _lower_mp;
+    Vec2 _upper_mp0;
+    double _shift_to_2nd;
+    double _angle0;
+    double _range;
+
+
+};  // LinearLeverCalculator
 
 
 class NonLinearLeverCalculator {
@@ -114,7 +158,6 @@ class NonLinearLeverCalculator {
     Vec2 _lower_axis;
     Vec2 _lower_mp;
 
-    static Vec2 _rotate2D(Vec2, Vec2, double);
 
     static std::pair<Vec2, Vec2> _circles_cross(Vec2, double, Vec2, double);
 

@@ -31,16 +31,12 @@ struct Vec2 {
         return {x+other.x, y+other.y};
     }
 
-    constexpr Vec2 operator+(double other) const {
-        return {x+other, y+other};
+    constexpr Vec2 operator*(double value) const {
+        return {x*value, y*value};
     }
 
-    constexpr Vec2 operator*(double other) const {
-        return {x*other, y*other};
-    }
-
-    constexpr Vec2 operator/(double other) const {
-        return {x/other, y/other};
+    constexpr Vec2 operator/(double value) const {
+        return {x/value, y/value};
     }
 
     constexpr Vec2& operator*=(double value) {
@@ -106,16 +102,12 @@ struct Vec3 {
         return {x+other.x, y+other.y, z+other.z};
     }
 
-    constexpr Vec3 operator+(double other) const {
-        return {x+other, y+other, z+other};
+    constexpr Vec3 operator*(double value) const {
+        return {x*value, y*value, z*value};
     }
 
-    constexpr Vec3 operator*(double other) const {
-        return {x*other, y*other, z*other};
-    }
-
-    constexpr Vec3 operator/(double other) const {
-        return {x/other, y/other, z/other};
+    constexpr Vec3 operator/(double value) const {
+        return {x/value, y/value, z/value};
     }
 
     constexpr Vec3& operator*=(double value) {
