@@ -1,7 +1,7 @@
 #ifndef GLOBALS_H_INCLUDED
 #define GLOBALS_H_INCLUDED
 
-#include "base.h"
+#include "base/geometry.h"
 
 
 constexpr double OW_THICC = 6;

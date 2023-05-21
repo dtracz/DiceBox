@@ -1,7 +1,7 @@
 #ifndef BOX_H_INCLUDED
 #define BOX_H_INCLUDED
 
-#include "base.h"
+#include "base/parts.hpp"
 
 
 namespace box {

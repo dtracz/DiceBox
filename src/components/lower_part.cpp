@@ -1,8 +1,10 @@
 #include "core/Component2D.h"
 #include "core/Polygon2D.h"
 #include "components.h"
-#include "base.h"
-#include "toolkit.h"
+#include "base/parts.hpp"
+#include "base/colors.h"
+#include "base/geometry.h"
+#include "utils/structures.h"
 #include "globals.h"
 
 

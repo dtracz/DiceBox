@@ -1,7 +1,8 @@
 #ifndef LOWER_PART_H_INCLUDED
 #define LOWER_PART_H_INCLUDED
 
-#include "base.h"
+#include "base/parts.hpp"
+#include "base/colors.h"
 
 
 namespace LowerPart {

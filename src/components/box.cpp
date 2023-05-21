@@ -1,12 +1,14 @@
 #include <cmath>
 #include <numbers>
-#include "box.h"
-#include "base.h"
-#include "toolkit.h"
+#include "components/box.h"
+#include "base/parts.hpp"
+#include "base/colors.h"
+#include "utils/lever_calculators.h"
+#include "utils/color_generators.h"
 #include "globals.h"
-#include "lower_part.h"
-#include "upper_part.h"
-#include "levers.h"
+#include "components/lower_part.h"
+#include "components/upper_part.h"
+#include "components/levers.h"
 
 
 namespace box {

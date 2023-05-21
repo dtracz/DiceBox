@@ -1,7 +1,10 @@
-#include "levers.h"
 #include "globals.h"
-#include "base.h"
-#include "components.h"
+#include "components/levers.h"
+#include "base/parts.hpp"
+#include "components/Cylinder.h"
+#include "components/Circle.h"
+#include "components/Square.h"
+#include "core/Difference.h"
 
 
 namespace levers {

@@ -1,6 +1,7 @@
 #include <cmath>
 #include <stdexcept>
-#include "base.h"
+#include "base/parts.hpp"
+#include "base/geometry.h"
 #include "core.h"
 
 

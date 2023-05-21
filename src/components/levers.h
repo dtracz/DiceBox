@@ -1,7 +1,8 @@
-#ifndef LEVBERS_H_INCLUDED
-#define LEVBERS_H_INCLUDED
+#ifndef LEVERS_H_INCLUDED
+#define LEVERS_H_INCLUDED
 
-#include "base.h"
+#include "base/parts.hpp"
+#include "base/colors.h"
 
 
 namespace levers {
@@ -15,4 +16,4 @@ Module3D simple(
 };  // namespace levers
 
 
-#endif  // LEVBERS_H_INCLUDED
+#endif  // LEVERS_H_INCLUDED

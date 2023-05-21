@@ -8,60 +8,9 @@
 #include <cmath>
 #include <numbers>
 #include "core/Component2D.h"
-#include "base.h"
-
-
-
-inline constexpr double sqr(double x) {
-    return x*x;
-}
-
-
-inline double angle2D(double x, double y) {
-    double angle = std::atan2(y, x);
-    return std::fmod(angle + 2*std::numbers::pi, 2*std::numbers::pi);
-}
-
-inline double angle2D(Vec2 vec) {
-    double angle = std::atan2(vec.y, vec.x);
-    return std::fmod(angle + 2*std::numbers::pi, 2*std::numbers::pi);
-}
-
-
-Vec2 rotate2D(Vec2, Vec2, double);
-
-
-Component2D crenels(Vec2 crenel_dims,
-                    double length, double offset=0);
-
-
-Component2D crenellated_wall(Vec2 dims,
-                             Vec3 top_crenel_params = Vec3::ZERO(),
-                             Vec3 bottom_crenel_params = Vec3::ZERO(),
-                             Vec3 left_crenel_params = Vec3::ZERO(),
-                             Vec3 right_crenel_params = Vec3::ZERO());
-
-
-
-class DistinguishableColorGenerator : public IColorGenerator {
-  public:
-    DistinguishableColorGenerator(size_t offset=0): _offset{offset} { }
-
-    Color next() override;
-
-    Color operator[](size_t idx) const override;
-
-    void set_offset(size_t offset) {
-        _offset = offset;
-    }
-
-  private:
-    static double _get_value(size_t);
-
-    size_t _offset;
-    const static Color _basic_colors[6];
-};  // DistinguishableColorGenerator
-
+#include "base/geometry.h"
+#include "base/parts.hpp"
+#include "base/colors.h"
 
 
 class LinearLeverCalculator {

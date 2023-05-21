@@ -1,7 +1,8 @@
 #ifndef UPPER_PART_H_INCLUDED
 #define UPPER_PART_H_INCLUDED
 
-#include "base.h"
+#include "base/parts.hpp"
+#include "base/colors.h"
 
 
 namespace UpperPart {
