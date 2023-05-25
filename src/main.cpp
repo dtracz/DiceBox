@@ -1,10 +1,11 @@
-#include <iostream>
-#include "core/IndentWriter.h"
-#include "components/box.h"
 #include "base/parts.hpp"
+#include "components/box.h"
+#include "core/IndentWriter.h"
 #include "utils/color_generators.h"
+#include <iostream>
 
-int main() {
+int main()
+{
     DistinguishableColorGenerator gen;
     auto box = box::get(0.7, 0.6);
 
@@ -13,4 +14,3 @@ int main() {
     std::cout << writer << std::flush;
     return 0;
 }
-

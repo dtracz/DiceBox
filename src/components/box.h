@@ -8,6 +8,6 @@ namespace box {
 
 Module3D get(double open, double cover_open);
 
-}  // namespace box
+} // namespace box
 
-#endif  // BOX_H_INCLUDED
+#endif // BOX_H_INCLUDED
