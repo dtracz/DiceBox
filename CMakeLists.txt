@@ -21,7 +21,10 @@ project(
 
 # compile everything into one executable
 file(GLOB ALL_SRCS
-    ${DICEBOX_SRC}/*.cpp
+    ${DICEBOX_SRC}/base/*.cpp
+    ${DICEBOX_SRC}/utils/*.cpp
+    ${DICEBOX_SRC}/components/*.cpp
+    ${DICEBOX_SRC}/main.cpp
 )
 add_executable(${DICE_BOX} ${ALL_SRCS})
 
@@ -36,7 +39,7 @@ add_subdirectory(${THIRD_PARTY}/OOML)
 target_include_directories(${DICE_BOX}
     PUBLIC ${DICEBOX_SRC} 
     PUBLIC ${THIRD_PARTY}/OOML/src
-    )
+)
 
 target_link_directories(${DICE_BOX}
     PUBLIC ${DICEBOX_SRC}

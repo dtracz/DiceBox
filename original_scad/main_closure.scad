@@ -8,16 +8,16 @@ module cut_lever_hole(position, d=HOLE_D, in_depth=0) {
         children();
         translate([position.x, in_depth-1, position.y])
             rotate([-90, 0, 0])
-            cylinder(OW_THICC+2, d/2, d/2);
+            cylinder(OW_THICKNESS+2, d/2, d/2);
     }
 }
 
 
 module lever_plug(hole_d) {
-    translate([0, -LEV_THICC.y-SEP, 0])
+    translate([0, -LEV_THICKNESS.y-SEP, 0])
     union() {
         rotate([-90, 0, 0])
-            cylinder(OW_THICC+SEP+LEV_THICC.y, hole_d/2, hole_d/2);
+            cylinder(OW_THICKNESS+SEP+LEV_THICKNESS.y, hole_d/2, hole_d/2);
         difference() {
             sphere(hole_d);
             translate([-hole_d-1, 0, -hole_d-1])
@@ -28,23 +28,23 @@ module lever_plug(hole_d) {
 
 
 module lever_bar(length, hole_d) {
-    translate([0, 0, -LEV_THICC.x/2])
+    translate([0, 0, -LEV_THICKNESS.x/2])
     difference() {
         union() {
-            cube([length, LEV_THICC.y, LEV_THICC.x]);
-            translate([0, 0, LEV_THICC.x/2])
+            cube([length, LEV_THICKNESS.y, LEV_THICKNESS.x]);
+            translate([0, 0, LEV_THICKNESS.x/2])
                 rotate([-90, 0, 0])
-                cylinder(LEV_THICC.y, LEV_THICC.x/2, LEV_THICC.x/2);
-            translate([length, 0, LEV_THICC.x/2])
+                cylinder(LEV_THICKNESS.y, LEV_THICKNESS.x/2, LEV_THICKNESS.x/2);
+            translate([length, 0, LEV_THICKNESS.x/2])
                 rotate([-90, 0, 0])
-                cylinder(LEV_THICC.y, LEV_THICC.x/2, LEV_THICC.x/2);
+                cylinder(LEV_THICKNESS.y, LEV_THICKNESS.x/2, LEV_THICKNESS.x/2);
         }
-        translate([0, -1, LEV_THICC.x/2])
+        translate([0, -1, LEV_THICKNESS.x/2])
             rotate([-90, 0, 0])
-            cylinder(LEV_THICC.y+2, hole_d/2, hole_d/2);
-        translate([length, -1, LEV_THICC.x/2])
+            cylinder(LEV_THICKNESS.y+2, hole_d/2, hole_d/2);
+        translate([length, -1, LEV_THICKNESS.x/2])
             rotate([-90, 0, 0])
-            cylinder(LEV_THICC.y+2, hole_d/2, hole_d/2);
+            cylinder(LEV_THICKNESS.y+2, hole_d/2, hole_d/2);
     }
 }
 
@@ -53,7 +53,7 @@ module lever(alpha, lhp, length, hole_d, c=[0.8, 0.8, 0], explode=0) {
     color(c)
         translate([lhp.x, -explode*3/2, lhp.y])
         rotate([0, -alpha, 0])
-        translate([0, -LEV_THICC.y-SEP, 0])
+        translate([0, -LEV_THICKNESS.y-SEP, 0])
         lever_bar(length, hole_d);
     translate([0, -explode*5/2, 0]) {
         translate([lhp.x, 0, lhp.y])
