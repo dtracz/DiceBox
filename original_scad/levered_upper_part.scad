@@ -375,7 +375,7 @@ module levers(open, EXPLODE) {
 
 //--MAIN-PART---------------------------------------------------
 
-module upper_part(open, EXPLODE) {
+module upper_part(open, EXPLODE, vis=false) {
     mov_D = get_current_D(open);
     mov_S = get_current_S(open);
     cov_angle_0 = atan2((D-S).y, (D-S).x);
@@ -388,11 +388,12 @@ module upper_part(open, EXPLODE) {
         rotate_around([OW_THICKNESS/2, 0, OW_THICKNESS/2], [0, -cov_angle, 0])
         cover(EXPLODE);
     levers(open, EXPLODE);
+    if (vis)
+        math_visualisation(TOP_OPEN);
 }
 
 
 TOP_OPEN = min(max($t*1.2-0.1, 0), 1);
 EXPLODE = 0;
 
-math_visualisation(TOP_OPEN);
-upper_part(TOP_OPEN, EXPLODE);
+upper_part(TOP_OPEN, EXPLODE, true);
