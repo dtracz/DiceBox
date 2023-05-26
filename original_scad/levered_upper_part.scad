@@ -20,7 +20,7 @@ MP_Y = RS*2/5;
 SA = FULL_DIMS.z;
 AE = FULL_DIMS.x/2 - FULL_DIMS.z;
 RE = (AE^2 + SA^2) / (2*SA);
-S = [OW_THICC/2, OW_THICC/2];
+S = [OW_THICKNESS/2, OW_THICKNESS/2];
 R = S + [RE, 0];
 E = S + [SA, -AE];
 
@@ -28,7 +28,7 @@ E = S + [SA, -AE];
 // C       D
 //   \   /
 //     T
-C = [OW_THICC + MP_Y, FULL_DIMS.z-RS + MP_X];
+C = [OW_THICKNESS + MP_Y, FULL_DIMS.z-RS + MP_X];
 D = [FULL_DIMS.x/2-RS + MP_X, FULL_DIMS.z - MP_Y];
 // returns point basing on it's y position
 function line_T(y) = let(T_ = (C+D)/2) T_ + [-((T_-C).y/(T_-C).x)*y, y];
@@ -108,20 +108,20 @@ module top_cover() {
     rotate([90, 0, 0])
     rotate([0, -90, 0])
     union() {
-        translate([0,0,FULL_DIMS.x/2-(OW_THICC+RS)])
+        translate([0,0,FULL_DIMS.x/2-(OW_THICKNESS+RS)])
         difference() {
-            crenellated_wall([FULL_DIMS.y, OW_THICC, OW_THICC+RS],
-                [OW_THICC,CY,CY], [0,0,0], [OW_THICC,RS/3,RS/3], [OW_THICC,RS/3,RS/3]);
-            translate([OW_THICC+SLOT_SIZE.y, -1, RS/2])
-                cube([IW_THICC, OW_THICC+2, RS/2+1]);
+            crenellated_wall([FULL_DIMS.y, OW_THICKNESS, OW_THICKNESS+RS],
+                [OW_THICKNESS,CY,CY], [0,0,0], [OW_THICKNESS,RS/3,RS/3], [OW_THICKNESS,RS/3,RS/3]);
+            translate([OW_THICKNESS+SLOT_SIZE.y, -1, RS/2])
+                cube([IW_THICKNESS, OW_THICKNESS+2, RS/2+1]);
         }
         translate([0,0,RS])
-            cube([FULL_DIMS.y, OW_THICC, FULL_DIMS.x/2-OW_THICC-2*RS]);
+            cube([FULL_DIMS.y, OW_THICKNESS, FULL_DIMS.x/2-OW_THICKNESS-2*RS]);
         difference() {
-            crenellated_wall([FULL_DIMS.y, OW_THICC, RS],
-                [0,0,0], [IW_THICC,CY,CY], [OW_THICC,RS/3,RS/3], [OW_THICC,RS/3,RS/3]);
-            translate([OW_THICC+SLOT_SIZE.y, -1, IW_THICC-1])
-                cube([IW_THICC, OW_THICC+2, RS/3+1]);
+            crenellated_wall([FULL_DIMS.y, OW_THICKNESS, RS],
+                [0,0,0], [IW_THICKNESS,CY,CY], [OW_THICKNESS,RS/3,RS/3], [OW_THICKNESS,RS/3,RS/3]);
+            translate([OW_THICKNESS+SLOT_SIZE.y, -1, IW_THICKNESS-1])
+                cube([IW_THICKNESS, OW_THICKNESS+2, RS/3+1]);
         }
     }
 }
@@ -130,58 +130,58 @@ module top_cover() {
 module cover_wall() {
     color([0,1,1])
     cut_lever_hole(S, TLHD)
-    cut_lever_hole(S, TLHD, in_depth=FULL_DIMS.y-OW_THICC)
-    rotate_around([OW_THICC/2, OW_THICC/2, 0], [0, 0, 90])
+    cut_lever_hole(S, TLHD, in_depth=FULL_DIMS.y-OW_THICKNESS)
+    rotate_around([OW_THICKNESS/2, OW_THICKNESS/2, 0], [0, 0, 90])
     union() {
         translate([0, 0, FULL_DIMS.z-RS])
         difference() {
-            crenellated_wall([FULL_DIMS.y, OW_THICC, RS+OW_THICC],
-                [OW_THICC,CY,0], [0,0,0], [OW_THICC,RS/3,RS/3], [OW_THICC,RS/3,RS/3]);
-            translate([OW_THICC+SLOT_SIZE.y, -1, -1])
-                cube([IW_THICC, OW_THICC+2, RS/2+1]);
+            crenellated_wall([FULL_DIMS.y, OW_THICKNESS, RS+OW_THICKNESS],
+                [OW_THICKNESS,CY,0], [0,0,0], [OW_THICKNESS,RS/3,RS/3], [OW_THICKNESS,RS/3,RS/3]);
+            translate([OW_THICKNESS+SLOT_SIZE.y, -1, -1])
+                cube([IW_THICKNESS, OW_THICKNESS+2, RS/2+1]);
         }
-        translate([0, 0, OW_THICC/2])
-            cube([FULL_DIMS.y, OW_THICC, FULL_DIMS.z-RS-OW_THICC/2]);
-        translate([0, OW_THICC/2, 0])
-            cube([FULL_DIMS.y, OW_THICC/2, OW_THICC/2]);
-        translate([0, OW_THICC/2, OW_THICC/2])
+        translate([0, 0, OW_THICKNESS/2])
+            cube([FULL_DIMS.y, OW_THICKNESS, FULL_DIMS.z-RS-OW_THICKNESS/2]);
+        translate([0, OW_THICKNESS/2, 0])
+            cube([FULL_DIMS.y, OW_THICKNESS/2, OW_THICKNESS/2]);
+        translate([0, OW_THICKNESS/2, OW_THICKNESS/2])
             rotate([0, 90, 0])
-            cylinder(FULL_DIMS.y, OW_THICC/2, OW_THICC/2);
+            cylinder(FULL_DIMS.y, OW_THICKNESS/2, OW_THICKNESS/2);
     }
 }
 
 
 module cover_sep() {
     color([0,0.8,0.8])
-    translate([OW_THICC+SLOT_SIZE.x, OW_THICC, FULL_DIMS.z-RS])
+    translate([OW_THICKNESS+SLOT_SIZE.x, OW_THICKNESS, FULL_DIMS.z-RS])
     union() {
-        rotate_around([IW_THICC/2, IW_THICC/2, 0], [0, 0, 90])
+        rotate_around([IW_THICKNESS/2, IW_THICKNESS/2, 0], [0, 0, 90])
         difference() {
-            crenellated_wall([FULL_DIMS.y-2*OW_THICC, IW_THICC, RS+OW_THICC], [OW_THICC,CY,-OW_THICC], [0,RS/3,RS/2], [0,RS/3,RS/2], [0,0,0]);
+            crenellated_wall([FULL_DIMS.y-2*OW_THICKNESS, IW_THICKNESS, RS+OW_THICKNESS], [OW_THICKNESS,CY,-OW_THICKNESS], [0,RS/3,RS/2], [0,RS/3,RS/2], [0,0,0]);
             translate([SLOT_SIZE.x, -1, -1])
-                cube([IW_THICC, IW_THICC+2, RS/2+1]);
+                cube([IW_THICKNESS, IW_THICKNESS+2, RS/2+1]);
         }
-        translate([0, -OW_THICC, RS/2])
-            cube([IW_THICC, OW_THICC, RS/3]);
-        translate([0, FULL_DIMS.y-2*OW_THICC, RS/2])
-            cube([IW_THICC, OW_THICC, RS/3]);
+        translate([0, -OW_THICKNESS, RS/2])
+            cube([IW_THICKNESS, OW_THICKNESS, RS/3]);
+        translate([0, FULL_DIMS.y-2*OW_THICKNESS, RS/2])
+            cube([IW_THICKNESS, OW_THICKNESS, RS/3]);
     }
 }
 
 
 module outer_reinforcement(rs) {
     color([0.8,0.8,0])
-    translate([OW_THICC, 0, 0])
+    translate([OW_THICKNESS, 0, 0])
     union() {
-        translate([0, OW_THICC, 0])
+        translate([0, OW_THICKNESS, 0])
             rotate([90, 0, 0])
-            linear_extrude(OW_THICC)
+            linear_extrude(OW_THICKNESS)
             polygon([[0,0], [rs, rs], [0,rs]]);
-        translate([-OW_THICC, 0, rs])
+        translate([-OW_THICKNESS, 0, rs])
             rotate([0,90,0])
-            crenels(OW_THICC, rs/3, OW_THICC, 0, rs);
+            crenels(OW_THICKNESS, rs/3, OW_THICKNESS, 0, rs);
         translate([0, 0, rs])
-            crenels(OW_THICC, rs/3, OW_THICC, 0, rs);
+            crenels(OW_THICKNESS, rs/3, OW_THICKNESS, 0, rs);
     }
 }
 
@@ -190,30 +190,30 @@ module inner_reinforcement(rs) {
     color([0.8,0.8,0])
     union() {
         difference() {
-            translate([0, OW_THICC, 0])
+            translate([0, OW_THICKNESS, 0])
                 rotate([90, 0, 0])
-                linear_extrude(OW_THICC)
+                linear_extrude(OW_THICKNESS)
                 polygon([[rs,0], [rs, rs], [0,rs]]);
-            translate([rs-IW_THICC, -1, rs/2])
-                cube([IW_THICC+1, OW_THICC+2, rs/3]);
+            translate([rs-IW_THICKNESS, -1, rs/2])
+                cube([IW_THICKNESS+1, OW_THICKNESS+2, rs/3]);
         }
         translate([0, 0, rs])
-            crenels(OW_THICC, rs/3, OW_THICC, 0, rs);
+            crenels(OW_THICKNESS, rs/3, OW_THICKNESS, 0, rs);
     }
 }
 
 
 module inner_central_reinf(rs) {
     color([0.8,0.8,0])
-    translate([FULL_DIMS.x/2-RS,OW_THICC+SLOT_SIZE.y,FULL_DIMS.z-RS])
-    rotate_around([0, IW_THICC/2, IW_THICC/2], [90, 0, 0])
-    linear_extrude(IW_THICC)
+    translate([FULL_DIMS.x/2-RS,OW_THICKNESS+SLOT_SIZE.y,FULL_DIMS.z-RS])
+    rotate_around([0, IW_THICKNESS/2, IW_THICKNESS/2], [90, 0, 0])
+    linear_extrude(IW_THICKNESS)
     polygon([[RS, 0],
              [RS, RS/2],
-             [RS-IW_THICC, RS/2],
-             [RS-IW_THICC, RS+OW_THICC],
-             [RS-IW_THICC-RS/3, RS+OW_THICC],
-             [RS-IW_THICC-RS/3, RS],
+             [RS-IW_THICKNESS, RS/2],
+             [RS-IW_THICKNESS, RS+OW_THICKNESS],
+             [RS-IW_THICKNESS-RS/3, RS+OW_THICKNESS],
+             [RS-IW_THICKNESS-RS/3, RS],
              [0, RS]
     ]);
 }
@@ -221,16 +221,16 @@ module inner_central_reinf(rs) {
 
 module outer_central_reinf(rs) {
     color([0.8,0.8,0])
-    translate([0,OW_THICC+SLOT_SIZE.y,FULL_DIMS.z-RS])
-    rotate_around([0, IW_THICC/2, IW_THICC/2], [90, 0, 0])
-    linear_extrude(IW_THICC)
+    translate([0,OW_THICKNESS+SLOT_SIZE.y,FULL_DIMS.z-RS])
+    rotate_around([0, IW_THICKNESS/2, IW_THICKNESS/2], [90, 0, 0])
+    linear_extrude(IW_THICKNESS)
     polygon([[0, 0],
-             [OW_THICC, 0],
-             [OW_THICC+RS, RS],
-             [OW_THICC+RS/2, RS],
-             [OW_THICC+RS/2, OW_THICC+RS],
-             [RS-IW_THICC-RS/3, RS+OW_THICC],
-             [RS-IW_THICC-RS/3, RS/2],
+             [OW_THICKNESS, 0],
+             [OW_THICKNESS+RS, RS],
+             [OW_THICKNESS+RS/2, RS],
+             [OW_THICKNESS+RS/2, OW_THICKNESS+RS],
+             [RS-IW_THICKNESS-RS/3, RS+OW_THICKNESS],
+             [RS-IW_THICKNESS-RS/3, RS/2],
              [0, RS/2],
     ]);
 }
@@ -247,7 +247,7 @@ module cover(EXPLODE) {
             inner_reinforcement(RS);
         }
     translate([0, EXPLODE, 0])
-        translate([0, FULL_DIMS.y-OW_THICC, 0])
+        translate([0, FULL_DIMS.y-OW_THICKNESS, 0])
         cut_lever_hole(D, TLHD)
         translate([0, 0, FULL_DIMS.z-RS]) {
             outer_reinforcement(RS);
@@ -269,63 +269,63 @@ module upper_deck() {
     rotate([90, 0, 0])
     rotate([0, 90, 0])
     difference() {
-        translate([0, 0, OW_THICC])
-        crenellated_wall([FULL_DIMS.y, OW_THICC, SLOT_SIZE.x+IW_THICC],
-                [IW_THICC,CY,CY], [0,CY,CY], [OW_THICC,DX,DX], [OW_THICC,DX,DX]);
-        translate([OW_THICC+SLOT_SIZE.y, -1, OW_THICC-1])
-            cube([IW_THICC, OW_THICC+2, BOTT_CUT+1]);
-        translate([OW_THICC + SLOT_SIZE.y, -1, OW_THICC+SLOT_SIZE.x-BOTT_CUT])
-            cube([IW_THICC, OW_THICC+2, BOTT_CUT+1]);
+        translate([0, 0, OW_THICKNESS])
+        crenellated_wall([FULL_DIMS.y, OW_THICKNESS, SLOT_SIZE.x+IW_THICKNESS],
+                [IW_THICKNESS,CY,CY], [0,CY,CY], [OW_THICKNESS,DX,DX], [OW_THICKNESS,DX,DX]);
+        translate([OW_THICKNESS+SLOT_SIZE.y, -1, OW_THICKNESS-1])
+            cube([IW_THICKNESS, OW_THICKNESS+2, BOTT_CUT+1]);
+        translate([OW_THICKNESS + SLOT_SIZE.y, -1, OW_THICKNESS+SLOT_SIZE.x-BOTT_CUT])
+            cube([IW_THICKNESS, OW_THICKNESS+2, BOTT_CUT+1]);
     }
 }
 
 
 module xu_wall() {
     color([1,1,0])
-    translate([OW_THICC, 0, 0])
+    translate([OW_THICKNESS, 0, 0])
     union() {
-        rotate_around([0, OW_THICC/2, OW_THICC/2], [90, 0, 0])
-        linear_extrude(OW_THICC)
-        polygon([[SLOT_SIZE.x+IW_THICC, FULL_DIMS.z-RS],
-                 [SLOT_SIZE.x+IW_THICC-RS, FULL_DIMS.z],
+        rotate_around([0, OW_THICKNESS/2, OW_THICKNESS/2], [90, 0, 0])
+        linear_extrude(OW_THICKNESS)
+        polygon([[SLOT_SIZE.x+IW_THICKNESS, FULL_DIMS.z-RS],
+                 [SLOT_SIZE.x+IW_THICKNESS-RS, FULL_DIMS.z],
                  [RS, FULL_DIMS.z],
                  [0, FULL_DIMS.z-RS],
         ]);
-        crenellated_wall([SLOT_SIZE.x+IW_THICC, OW_THICC, FULL_DIMS.z-RS],
-                [0,0,0],[OW_THICC,DX,0],[IW_THICC,DZ,DZ],[0,0,0]);
+        crenellated_wall([SLOT_SIZE.x+IW_THICKNESS, OW_THICKNESS, FULL_DIMS.z-RS],
+                [0,0,0],[OW_THICKNESS,DX,0],[IW_THICKNESS,DZ,DZ],[0,0,0]);
     }
 }
 
 module yu_wall() {
     color([0,0,1])
-    rotate_around([IW_THICC/2, IW_THICC/2, 0], [0, 0, 90])
+    rotate_around([IW_THICKNESS/2, IW_THICKNESS/2, 0], [0, 0, 90])
     difference() {
-        crenellated_wall([FULL_DIMS.y, IW_THICC, FULL_DIMS.z-RS],
-            [0,0,0], [OW_THICC,CY,0], [OW_THICC,DZ,0], [OW_THICC,DZ,0]);
-        translate([OW_THICC+SLOT_SIZE.y, -1 ,OW_THICC+DZ])
-            cube([IW_THICC, IW_THICC+2, DZ+1]);
+        crenellated_wall([FULL_DIMS.y, IW_THICKNESS, FULL_DIMS.z-RS],
+            [0,0,0], [OW_THICKNESS,CY,0], [OW_THICKNESS,DZ,0], [OW_THICKNESS,DZ,0]);
+        translate([OW_THICKNESS+SLOT_SIZE.y, -1 ,OW_THICKNESS+DZ])
+            cube([IW_THICKNESS, IW_THICKNESS+2, DZ+1]);
     }
 }
 
 
 module xu_sep() {
     color([1,1,0])
-    translate([OW_THICC, OW_THICC+SLOT_SIZE.y, 0])
+    translate([OW_THICKNESS, OW_THICKNESS+SLOT_SIZE.y, 0])
     union() {
-        rotate_around([0, IW_THICC/2, IW_THICC/2], [90, 0, 0])
-        linear_extrude(IW_THICC)
-        polygon([[SLOT_SIZE.x+IW_THICC, FULL_DIMS.z-RS],
-                 [SLOT_SIZE.x+IW_THICC-RS, FULL_DIMS.z],
+        rotate_around([0, IW_THICKNESS/2, IW_THICKNESS/2], [90, 0, 0])
+        linear_extrude(IW_THICKNESS)
+        polygon([[SLOT_SIZE.x+IW_THICKNESS, FULL_DIMS.z-RS],
+                 [SLOT_SIZE.x+IW_THICKNESS-RS, FULL_DIMS.z],
                  [RS, FULL_DIMS.z],
                  [0, FULL_DIMS.z-RS],
                  [0, 0],
                  [BOTT_CUT, 0],
-                 [BOTT_CUT, OW_THICC],
-                 [SLOT_SIZE.x-BOTT_CUT, OW_THICC],
+                 [BOTT_CUT, OW_THICKNESS],
+                 [SLOT_SIZE.x-BOTT_CUT, OW_THICKNESS],
                  [SLOT_SIZE.x-BOTT_CUT, 0],
                  [SLOT_SIZE.x, 0],
-                 [SLOT_SIZE.x, OW_THICC+DZ],
-                 [SLOT_SIZE.x+IW_THICC, OW_THICC+DZ],
+                 [SLOT_SIZE.x, OW_THICKNESS+DZ],
+                 [SLOT_SIZE.x+IW_THICKNESS, OW_THICKNESS+DZ],
         ]);
     }
 }
@@ -333,7 +333,7 @@ module xu_sep() {
 
 module upper_base(EXPLODE) {
     translate([EXPLODE, 0, 0])
-        translate([OW_THICC+SLOT_SIZE.x, 0, 0])
+        translate([OW_THICKNESS+SLOT_SIZE.x, 0, 0])
         color([0,1,1])
         yu_wall();
     translate([0, -EXPLODE, 0])
@@ -385,7 +385,7 @@ module upper_part(open, EXPLODE) {
     upper_base(EXPLODE);
     translate([-EXPLODE, 0, EXPLODE])
         translate([mov_S.x-S.x, 0, mov_S.y-S.y])
-        rotate_around([OW_THICC/2, 0, OW_THICC/2], [0, -cov_angle, 0])
+        rotate_around([OW_THICKNESS/2, 0, OW_THICKNESS/2], [0, -cov_angle, 0])
         cover(EXPLODE);
     levers(open, EXPLODE);
 }
