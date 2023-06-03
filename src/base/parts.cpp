@@ -2,6 +2,7 @@
 #include "base/geometry.h"
 #include "core.h"
 #include <cmath>
+#include <list>
 #include <stdexcept>
 
 
@@ -73,6 +74,23 @@ Module3D::Module3D(Module3D& other)
         std::shared_ptr<Part3D> shp = pair.second;
         _parts.emplace_back(type, shp->_clone());
     }
+}
+
+
+std::list<FlatPart> Module3D::get_all_flats() const
+{
+    std::list<FlatPart> flat_parts;
+    for (auto& pair : this->_parts) {
+        _CompositionT composition = pair.first;
+        switch (composition) {
+        case _CompositionT::tCut:
+            continue;
+        case _CompositionT::tAdd:
+            std::shared_ptr<Part3D> part_ptr = pair.second;
+            flat_parts.splice(flat_parts.end(), part_ptr->get_all_flats());
+        }
+    }
+    return flat_parts;
 }
 
 

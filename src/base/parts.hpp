@@ -2,6 +2,7 @@
 #define PARTS_HPP_INCLUDED
 
 #include <concepts>
+#include <list>
 #include <memory>
 #include <stdexcept>
 #include <type_traits>
@@ -14,6 +15,7 @@
 #include "core/Component2D.h"
 
 class Module3D;
+class FlatPart;
 
 class Part3D {
   public:
@@ -30,6 +32,8 @@ class Part3D {
     virtual Part3D& mirror(Vec3, Vec3);
 
     virtual void render3D(IndentWriter&) = 0;
+
+    virtual std::list<FlatPart> get_all_flats() const = 0;
 
   protected:
     virtual Component _get_final_form() = 0;
@@ -70,6 +74,11 @@ class FlatPart : public Part3D {
         if (_thickness > 0 && !force_reset)
             throw std::runtime_error("thichness is already set");
         _thickness = thickness;
+    }
+
+    double get_thickness() const
+    {
+        return _thickness;
     }
 
     void set_color(Color color) override
@@ -136,6 +145,11 @@ class FlatPart : public Part3D {
         writer << _get_final_form();
     }
 
+    std::list<FlatPart> get_all_flats() const override
+    {
+        return { *this };
+    }
+
   protected:
     Component _get_final_form() override;
 
@@ -190,6 +204,11 @@ class HelperPart : public Part3D,
     void render3D(IndentWriter& writer) override
     {
         writer << *this;
+    }
+
+    std::list<FlatPart> get_all_flats() const override
+    {
+        return {};
     }
 
   protected:
@@ -288,6 +307,8 @@ class Module3D : public Part3D {
         return _append(std::forward<T>(part), _CompositionT::tCut);
     }
 
+    std::list<FlatPart> get_all_flats() const override;
+
   protected:
     Component _get_final_form() override;
 
@@ -297,10 +318,6 @@ class Module3D : public Part3D {
     }
 
   private:
-    std::vector<std::pair<_CompositionT, std::shared_ptr<Part3D>>> _parts;
-
-    Color _color = { -1, 0, 0 };
-
     template <typename T1, typename T2>
     requires std::derived_from<typename std::remove_reference<T1>::type, Part3D>
           && std::derived_from<typename std::remove_reference<T2>::type, Part3D>
@@ -331,6 +348,10 @@ class Module3D : public Part3D {
           && std::derived_from<typename std::remove_reference<T2>::type, Part3D>
     friend Module3D operator-(T1&&, T2&&);
 
+
+    std::vector<std::pair<_CompositionT, std::shared_ptr<Part3D>>> _parts;
+
+    Color _color = { -1, 0, 0 };
 }; // class Module3D
 
 template <typename T1, typename T2>
