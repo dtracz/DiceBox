@@ -27,4 +27,7 @@ constexpr Vec2 UHP = { OW_THICKNESS + 39, UHP_Z };
 constexpr Vec2 LHP = { OW_THICKNESS + 39 - OPEN_SIZE / 2, LHP_Z };
 constexpr double SHIFT_TO_2ND = 10;
 
+constexpr double SHEET_IN_BETWEEN_MARGIN = 2;
+constexpr double SHEET_OUTER_MARGIN = 10;
+
 #endif // GLOBALS_H_INCLUDED
