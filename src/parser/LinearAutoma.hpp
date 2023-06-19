@@ -17,13 +17,13 @@ class ParseError : public std::runtime_error {
 
 
 template <typename T>
-bool write_from_str(T* value, const std::string& inp)
+inline bool write_from_str(T* value, const std::string& inp)
 {
     return false;
 }
 
 template <>
-bool write_from_str(double* value, const std::string& inp)
+inline bool write_from_str(double* value, const std::string& inp)
 {
     try {
         *value = std::stod(inp);
@@ -34,7 +34,7 @@ bool write_from_str(double* value, const std::string& inp)
 }
 
 template <>
-bool write_from_str(bool* value, const std::string& inp)
+inline bool write_from_str(bool* value, const std::string& inp)
 {
     if (inp == "true") {
         *value = true;
@@ -47,7 +47,7 @@ bool write_from_str(bool* value, const std::string& inp)
 }
 
 template <int I, typename... Ts>
-bool write_from_str(int i, std::tuple<Ts...>& tuple, const std::string& inp)
+inline bool write_from_str(int i, std::tuple<Ts...>& tuple, const std::string& inp)
 {
     if (i > I)
         throw std::out_of_range("Index out of tuple range");
@@ -58,7 +58,7 @@ bool write_from_str(int i, std::tuple<Ts...>& tuple, const std::string& inp)
 }
 
 template <typename... Ts>
-bool write_from_str(int i, std::tuple<Ts...>& tuple, const std::string& inp)
+inline bool write_from_str(int i, std::tuple<Ts...>& tuple, const std::string& inp)
 {
     return write_from_str<sizeof...(Ts) - 1>(i, tuple, inp);
 }
@@ -70,15 +70,25 @@ class LinearAutoma {
   public:
     LinearAutoma(const std::vector<std::regex>& expected_seq)
         : _expected_seq { expected_seq }
-        , _state { _expected_seq.begin() }
+        , _state { 0 }
         , _loaded { 0 }
     { }
+
+    LinearAutoma(const std::vector<std::string>& regex_strings)
+        : _expected_seq { regex_strings.size() }
+        , _state { 0 }
+        , _loaded { 0 }
+    {
+        for (size_t i = 0; i < regex_strings.size(); i++)
+            _expected_seq[i] = std::regex { regex_strings[i] };
+    }
 
     LinearAutoma& operator<<(const std::string& inp)
     {
         if (at_endstate())
             throw ParseError("Automa already at its end state");
-        if (!std::regex_match(inp, *_state))
+        // std::cout << "====== " << inp << std::endl;
+        if (!std::regex_match(inp, _expected_seq[_state]))
             throw ParseError(
                 "Given input \"" + inp + "\" does not match expected regex"
             );
@@ -90,20 +100,70 @@ class LinearAutoma {
 
     bool at_endstate()
     {
-        return _state == _expected_seq.end();
+        return _state == _expected_seq.size();
     }
 
     std::tuple<Ts...> get_result()
     {
+        if (!at_endstate())
+            std::runtime_error("Parsing not finished");
         return _result;
     }
 
   private:
     std::vector<std::regex> _expected_seq;
-    std::vector<std::regex>::iterator _state;
+    int _state;
     std::tuple<Ts...> _result;
     int _loaded;
 }; // class LinearAutoma
+
+
+template <>
+class LinearAutoma<> {
+  public:
+    LinearAutoma(const std::vector<std::regex>& expected_seq)
+        : _expected_seq { expected_seq }
+        , _state { 0 }
+    { }
+
+    LinearAutoma(const std::vector<std::string>& regex_strings)
+        : _expected_seq { regex_strings.size() }
+        , _state { 0 }
+    {
+        for (size_t i = 0; i < regex_strings.size(); i++)
+            _expected_seq[i] = std::regex { regex_strings[i] };
+    }
+
+    LinearAutoma& operator<<(const std::string& inp)
+    {
+        if (at_endstate())
+            throw ParseError("Automa already at its end state");
+        if (!std::regex_match(inp, _expected_seq[_state]))
+            throw ParseError(
+                "Given input \"" + inp + "\" does not match expected regex"
+            );
+        _state++;
+        return *this;
+    }
+
+    bool at_endstate()
+    {
+        return _state == _expected_seq.size();
+    }
+
+    std::tuple<> get_result()
+    {
+        if (!at_endstate())
+            std::runtime_error("Parsing not finished");
+        return std::make_tuple();
+    }
+
+
+  private:
+    std::vector<std::regex> _expected_seq;
+    int _state;
+}; // class LinearAutoma
+
 
 
 #endif // LINEAR_AUTOMA_HPP_INCLUDED

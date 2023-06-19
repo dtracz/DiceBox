@@ -1,5 +1,5 @@
-#ifndef SCAD_2D_PARSER_H_INCLUDED
-#define SCAD_2D_PARSER_H_INCLUDED
+#ifndef SCAD_2D_PARSER_HPP_INCLUDED
+#define SCAD_2D_PARSER_HPP_INCLUDED
 
 #include "core/IndentWriter.h"
 #include "parser/LinearAutoma.hpp"
@@ -22,7 +22,6 @@ class AbstractParser {
     virtual std::shared_ptr<Shape> get_parsed() = 0;
 };
 
-
 class Scad2DParser : public AbstractParser {
   public:
     Scad2DParser()
@@ -36,7 +35,13 @@ class Scad2DParser : public AbstractParser {
 
     AbstractParser& operator<<(const std::string&);
 
-    std::shared_ptr<Shape> get_parsed();
+    std::shared_ptr<Shape> get_parsed()
+    {
+        if (_shape_stack.empty() && _operation_stack.empty()
+            && _main_shape.get() != nullptr)
+            return _main_shape;
+        throw std::runtime_error("bad parse");
+    }
 
     void add(std::shared_ptr<Shape>);
     void add(std::shared_ptr<Operation>) { }
@@ -83,4 +88,4 @@ class ShapeParser : public AbstractParser {
 
 } // namespace packer
 
-#endif // SCAD_2D_PARSER_H_INCLUDED
+#endif // SCAD_2D_PARSER_HPP_INCLUDED
