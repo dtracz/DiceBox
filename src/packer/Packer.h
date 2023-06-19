@@ -8,6 +8,8 @@
 #include <vector>
 
 
+namespace packer {
+
 struct Sheet {
     Sheet(double thickness, Vec2 dims)
         : thickness { thickness }
@@ -50,5 +52,6 @@ class IPacker {
     virtual std::vector<Sheet> pack() = 0;
 }; // class Packer
 
+} // namespace packer
 
 #endif // PACKER_H_INCLUDED

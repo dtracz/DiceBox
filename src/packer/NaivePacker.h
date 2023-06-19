@@ -8,6 +8,9 @@
 #include <map>
 #include <vector>
 
+
+namespace packer {
+
 class NaivePacker : public IPacker {
   public:
     NaivePacker(Vec2 sheet_dims)
@@ -40,5 +43,7 @@ class NaivePacker : public IPacker {
  * top-right, top-left, bottom-left, bottom-right
  */
 std::vector<Vec2> rectangular_hull(const Component2D&, double);
+
+} // namespace packer
 
 #endif // NAIVE_PACKER_H_INCLUDED

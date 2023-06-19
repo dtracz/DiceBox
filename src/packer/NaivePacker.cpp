@@ -6,6 +6,8 @@
 #include <vector>
 
 
+namespace packer {
+
 class ShapeThief : public IndentWriter {
   public:
     void operator<<(const Component2D& shape)
@@ -100,3 +102,5 @@ std::vector<Vec2> rectangular_hull(const Component2D& component, double margin)
 {
     // TODO
 }
+
+} // namespace packer
