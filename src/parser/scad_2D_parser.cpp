@@ -14,7 +14,7 @@ class NullBuffer : public AbstractParser {
 
     AbstractParser& operator<<(const std::string&)
     {
-        if (0 < _inps_to_skip--)
+        if (0 < --_inps_to_skip)
             return *this;
         return *_parent;
     }
@@ -48,38 +48,67 @@ split_by(std::string str, const std::string& delim = " ")
 }
 
 
+template <class ShapeT, typename... Ts>
+std::unique_ptr<ShapeParser<ShapeT, Ts...>>
+get_parser_ptr(AbstractParser* parent, const std::string& regexes)
+{
+    auto regex_vector = split_by(regexes);
+    auto automa = LinearAutoma<Ts...> { regex_vector };
+    return std::make_unique<ShapeParser<ShapeT, Ts...>>(parent, automa);
+}
+
+
 AbstractParser& Scad2DParser::operator<<(const std::string& str)
 {
     if (str.starts_with(";")) {
         add(_current_child->get_parsed());
         _current_child.release();
         return *this;
+    } else if (str.starts_with("{")) {
+        switch (_last_indent.top()) {
+        case tShape: {
+            auto shp = _current_child->get_parsed();
+            auto shcp = std::dynamic_pointer_cast<ShapeContainer>(shp);
+            _shape_stack.push(shcp);
+            break;
+        }
+        case tOperation:
+            break;
+        case tOther:
+            break;
+        default:
+            throw std::runtime_error("Bad last indent type");
+        }
+        _last_indent.pop();
     } else if (str.starts_with("}")) {
         auto shape_container_ptr = _shape_stack.top();
         _shape_stack.pop();
         add(shape_container_ptr);
         _current_child = std::make_unique<NullBuffer>(this, 3);
-        return *(_current_child.get());
+        return *_current_child;
     } else if (str.starts_with("union")) {
-        auto automa = LinearAutoma<> { { "\\(", "\\)", "\\{" } };
-        _current_child = std::make_unique<ShapeParser<Union>>(this, automa);
-        return *(_current_child.get());
+        _current_child = get_parser_ptr<Union>(this, "\\( \\)");
+        _last_indent.push(tShape);
+        return *_current_child;
     } else if (str.starts_with("difference")) {
+        _current_child = get_parser_ptr<Difference>(this, "\\( \\)");
+        _last_indent.push(tShape);
+        return *_current_child;
     } else if (str.starts_with("translate")) {
     } else if (str.starts_with("rotate")) {
     } else if (str.starts_with("mirror")) {
     } else if (str.starts_with("square")) {
-        auto rgxs = split_by(
+        _current_child = get_parser_ptr<Rectangle, double, double, bool>(
+            this,
             "\\( size = \\[ \\d+(\\.\\d+)? , \\d+(\\.\\d+)? \\] , center = "
             "(true)|(false) \\)"
         );
-        auto automa = LinearAutoma<double, double, bool> { rgxs };
-        _current_child
-            = std::make_unique<ShapeParser<Rectangle, double, double, bool>>(
-                this, automa
-            );
-        return *(_current_child.get());
+        return *_current_child;
     } else if (str.starts_with("circle")) {
+        _current_child = get_parser_ptr<Circle, double>(
+            this, "\\( r = \\d+(\\.\\d+)? , \\$fn = \\d+ \\)"
+        );
+        return *_current_child;
     } else if (str.starts_with("polygon")) {
     } else {
         throw std::runtime_error("Unknown symbol: <" + str + ">");
@@ -100,4 +129,3 @@ void Scad2DParser::add(std::shared_ptr<Shape> shape)
     else
         _shape_stack.top()->children.push_back(std::move(shape));
 }
-

@@ -90,7 +90,7 @@ struct Union : public ShapeContainer {
     }
 }; // struct Union
 
-struct Difference : public Shape {
+struct Difference : public ShapeContainer {
     virtual ShapeTypeId type_id()
     {
         return ShapeTypeId::Difference;

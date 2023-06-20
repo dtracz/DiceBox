@@ -27,8 +27,8 @@ class Scad2DParser : public AbstractParser {
     Scad2DParser()
         : _current_child { nullptr }
         , _main_shape { nullptr }
-        , _shape_stack { { std::make_shared<Union>() } }
-        , _last_indent { { tShape } }
+        , _shape_stack { }
+        , _last_indent { }
     { }
 
     ~Scad2DParser() = default;
@@ -61,7 +61,7 @@ class Scad2DParser : public AbstractParser {
 template <class ShapeT, typename... Ts>
 class ShapeParser : public AbstractParser {
   public:
-    ShapeParser(Scad2DParser* parser_ptr, const LinearAutoma<Ts...>& automa)
+    ShapeParser(AbstractParser* parser_ptr, const LinearAutoma<Ts...>& automa)
         : _parent { parser_ptr }
         , _automa { automa }
     { }
@@ -81,7 +81,7 @@ class ShapeParser : public AbstractParser {
     }
 
   private:
-    Scad2DParser* _parent;
+    AbstractParser* _parent;
     LinearAutoma<Ts...> _automa;
 }; // class RectangleParser
 
