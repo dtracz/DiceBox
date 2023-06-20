@@ -20,14 +20,6 @@ class Preparser {
     Preparser& operator>>(AbstractParser& parser);
 
   private:
-    inline char _next_char()
-    {
-        char c { ' ' };
-        while (std::isspace(c))
-            c = _buff.get();
-        return c;
-    }
-
     int _load_next(std::string& str);
 
     std::stringstream _buff;
