@@ -3,6 +3,8 @@
 
 #include "base/geometry.h"
 #include <memory>
+#include <numbers>
+#include <stdexcept>
 #include <vector>
 
 
@@ -19,6 +21,10 @@ enum class ShapeTypeId {
 
 struct Shape {
     virtual ShapeTypeId type_id() = 0;
+
+    virtual void translate(Vec2) = 0;
+    virtual void rotate(double) = 0;
+    virtual void mirror(Vec2) = 0;
 }; // struct Shape
 
 
@@ -27,6 +33,30 @@ struct SimpleShape : public Shape {
         : position { Vec2::ZERO() }
         , rotation { 0 }
     { }
+
+    void translate(Vec2 translation)
+    {
+        position += translation;
+    }
+
+    void rotate(double angle)
+    {
+        position = rotate2D(Vec2::ZERO(), position, angle);
+        rotation += angle;
+    }
+
+    /**
+     * Works for non-chiral shapes
+     * param: mirror_plane unit-length vector perpendicular to the mirror
+     */
+    void mirror(Vec2 mirror_plane)
+    {
+        double plane_angle = angle2D(mirror_plane);
+        rotation = std::numbers::pi + 2 * plane_angle - rotation;
+        Vec2 dist_to_mirror = mirror_plane * position.dot(mirror_plane);
+        Vec2 length_along_mirror = position - dist_to_mirror;
+        position = -dist_to_mirror + length_along_mirror;
+    }
 
     Vec2 position;
     double rotation;
@@ -75,11 +105,34 @@ struct Polygon : public SimpleShape {
         return ShapeTypeId::Polygon;
     }
 
+    void mirror(Vec2 mirror_plane)
+    {
+        throw std::logic_error("Not implemented");
+    }
+
     std::vector<Vec2> vertices;
 }; // struct Polygon
 
 
 struct ShapeContainer : public Shape {
+    void translate(Vec2 translation)
+    {
+        for (auto& child : children)
+            child->translate(translation);
+    }
+
+    void rotate(double angle)
+    {
+        for (auto& child : children)
+            child->rotate(angle);
+    }
+
+    void mirror(Vec2 mirror_plane)
+    {
+        for (auto& child : children)
+            child->mirror(mirror_plane);
+    }
+
     std::vector<std::shared_ptr<Shape>> children;
 }; // struct ShapeContainer
 

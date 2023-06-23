@@ -17,31 +17,48 @@ class Operation {
 class Translate : public Operation {
   public:
     Translate(Vec2 translation)
-        : translation { translation }
+        : _translation { translation }
     { }
 
-    void apply(std::shared_ptr<Shape>);
+    void apply(std::shared_ptr<Shape> shape_ptr)
+    {
+        shape_ptr->translate(_translation);
+    }
 
   private:
-    Vec2 translation;
+    Vec2 _translation;
 }; // class Translate
 
 
 class Rotate : public Operation {
   public:
-    void apply(std::shared_ptr<Shape>);
+    Rotate(double angle)
+        : _angle { angle }
+    { }
+
+    void apply(std::shared_ptr<Shape> shape_ptr)
+    {
+        shape_ptr->rotate(_angle);
+    }
 
   private:
-    double angle;
+    double _angle;
 }; // class Rotate
 
 
 class Mirror : public Operation {
   public:
-    void apply(std::shared_ptr<Shape>);
+    Mirror(Vec2 plane)
+        : _plane { plane }
+    { }
+
+    void apply(std::shared_ptr<Shape> shape_ptr)
+    {
+        shape_ptr->mirror(_plane);
+    }
 
   private:
-    Vec2 plane;
+    Vec2 _plane;
 }; // class Mirror
 
 } // namespace packer
