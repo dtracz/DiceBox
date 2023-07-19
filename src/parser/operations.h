@@ -4,6 +4,8 @@
 #include "base/geometry.h"
 #include "parser/shapes.h"
 #include <memory>
+#include <stdexcept>
+#include <vector>
 
 
 namespace parser {
@@ -19,6 +21,13 @@ class Translate : public Operation {
     Translate(Vec2 translation)
         : _translation { translation }
     { }
+
+    Translate(double x, double y, double z)
+        : _translation { x, y }
+    {
+        if (z != 0)
+            throw std::runtime_error("Object translated in z dimension");
+    }
 
     void apply(std::shared_ptr<Shape> shape_ptr)
     {
@@ -36,12 +45,18 @@ class Rotate : public Operation {
         : _angle { angle }
     { }
 
+    Rotate(double x, double y, double z)
+        : _angle { _normalize(x, y, z) }
+    { }
+
     void apply(std::shared_ptr<Shape> shape_ptr)
     {
         shape_ptr->rotate(_angle);
     }
 
   private:
+    static double _normalize(double x, double y, double z);
+
     double _angle;
 }; // class Rotate
 
@@ -51,6 +66,13 @@ class Mirror : public Operation {
     Mirror(Vec2 plane)
         : _plane { plane }
     { }
+
+    Mirror(double x, double y, double z)
+        : _plane { x, y }
+    {
+        if (z != 0)
+            throw std::runtime_error("Object mirrored in z dimension");
+    }
 
     void apply(std::shared_ptr<Shape> shape_ptr)
     {
