@@ -29,9 +29,9 @@ struct Shape {
 
 
 struct SimpleShape : public Shape {
-    SimpleShape()
-        : position { Vec2::ZERO() }
-        , rotation { 0 }
+    SimpleShape(Vec2 position=Vec2::ZERO(), double rotation=0)
+        : position { position }
+        , rotation { rotation }
     { }
 
     void translate(Vec2 translation)
@@ -49,14 +49,7 @@ struct SimpleShape : public Shape {
      * Works for non-chiral shapes
      * param: mirror_plane unit-length vector perpendicular to the mirror
      */
-    void mirror(Vec2 mirror_plane)
-    {
-        double plane_angle = angle2D(mirror_plane);
-        rotation = std::numbers::pi + 2 * plane_angle - rotation;
-        Vec2 dist_to_mirror = mirror_plane * position.dot(mirror_plane);
-        Vec2 length_along_mirror = position - dist_to_mirror;
-        position = -dist_to_mirror + length_along_mirror;
-    }
+    void mirror(Vec2 mirror_plane);
 
     Vec2 position;
     double rotation;
@@ -64,13 +57,13 @@ struct SimpleShape : public Shape {
 
 struct Rectangle : public SimpleShape {
     Rectangle(Vec2 size, bool center)
-        : size { size }
-        , center { center }
+        : SimpleShape { (-size / 2) * center }
+        , size { size }
     { }
 
     Rectangle(double x, double y, bool center)
-        : size { x, y }
-        , center { center }
+        : SimpleShape { (-Vec2(x, y) / 2) * center }
+        , size { x, y }
     { }
 
     virtual ShapeTypeId type_id()
@@ -78,8 +71,11 @@ struct Rectangle : public SimpleShape {
         return ShapeTypeId::Rectangle;
     }
 
+    void mirror(Vec2 mirror_plane);
+
+    void _normalize();
+
     Vec2 size;
-    bool center;
 }; // struct Rectangle
 
 struct Circle : public SimpleShape {
@@ -109,7 +105,6 @@ struct Polygon : public SimpleShape {
     {
         throw std::logic_error("Not implemented");
     }
-
     std::vector<Vec2> vertices;
 }; // struct Polygon
 
