@@ -12,14 +12,14 @@ class NullBuffer : public AbstractParser {
         , _inps_to_skip { inps_to_skip }
     { }
 
-    AbstractParser& operator<<(const std::string&)
+    AbstractParser& operator<<(const std::string&) override
     {
         if (0 < --_inps_to_skip)
             return *this;
         return *_parent;
     }
 
-    virtual std::shared_ptr<Shape> get_parsed()
+    std::shared_ptr<Parseable> get_parsed() override
     {
         return nullptr;
     }
@@ -48,42 +48,59 @@ split_by(std::string str, const std::string& delim = " ")
 }
 
 
-template <class ShapeT, typename... Ts>
-std::unique_ptr<ShapeParser<ShapeT, Ts...>>
+template <class Parseable, typename... Ts>
+std::unique_ptr<ShapeParser<Parseable, Ts...>>
 get_parser_ptr(AbstractParser* parent, const std::string& regexes)
 {
     auto regex_vector = split_by(regexes);
     auto automa = LinearAutoma<Ts...> { regex_vector };
-    return std::make_unique<ShapeParser<ShapeT, Ts...>>(parent, automa);
+    return std::make_unique<ShapeParser<Parseable, Ts...>>(parent, automa);
 }
 
 
 AbstractParser& Scad2DParser::operator<<(const std::string& str)
 {
     if (str.starts_with(";")) {
-        add(_current_child->get_parsed());
+        auto shp = _current_child->get_parsed();
+        add(std::dynamic_pointer_cast<Shape>(shp));
         _current_child.release();
         return *this;
     } else if (str.starts_with("{")) {
         switch (_last_indent.top()) {
         case tShape: {
             auto shp = _current_child->get_parsed();
-            auto shcp = std::dynamic_pointer_cast<ShapeContainer>(shp);
-            _shape_stack.push(shcp);
+            _shape_stack.push(std::dynamic_pointer_cast<ShapeContainer>(shp));
             break;
         }
-        case tOperation:
+        case tOperation: {
+            auto o = _current_child->get_parsed();
+            _operation_stack.push_back(std::dynamic_pointer_cast<Operation>(o));
             break;
+        }
+        case tOther: {
+            break;
+        }
+        default:
+            throw std::runtime_error("Bad last indent type");
+        }
+    } else if (str.starts_with("}")) {
+        switch (_last_indent.top()) {
+        case tShape: {
+            auto shape_container_ptr = _shape_stack.top();
+            _shape_stack.pop();
+            add(shape_container_ptr);
+            break;
+        }
+        case tOperation: {
+            _operation_stack.pop_back();
+            break;
+        }
         case tOther:
             break;
         default:
             throw std::runtime_error("Bad last indent type");
         }
         _last_indent.pop();
-    } else if (str.starts_with("}")) {
-        auto shape_container_ptr = _shape_stack.top();
-        _shape_stack.pop();
-        add(shape_container_ptr);
         _current_child = std::make_unique<NullBuffer>(this, 3);
         return *_current_child;
     } else if (str.starts_with("union")) {
@@ -95,8 +112,29 @@ AbstractParser& Scad2DParser::operator<<(const std::string& str)
         _last_indent.push(tShape);
         return *_current_child;
     } else if (str.starts_with("translate")) {
+        _current_child = get_parser_ptr<Translate, double, double, double>(
+            this,
+            "\\( v = \\[ -?\\d+(\\.\\d+)? , \\d+(\\.\\d+)? , \\d+(\\.\\d+)? "
+            "\\] \\)"
+        );
+        _last_indent.push(tOperation);
+        return *_current_child;
     } else if (str.starts_with("rotate")) {
+        _current_child = get_parser_ptr<Rotate, double, double, double>(
+            this,
+            "\\( \\[ -?\\d+(\\.\\d+)? , -?\\d+(\\.\\d+)? , -?\\d+(\\.\\d+)? "
+            "\\] \\)"
+        );
+        _last_indent.push(tOperation);
+        return *_current_child;
     } else if (str.starts_with("mirror")) {
+        _current_child = get_parser_ptr<Mirror, double, double, double>(
+            this,
+            "\\( v = \\[ -?\\d+(\\.\\d+)? , \\d+(\\.\\d+)? , \\d+(\\.\\d+)? "
+            "\\] \\)"
+        );
+        _last_indent.push(tOperation);
+        return *_current_child;
     } else if (str.starts_with("square")) {
         _current_child = get_parser_ptr<Rectangle, double, double, bool>(
             this,
@@ -110,6 +148,7 @@ AbstractParser& Scad2DParser::operator<<(const std::string& str)
         );
         return *_current_child;
     } else if (str.starts_with("polygon")) {
+        // TODO
     } else {
         throw std::runtime_error("Unknown symbol: <" + str + ">");
     }
@@ -127,5 +166,5 @@ void Scad2DParser::add(std::shared_ptr<Shape> shape)
     if (_shape_stack.empty())
         _main_shape = shape;
     else
-        _shape_stack.top()->children.push_back(std::move(shape));
+        _shape_stack.top()->children.push_back(shape);
 }

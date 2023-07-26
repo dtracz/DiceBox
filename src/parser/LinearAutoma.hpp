@@ -47,7 +47,8 @@ inline bool write_from_str(bool* value, const std::string& inp)
 }
 
 template <int I, typename... Ts>
-inline bool write_from_str(int i, std::tuple<Ts...>& tuple, const std::string& inp)
+inline bool
+write_from_str(int i, std::tuple<Ts...>& tuple, const std::string& inp)
 {
     if (i > I)
         throw std::out_of_range("Index out of tuple range");
@@ -58,7 +59,8 @@ inline bool write_from_str(int i, std::tuple<Ts...>& tuple, const std::string& i
 }
 
 template <typename... Ts>
-inline bool write_from_str(int i, std::tuple<Ts...>& tuple, const std::string& inp)
+inline bool
+write_from_str(int i, std::tuple<Ts...>& tuple, const std::string& inp)
 {
     return write_from_str<sizeof...(Ts) - 1>(i, tuple, inp);
 }
@@ -87,7 +89,6 @@ class LinearAutoma {
     {
         if (at_endstate())
             throw ParseError("Automa already at its end state");
-        // std::cout << "====== " << inp << std::endl;
         if (!std::regex_match(inp, _expected_seq[_state]))
             throw ParseError(
                 "Given input \"" + inp + "\" does not match expected regex"

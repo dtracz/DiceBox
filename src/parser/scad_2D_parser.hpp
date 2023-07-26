@@ -3,6 +3,7 @@
 
 #include "core/IndentWriter.h"
 #include "parser/LinearAutoma.hpp"
+#include "parser/Parseable.h"
 #include "parser/operations.h"
 #include "parser/shapes.h"
 #include <cctype>
@@ -10,6 +11,7 @@
 #include <sstream>
 #include <stack>
 #include <stdexcept>
+#include <string>
 #include <vector>
 
 
@@ -19,7 +21,7 @@ class AbstractParser {
   public:
     virtual AbstractParser& operator<<(const std::string&) = 0;
 
-    virtual std::shared_ptr<Shape> get_parsed() = 0;
+    virtual std::shared_ptr<Parseable> get_parsed() = 0;
 };
 
 class Scad2DParser : public AbstractParser {
@@ -27,15 +29,15 @@ class Scad2DParser : public AbstractParser {
     Scad2DParser()
         : _current_child { nullptr }
         , _main_shape { nullptr }
-        , _shape_stack { }
-        , _last_indent { }
+        , _shape_stack {}
+        , _last_indent {}
     { }
 
     ~Scad2DParser() = default;
 
     AbstractParser& operator<<(const std::string&);
 
-    std::shared_ptr<Shape> get_parsed()
+    std::shared_ptr<Parseable> get_parsed()
     {
         if (_shape_stack.empty() && _operation_stack.empty()
             && _main_shape.get() != nullptr)
@@ -58,7 +60,7 @@ class Scad2DParser : public AbstractParser {
 }; // class Scad2DParser
 
 
-template <class ShapeT, typename... Ts>
+template <class ParsedT, typename... Ts>
 class ShapeParser : public AbstractParser {
   public:
     ShapeParser(AbstractParser* parser_ptr, const LinearAutoma<Ts...>& automa)
@@ -66,7 +68,7 @@ class ShapeParser : public AbstractParser {
         , _automa { automa }
     { }
 
-    AbstractParser& operator<<(const std::string& inp)
+    AbstractParser& operator<<(const std::string& inp)  override
     {
         _automa << inp;
         if (_automa.at_endstate())
@@ -74,10 +76,10 @@ class ShapeParser : public AbstractParser {
         return *this;
     }
 
-    std::shared_ptr<Shape> get_parsed()
+    std::shared_ptr<Parseable> get_parsed() override
     {
-        ShapeT shape = std::make_from_tuple<ShapeT>(_automa.get_result());
-        return std::make_shared<ShapeT>(shape);
+        ParsedT shape = std::make_from_tuple<ParsedT>(_automa.get_result());
+        return std::make_shared<ParsedT>(shape);
     }
 
   private:
