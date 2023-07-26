@@ -10,7 +10,7 @@
 
 namespace parser {
 
-class Operation {
+class Operation : public Parseable {
   public:
     virtual void apply(std::shared_ptr<Shape>) = 0;
 }; // class Operation
@@ -34,6 +34,11 @@ class Translate : public Operation {
         shape_ptr->translate(_translation);
     }
 
+    void print()
+    {
+        printf("Translate\n");
+    }
+
   private:
     Vec2 _translation;
 }; // class Translate
@@ -52,6 +57,11 @@ class Rotate : public Operation {
     void apply(std::shared_ptr<Shape> shape_ptr)
     {
         shape_ptr->rotate(_angle);
+    }
+
+    void print()
+    {
+        printf("Rotate\n");
     }
 
   private:
@@ -77,6 +87,11 @@ class Mirror : public Operation {
     void apply(std::shared_ptr<Shape> shape_ptr)
     {
         shape_ptr->mirror(_plane);
+    }
+
+    void print()
+    {
+        printf("Mirror\n");
     }
 
   private:

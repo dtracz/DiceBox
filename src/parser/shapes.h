@@ -2,6 +2,7 @@
 #define SHAPES_H_INCLUDED
 
 #include "base/geometry.h"
+#include "parser/Parseable.h"
 #include <memory>
 #include <numbers>
 #include <stdexcept>
@@ -19,17 +20,21 @@ enum class ShapeTypeId {
 }; // enum class ShapeTypeId
 
 
-struct Shape {
+class Shape : public Parseable {
+  public:
     virtual ShapeTypeId type_id() = 0;
 
     virtual void translate(Vec2) = 0;
     virtual void rotate(double) = 0;
     virtual void mirror(Vec2) = 0;
-}; // struct Shape
+
+    // virtual void print() = 0;
+}; // class Shape
 
 
-struct SimpleShape : public Shape {
-    SimpleShape(Vec2 position=Vec2::ZERO(), double rotation=0)
+class SimpleShape : public Shape {
+  public:
+    SimpleShape(Vec2 position = Vec2::ZERO(), double rotation = 0)
         : position { position }
         , rotation { rotation }
     { }
@@ -53,9 +58,10 @@ struct SimpleShape : public Shape {
 
     Vec2 position;
     double rotation;
-}; // struct SimpleShape
+}; // class SimpleShape
 
-struct Rectangle : public SimpleShape {
+class Rectangle : public SimpleShape {
+  public:
     Rectangle(Vec2 size, bool center)
         : SimpleShape { (-size / 2) * center }
         , size { size }
@@ -75,10 +81,23 @@ struct Rectangle : public SimpleShape {
 
     void _normalize();
 
-    Vec2 size;
-}; // struct Rectangle
+    void print()
+    {
+        printf(
+            "Rectangle: %f, %f; (%f, %f / %f)\n",
+            size.x,
+            size.y,
+            position.x,
+            position.y,
+            rotation
+        );
+    }
 
-struct Circle : public SimpleShape {
+    Vec2 size;
+}; // class Rectangle
+
+class Circle : public SimpleShape {
+  public:
     Circle(double radius)
         : radius { radius }
     { }
@@ -88,10 +107,22 @@ struct Circle : public SimpleShape {
         return ShapeTypeId::Circle;
     }
 
-    double radius;
-}; // struct Circle
+    virtual void print()
+    {
+        printf(
+            "Circle: %f; (%f, %f / %f)\n",
+            radius,
+            position.x,
+            position.y,
+            rotation
+        );
+    }
 
-struct Polygon : public SimpleShape {
+    double radius;
+}; // class Circle
+
+class Polygon : public SimpleShape {
+  public:
     Polygon(const std::vector<Vec2>& vertices)
         : vertices { vertices }
     { }
@@ -105,11 +136,18 @@ struct Polygon : public SimpleShape {
     {
         throw std::logic_error("Not implemented");
     }
+
+    virtual void print()
+    {
+        printf("not implemented Polygon\n");
+    }
+
     std::vector<Vec2> vertices;
-}; // struct Polygon
+}; // class Polygon
 
 
-struct ShapeContainer : public Shape {
+class ShapeContainer : public Shape {
+  public:
     void translate(Vec2 translation)
     {
         for (auto& child : children)
@@ -129,21 +167,39 @@ struct ShapeContainer : public Shape {
     }
 
     std::vector<std::shared_ptr<Shape>> children;
-}; // struct ShapeContainer
+}; // class ShapeContainer
 
-struct Union : public ShapeContainer {
+class Union : public ShapeContainer {
+  public:
     virtual ShapeTypeId type_id()
     {
         return ShapeTypeId::Union;
     }
-}; // struct Union
 
-struct Difference : public ShapeContainer {
+    void print()
+    {
+        printf("Union:\n");
+        for (auto& shape : children)
+            shape->print();
+        printf("\n");
+    }
+}; // class Union
+
+class Difference : public ShapeContainer {
+  public:
     virtual ShapeTypeId type_id()
     {
         return ShapeTypeId::Difference;
     }
-}; // struct Difference
+
+    void print()
+    {
+        printf("Difference:\n");
+        for (auto& shape : children)
+            shape->print();
+        printf("\n");
+    }
+}; // class Difference
 
 } // namespace packer
 
