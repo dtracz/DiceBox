@@ -36,6 +36,11 @@ struct Vec2 {
         return { x * value, y * value };
     }
 
+    constexpr double dot(Vec2 other) const
+    {
+        return x * other.x + y * other.y;
+    }
+
     constexpr Vec2 operator/(double value) const
     {
         return { x / value, y / value };
@@ -178,19 +183,36 @@ inline constexpr double sqr(double x)
     return x * x;
 }
 
+inline double mod(double x, double m) {
+    x = std::fmod(x, m);
+    return x + ((x < 0) * m);
+}
+
 inline double angle2D(double x, double y)
 {
     double angle = std::atan2(y, x);
-    return std::fmod(angle + 2 * std::numbers::pi, 2 * std::numbers::pi);
+    return mod(angle, 2*std::numbers::pi);
 }
 
 inline double angle2D(Vec2 vec)
 {
     double angle = std::atan2(vec.y, vec.x);
-    return std::fmod(angle + 2 * std::numbers::pi, 2 * std::numbers::pi);
+    return mod(angle, 2*std::numbers::pi);
 }
 
-Vec2 rotate2D(Vec2, Vec2, double);
+Vec2 rotate2D(Vec2 axis, Vec2 point, double angle);
+
+inline Vec2 rotate2D(Vec2 point, double angle)
+{
+    return rotate2D(Vec2::ZERO(), point, angle);
+}
+
+inline double mirror(double plane_angle, double angle)
+{
+    return 2 * plane_angle - angle;
+}
+
+Vec2 mirror(Vec2 point, Vec2 mirror_plane);
 
 
 #endif // GEOMETRY_H_INCLUDED
