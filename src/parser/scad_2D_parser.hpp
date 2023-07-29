@@ -24,7 +24,8 @@ class AbstractParser {
     virtual std::shared_ptr<Parseable> get_parsed() = 0;
 };
 
-class Scad2DParser : public AbstractParser {
+class Scad2DParser : public AbstractParser,
+                     public std::enable_shared_from_this<AbstractParser> {
   public:
     Scad2DParser()
         : _current_child { nullptr }
@@ -63,28 +64,28 @@ class Scad2DParser : public AbstractParser {
 template <class ParsedT, typename... Ts>
 class ShapeParser : public AbstractParser {
   public:
-    ShapeParser(AbstractParser* parser_ptr, const LinearAutoma<Ts...>& automa)
-        : _parent { parser_ptr }
-        , _automa { automa }
+    ShapeParser(std::shared_ptr<AbstractParser> parser_ptr, std::shared_ptr<IAutoma<Ts...>> automa_ptr)
+        : _parent { std::move(parser_ptr) }
+        , _automa_ptr { automa_ptr }
     { }
 
     AbstractParser& operator<<(const std::string& inp)  override
     {
-        _automa << inp;
-        if (_automa.at_endstate())
+        *_automa_ptr << inp;
+        if (_automa_ptr->at_endstate())
             return *_parent;
         return *this;
     }
 
     std::shared_ptr<Parseable> get_parsed() override
     {
-        ParsedT shape = std::make_from_tuple<ParsedT>(_automa.get_result());
+        ParsedT shape = std::make_from_tuple<ParsedT>(_automa_ptr->get_result());
         return std::make_shared<ParsedT>(shape);
     }
 
   private:
-    AbstractParser* _parent;
-    LinearAutoma<Ts...> _automa;
+    std::shared_ptr<AbstractParser> _parent;
+    std::shared_ptr<IAutoma<Ts...>> _automa_ptr;
 }; // class RectangleParser
 
 
