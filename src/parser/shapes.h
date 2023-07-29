@@ -127,6 +127,16 @@ class Polygon : public SimpleShape {
         : vertices { vertices }
     { }
 
+    Polygon(const std::vector<double>& numbers)
+    {
+        if (numbers.size() % 2 == 1)
+            throw std::invalid_argument(
+                "Required even number of half-coordinates"
+            );
+        for (size_t i = 0; i < numbers.size(); i += 2)
+            vertices.emplace_back(numbers[i], numbers[i + 1]);
+    }
+
     virtual ShapeTypeId type_id()
     {
         return ShapeTypeId::Polygon;
@@ -139,7 +149,10 @@ class Polygon : public SimpleShape {
 
     virtual void print()
     {
-        printf("not implemented Polygon\n");
+        printf("Polygon: ");
+        for (Vec2 vec : vertices)
+            printf("[%f, %f], ", vec.x, vec.y);
+        printf("\b (%f, %f / %f)\n", position.x, position.y, rotation);
     }
 
     std::vector<Vec2> vertices;
@@ -181,7 +194,7 @@ class Union : public ShapeContainer {
         printf("Union:\n");
         for (auto& shape : children)
             shape->print();
-        printf("\n");
+        printf("/union\n");
     }
 }; // class Union
 
@@ -197,7 +210,7 @@ class Difference : public ShapeContainer {
         printf("Difference:\n");
         for (auto& shape : children)
             shape->print();
-        printf("\n");
+        printf("/difference\n");
     }
 }; // class Difference
 
