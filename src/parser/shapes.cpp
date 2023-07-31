@@ -36,3 +36,12 @@ void Rectangle::_normalize()
         size.y = -size.y;
     }
 }
+
+
+void Polygon::mirror(Vec2 mirror_plane)
+{
+    position = ::mirror(position, mirror_plane);
+    rotation = 2 * angle2D(mirror_plane) - rotation;
+    for (Vec2& vertex : vertices)
+        vertex = ::mirror(vertex, mirror_plane);
+}

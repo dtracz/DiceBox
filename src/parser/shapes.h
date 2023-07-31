@@ -142,10 +142,7 @@ class Polygon : public SimpleShape {
         return ShapeTypeId::Polygon;
     }
 
-    void mirror(Vec2 mirror_plane)
-    {
-        throw std::logic_error("Not implemented");
-    }
+    void mirror(Vec2 mirror_plane);
 
     virtual void print()
     {
