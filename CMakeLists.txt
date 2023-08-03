@@ -24,6 +24,8 @@ file(GLOB ALL_SRCS
     ${DICEBOX_SRC}/base/*.cpp
     ${DICEBOX_SRC}/utils/*.cpp
     ${DICEBOX_SRC}/components/*.cpp
+    ${DICEBOX_SRC}/packer/*.cpp
+    ${DICEBOX_SRC}/parser/*.cpp
     ${DICEBOX_SRC}/main.cpp
 )
 add_executable(${DICE_BOX} ${ALL_SRCS})
