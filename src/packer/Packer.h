@@ -3,7 +3,6 @@
 
 #include "base/geometry.h"
 #include "base/parts.hpp"
-#include "core/Component2D.h"
 #include "core/IndentWriter.h"
 #include <vector>
 
@@ -16,20 +15,20 @@ struct Sheet {
         , dims { dims }
     { }
 
-    void add(const Component2D& component)
+    void add(const FlatPart& part)
     {
-        elements.push_back(component);
+        elements.push_back(part);
     }
 
     void render(IndentWriter& writer)
     {
         for (auto& element : elements)
-            writer << element;
+            element.render2D(writer);
     }
 
     double thickness;
     Vec2 dims;
-    std::vector<Component2D> elements;
+    std::vector<FlatPart> elements;
 }; // struct Sheet
 
 
@@ -37,17 +36,28 @@ class IPacker {
   public:
     virtual void set_dims(Vec2) = 0;
 
-    virtual size_t add_part(const FlatPart&) = 0;
+    /**
+     * returns number of parts actually packed
+     * 1 if `part` is a simple part,
+     * n if `part` is a module composed with n simple parts
+     */
+    virtual size_t add_part(const FlatPart& part) = 0;
 
-    virtual size_t add_part(const Module3D&) = 0;
+    /**
+     * returns number of parts actually packed
+     * 1 if `part` is a simple part,
+     * n if `part` is a module composed with n simple parts
+     */
+    virtual size_t add_part(const Module3D& part) = 0;
 
     // virtual size_t add_part(const Part3D&) = 0;
 
-    template <typename... ArgTs>
-    size_t add_parts(const ArgTs&... args)
-    {
-        return (add_part(args) + ...);
-    }
+    // TODO: unify `add_part` functions into one for below to work
+    // template <typename... ArgTs>
+    // size_t add_parts(const ArgTs&... args)
+    // {
+    //     return (add_part(args) + ...);
+    // }
 
     virtual std::vector<Sheet> pack() = 0;
 }; // class Packer

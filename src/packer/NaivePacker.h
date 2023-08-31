@@ -3,7 +3,6 @@
 
 #include "base/geometry.h"
 #include "base/parts.hpp"
-#include "core/Component2D.h"
 #include "packer/Packer.h"
 #include <map>
 #include <vector>
@@ -22,27 +21,24 @@ class NaivePacker : public IPacker {
         _sheet_dims = sheet_dims;
     }
 
-    size_t add_part(const FlatPart&) override;
+    size_t add_part(const FlatPart& part) override;
 
-    size_t add_part(const Module3D&) override;
+    size_t add_part(const Module3D& part) override;
 
     std::vector<Sheet> pack() override;
 
   private:
-    void _add_component(double, const Component2D&);
-
-
     Vec2 _sheet_dims;
-    std::map<double, std::vector<Component2D>> _element_sets;
+    std::map<double, std::vector<FlatPart>> _element_sets;
 }; // NaivePacker
 
 
 /**
- * Fit given `component2D` into rectangle with given `margin` on each side.
+ * Fit given `FlatPart` into rectangle with given `margin` on each side.
  * Return coordinates of rectangle's corners in order:
  * top-right, top-left, bottom-left, bottom-right
  */
-std::vector<Vec2> rectangular_hull(const Component2D&, double);
+std::vector<Vec2> rectangular_hull(const FlatPart& part, double margin);
 
 } // namespace packer
 
