@@ -28,6 +28,8 @@ class Shape : public Parseable {
     virtual void rotate(double) = 0;
     virtual void mirror(Vec2) = 0;
 
+    virtual std::vector<Vec2> get_hull() = 0;
+
     // virtual void print() = 0;
 }; // class Shape
 
@@ -79,6 +81,8 @@ class Rectangle : public SimpleShape {
 
     void mirror(Vec2 mirror_plane);
 
+    virtual std::vector<Vec2> get_hull();
+
     void _normalize();
 
     void print()
@@ -106,6 +110,8 @@ class Circle : public SimpleShape {
     {
         return ShapeTypeId::Circle;
     }
+
+    virtual std::vector<Vec2> get_hull();
 
     virtual void print()
     {
@@ -143,6 +149,8 @@ class Polygon : public SimpleShape {
     }
 
     void mirror(Vec2 mirror_plane);
+
+    virtual std::vector<Vec2> get_hull();
 
     virtual void print()
     {
@@ -186,6 +194,8 @@ class Union : public ShapeContainer {
         return ShapeTypeId::Union;
     }
 
+    virtual std::vector<Vec2> get_hull();
+
     void print()
     {
         printf("Union:\n");
@@ -201,6 +211,8 @@ class Difference : public ShapeContainer {
     {
         return ShapeTypeId::Difference;
     }
+
+    virtual std::vector<Vec2> get_hull();
 
     void print()
     {
