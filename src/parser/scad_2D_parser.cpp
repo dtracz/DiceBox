@@ -140,7 +140,7 @@ AbstractParser& Scad2DParser::operator<<(const std::string& str)
     } else if (str.starts_with("translate")) {
         _current_child = get_parser_ptr<Translate, double, double, double>(
             shared_from_this(),
-            "\\( v = \\[ -?\\d+(\\.\\d+)? , \\d+(\\.\\d+)? , \\d+(\\.\\d+)? "
+            "\\( v = \\[ -?\\d+(\\.\\d+)? , -?\\d+(\\.\\d+)? , -?\\d+(\\.\\d+)? "
             "\\] \\)"
         );
         _last_indent.push(tOperation);
@@ -156,7 +156,7 @@ AbstractParser& Scad2DParser::operator<<(const std::string& str)
     } else if (str.starts_with("mirror")) {
         _current_child = get_parser_ptr<Mirror, double, double, double>(
             shared_from_this(),
-            "\\( v = \\[ -?\\d+(\\.\\d+)? , \\d+(\\.\\d+)? , \\d+(\\.\\d+)? "
+            "\\( v = \\[ -?\\d+(\\.\\d+)? , -?\\d+(\\.\\d+)? , -?\\d+(\\.\\d+)? "
             "\\] \\)"
         );
         _last_indent.push(tOperation);
@@ -164,13 +164,13 @@ AbstractParser& Scad2DParser::operator<<(const std::string& str)
     } else if (str.starts_with("square")) {
         _current_child = get_parser_ptr<Rectangle, double, double, bool>(
             shared_from_this(),
-            "\\( size = \\[ \\d+(\\.\\d+)? , \\d+(\\.\\d+)? \\] , center = "
+            "\\( size = \\[ -?\\d+(\\.\\d+)? , -?\\d+(\\.\\d+)? \\] , center = "
             "(true)|(false) \\)"
         );
         return *_current_child;
     } else if (str.starts_with("circle")) {
         _current_child = get_parser_ptr<Circle, double>(
-            shared_from_this(), "\\( r = \\d+(\\.\\d+)? , \\$fn = \\d+ \\)"
+            shared_from_this(), "\\( r = -?\\d+(\\.\\d+)? , \\$fn = \\d+ \\)"
         );
         return *_current_child;
     } else if (str.starts_with("polygon")) {
@@ -178,7 +178,7 @@ AbstractParser& Scad2DParser::operator<<(const std::string& str)
             shared_from_this(), "\\)"
         );
         auto regex_vector = split_by(
-            "\\[ \\d+(\\.\\d+)? , \\d+(\\.\\d+)? \\] [,\\]]"
+            "\\[ -?\\d+(\\.\\d+)? , -?\\d+(\\.\\d+)? \\] [,\\]]"
         );
         std::shared_ptr<IAutoma<std::vector<double>>> automa_ptr
             = std::make_shared<PrimitiveCyclicAutoma<double>>(
@@ -189,6 +189,10 @@ AbstractParser& Scad2DParser::operator<<(const std::string& str)
                 skip_till_the_end, automa_ptr
             );
         _current_child = std::make_unique<NullBuffer>(parse_polygon, "\\[");
+        return *_current_child;
+    } else if (str.starts_with("color")) {
+        _last_indent.push(tOther);
+        _current_child = std::make_unique<NullBuffer>(shared_from_this(), "\\)");
         return *_current_child;
     } else {
         throw std::runtime_error("Unknown symbol: <" + str + ">");
