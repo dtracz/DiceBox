@@ -137,7 +137,7 @@ class FlatPart : public Part3D {
 
     void render2D(IndentWriter& writer) const
     {
-        writer << _shape;
+        writer << _get_final_form_2D();
     }
 
     void render3D(IndentWriter& writer) override
@@ -152,6 +152,8 @@ class FlatPart : public Part3D {
 
   protected:
     Component _get_final_form() override;
+
+    Component2D _get_final_form_2D() const;
 
     std::shared_ptr<Part3D> _clone() override
     {

@@ -66,6 +66,30 @@ Component FlatPart::_get_final_form()
 }
 
 
+Component2D FlatPart::_get_final_form_2D() const
+{
+    Component2D part = _shape;
+    for (const auto& t : _transforms) {
+        auto transform_type = t.first;
+        auto transform_vec = t.second;
+        switch (transform_type) {
+        case _TransformT::tTranslate:
+            part.translate(transform_vec.x, transform_vec.y, 0);
+            break;
+        case _TransformT::tRotate:
+            part.rotate(0, 0, -transform_vec.z);
+            break;
+        case _TransformT::tMirror:
+            part.mirror(transform_vec.x, transform_vec.y, 0);
+            break;
+        }
+    }
+    if (_color.is_valid())
+        part.color(_color.x, _color.y, _color.z, _color.alpha);
+    return part;
+}
+
+
 
 Module3D::Module3D(Module3D& other)
 {
