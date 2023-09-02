@@ -14,7 +14,7 @@ struct Color : Vec3 {
         , alpha { alpha }
     { }
 
-    bool is_valid()
+    bool is_valid() const
     {
         return std::min({ x, y, z, alpha }) >= 0
             && std::max({ x, y, z, alpha }) <= 1;
