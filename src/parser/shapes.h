@@ -166,23 +166,11 @@ class Polygon : public SimpleShape {
 
 class ShapeContainer : public Shape {
   public:
-    void translate(Vec2 translation)
-    {
-        for (auto& child : children)
-            child->translate(translation);
-    }
+    void translate(Vec2 translation) { }
 
-    void rotate(double angle)
-    {
-        for (auto& child : children)
-            child->rotate(angle);
-    }
+    void rotate(double angle) { }
 
-    void mirror(Vec2 mirror_plane)
-    {
-        for (auto& child : children)
-            child->mirror(mirror_plane);
-    }
+    void mirror(Vec2 mirror_plane) { }
 
     std::vector<std::shared_ptr<Shape>> children;
 }; // class ShapeContainer
