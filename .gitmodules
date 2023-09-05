@@ -1,3 +1,6 @@
 [submodule "third_party/OOML"]
 	path = third_party/OOML
 	url = git@github.com:avalero/OOML.git
+[submodule "third_party/cxxopts"]
+	path = third_party/cxxopts
+	url = git@github.com:jarro2783/cxxopts.git
