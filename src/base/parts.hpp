@@ -31,7 +31,7 @@ class Part3D {
 
     virtual Part3D& mirror(Vec3, Vec3);
 
-    virtual void render3D(IndentWriter&) = 0;
+    virtual void render(IndentWriter&) = 0;
 
     virtual std::list<FlatPart> get_all_flats() const = 0;
 
@@ -140,7 +140,7 @@ class FlatPart : public Part3D {
         writer << _get_final_form_2D();
     }
 
-    void render3D(IndentWriter& writer) override
+    void render(IndentWriter& writer) override
     {
         writer << _get_final_form();
     }
@@ -203,7 +203,7 @@ class HelperPart : public Part3D,
 
     using Part3D::mirror;
 
-    void render3D(IndentWriter& writer) override
+    void render(IndentWriter& writer) override
     {
         writer << *this;
     }
@@ -290,7 +290,7 @@ class Module3D : public Part3D {
 
     using Part3D::mirror;
 
-    void render3D(IndentWriter& writer) override
+    void render(IndentWriter& writer) override
     {
         writer << _get_final_form();
     }
