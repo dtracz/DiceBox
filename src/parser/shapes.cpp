@@ -88,15 +88,17 @@ void Polygon::mirror(Vec2 mirror_plane)
 
 std::vector<Vec2> Polygon::get_hull()
 {
-    double north_bound = vertices[0].y + position.y;
-    double south_bound = vertices[0].y + position.y;
-    double east_bound = vertices[0].x + position.x;
-    double west_bound = vertices[0].x + position.x;
+    auto vertex = rotate2D(Vec2::ZERO(), vertices[0], rotation);
+    double north_bound = vertex.y + position.y;
+    double south_bound = vertex.y + position.y;
+    double east_bound = vertex.x + position.x;
+    double west_bound = vertex.x + position.x;
     for (int i = 1; i < vertices.size(); i++) {
-        north_bound = std::max(north_bound, vertices[i].y + position.y);
-        south_bound = std::min(south_bound, vertices[i].y + position.y);
-        east_bound = std::max(east_bound, vertices[i].x + position.x);
-        west_bound = std::min(west_bound, vertices[i].x + position.x);
+        auto vertex = rotate2D(Vec2::ZERO(), vertices[i], rotation);
+        north_bound = std::max(north_bound, vertex.y + position.y);
+        south_bound = std::min(south_bound, vertex.y + position.y);
+        east_bound = std::max(east_bound, vertex.x + position.x);
+        west_bound = std::min(west_bound, vertex.x + position.x);
     }
     return {
         { east_bound, north_bound },
