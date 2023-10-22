@@ -5,6 +5,7 @@ cmake_minimum_required(VERSION 3.12)
 set(DICE_BOX "DiceBox")
 # third parties
 set(OOML "OOML")
+set(cxxopts "cxxopts")
 
 # paths
 set(DICEBOX_ROOT ${CMAKE_CURRENT_SOURCE_DIR})
@@ -36,16 +37,20 @@ set_property(TARGET ${DICE_BOX} PROPERTY CXX_STANDARD 20)
 
 # set up third parties
 add_subdirectory(${THIRD_PARTY}/OOML)
+add_subdirectory(${THIRD_PARTY}/cxxopts)
 
 
 target_include_directories(${DICE_BOX}
     PUBLIC ${DICEBOX_SRC} 
     PUBLIC ${THIRD_PARTY}/OOML/src
+    PUBLIC ${THIRD_PARTY}/cxxopts/include
 )
 
 target_link_directories(${DICE_BOX}
     PUBLIC ${DICEBOX_SRC}
     PUBLIC ${THIRD_PARTY}/OOML/lib
+    # no linking required -- header only library
+    # PUBLIC ${THIRD_PARTY}/cxxopts/...
 )
 
 target_link_libraries(${DICE_BOX}

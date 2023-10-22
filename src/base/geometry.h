@@ -11,6 +11,11 @@ constexpr double _EPS = 1e-8;
 struct Vec2 {
     double x, y;
 
+    constexpr Vec2()
+        : x { 0 }
+        , y { 0 }
+    { }
+
     constexpr Vec2(double x, double y)
         : x { x }
         , y { y }
@@ -87,6 +92,12 @@ struct Vec2 {
 
 struct Vec3 {
     double x, y, z;
+
+    constexpr Vec3()
+        : x { 0 }
+        , y { 0 }
+        , z { 0 }
+    { }
 
     constexpr Vec3(double x, double y, double z)
         : x { x }
