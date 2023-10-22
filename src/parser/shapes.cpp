@@ -127,15 +127,5 @@ std::vector<Vec2> Union::get_hull()
 
 std::vector<Vec2> Difference::get_hull()
 {
-    std::vector<Vec2> hull = children[0]->get_hull();
-    for (int i = 1; i < children.size(); i++) {
-        std::vector<Vec2> childs_hull = children[i]->get_hull();
-        hull[0].y = std::max(hull[0].y, childs_hull[0].y);
-        hull[2].y = std::min(hull[2].y, childs_hull[2].y);
-        hull[0].x = std::max(hull[0].x, childs_hull[0].x);
-        hull[2].x = std::min(hull[2].x, childs_hull[2].x);
-    }
-    hull[1] = { hull[2].x, hull[0].y };
-    hull[3] = { hull[0].x, hull[2].y };
-    return hull;
+    return children[0]->get_hull();
 }
